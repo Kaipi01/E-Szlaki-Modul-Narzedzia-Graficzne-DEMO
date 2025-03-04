@@ -241,3 +241,26 @@ body.theme-dark::after {
   --yellow: #ffd700;
   --yellow-opacity: #ffd900b0;
 }
+
+#graphics-tools-module .modern-card, #graphics-tools-module.modern-card {
+  width: 100%;
+  padding: 1rem 0.85rem;
+  border-radius: 20px;
+  background: var(--background);
+  box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 15px;
+}
+@media (min-width: 30em) {
+  #graphics-tools-module .modern-card, #graphics-tools-module.modern-card {
+    padding: 1rem;
+  }
+}
+@media (min-width: 55em) {
+  #graphics-tools-module .modern-card, #graphics-tools-module.modern-card {
+    padding: 1.5rem;
+  }
+}
+@media (min-width: 103.125em) {
+  #graphics-tools-module .modern-card, #graphics-tools-module.modern-card {
+    padding-inline: 2rem;
+  }
+}

@@ -1,5 +1,5 @@
-import PIXI from "../libs/pixi-modules.min.js";
-import Cropper from "../libs/cropper.min.js"; 
+import PIXI from "./libs/pixi-modules.min.js";
+import Cropper from "./libs/cropper.min.js"; 
 
 console.log('hello main-panel.js !')
 
@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initTestPixiLib()
     } catch (e) {
         console.error(e)
-    }
-
+    } 
 
     const cropImage = document.querySelector('#image-test'); // Element img
 
@@ -44,11 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 function initTestPixiLib() {
+    const moduleContainer = document.querySelector('#graphics-tools-module > .modern-card')
     const app = new PIXI.Application({
         width: 1000,
         height: 500
     });
-    document.body.appendChild(app.view);
+    moduleContainer.appendChild(app.view);
 
     // Załaduj obraz
     // const image = PIXI.Sprite.from('./images/place-img-2.webp');
