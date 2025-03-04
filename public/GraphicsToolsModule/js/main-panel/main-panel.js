@@ -1,5 +1,5 @@
-import PIXI from "./libs/pixi-modules.min.js";
-import Cropper from "./libs/cropper.min.js"; 
+import PIXI from "../libs/pixi-modules.min.js";
+import Cropper from "../libs/cropper.min.js"; 
 
 console.log('hello main-panel.js !')
 

@@ -6,22 +6,14 @@
     <link rel="stylesheet" href="{{ asset('GraphicsToolsModule/css/compressor-panel.css') }}">
 {% endblock %}
 
-{% block panel_content %} 
+{% block panel_content %}    
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/src/Controller/IETMCompressorPanelController.php'|file_link(0) }}">src/Controller/IETMCompressorPanelController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/templates/ietm_compressor_panel/index.html.twig'|file_link(0) }}">templates/ietm_compressor_panel/index.html.twig</a></code></li>
-    </ul>
-</div>
-
+{% include "graphics_tools_module/compressor_panel/image-compressor.html.twig" %}
+ 
 {% endblock %}
 
 {% block panel_javascripts %}
  
-<script type="module" src="{{ asset('GraphicsToolsModule/js/compressor-panel.js') }}"></script>
+<script type="module" src="{{ asset('GraphicsToolsModule/js/compressor-panel/compressor-panel.js') }}"></script>
 
 {% endblock %}
