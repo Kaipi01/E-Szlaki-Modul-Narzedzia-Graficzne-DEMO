@@ -1,0 +1,24 @@
+@use "../base/variables" as *;
+
+#graphics-tools-module {
+  .modern-card,
+  &.modern-card {
+    width: 100%;
+    padding: 1rem 0.85rem;
+    border-radius: 20px;
+    background: var(--background);
+    box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 15px;
+
+    @media (min-width: $content-breakpoint-phone) {
+      padding: 1rem;
+    }
+
+    @media (min-width: $content-breakpoint-tablet) {
+      padding: 1.5rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-large) {
+      padding-inline: 2rem;
+    }
+  }
+}

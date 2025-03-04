@@ -1,0 +1,72 @@
+@use "sass:color";
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: toRem(10);
+    position: relative;
+    color: #fff;
+    border-radius: 7px;
+    box-shadow: rgba(0, 0, 0, 0.44) 0px 3px 8px;
+
+    @media (min-width: $content-breakpoint-phone) {
+      padding: toRem(20);
+    }
+
+    .icon {
+      font-size: 1.5rem;
+    }
+
+    .message {
+      font-weight: bold;
+      padding-right: toRem(40);
+    }
+
+    .close {
+      --size: 2rem;
+      position: absolute;
+      width: var(--size);
+      height: var(--size);
+      opacity: 0.75;
+      border-radius: 5px;
+      background-color: #ffffff91;
+      top: 50%;
+      right: toRem(20);
+      transform: translateY(-50%);
+      text-align: center;
+      font-size: 1.25em;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: rgba(0, 0, 0, 0.36) 0px 1px 4px;
+
+      &:hover,
+      &:focus,
+      &:active {
+        opacity: 1;
+      }
+    }
+  }
+
+  @mixin alert($name, $bgColor) {
+    $accentColor: color.adjust($bgColor, $lightness: -20%);
+
+    .#{$name} {
+      background-color: #{$bgColor};
+      border-left: 5px solid $accentColor;
+
+      .close {
+        border-color: $accentColor;
+        color: $accentColor;
+      }
+    }
+  }
+  @include alert(info-alert, #3665ffe1);
+  @include alert(success-alert, #00c11ae2);
+  @include alert(error-alert, #e40000e3);
+  @include alert(warning-alert, #cf7900e4);
+}

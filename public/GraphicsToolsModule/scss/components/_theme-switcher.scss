@@ -1,0 +1,260 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .theme-switcher {
+    --ts-width: 4.6875rem;
+    --ts-height: calc(var(--ts-width) * 0.5);
+    --ts-border: 0px;
+    --ts-gap: calc(var(--ts-width) * 0.08333);
+
+    display: block;
+    position: relative;
+    width: var(--ts-width);
+    height: var(--ts-height);
+    overflow: hidden;
+    transition: all 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border: var(--ts-border) solid #ffffff;
+    border-radius: 100vmax;
+    background: linear-gradient(0deg, #87ceeb 0%, #e0f6ff 100%);
+    box-shadow: 0 calc(var(--ts-width) * 0.03333) calc(var(--ts-width) * 0.1)
+      rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 10px;
+    }
+
+    &:focus-within {
+      outline: auto;
+      box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 10px;
+    }
+
+    input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+    }
+
+    .slider {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transition: 1s;
+    }
+
+    .sun,
+    .moon {
+      position: absolute;
+      top: calc(var(--ts-width) * 0.08333);
+      width: calc(var(--ts-width) * 0.33333);
+      height: calc(var(--ts-width) * 0.33333);
+      transition: 1s;
+      border-radius: 50%;
+    }
+
+    .sun {
+      left: calc(var(--ts-width) * 0.08333);
+      transform: scale(1);
+      background: radial-gradient(circle, #ffd700 30%, #ffa500 70%);
+      box-shadow: 0 0 calc(var(--ts-width) * 0.06667) #ffd700;
+    }
+
+    .moon {
+      right: calc(var(--ts-width) * -0.4);
+      transform: scale(0);
+      background: radial-gradient(circle, #f4f4f4 30%, #e0e0e0 70%);
+      box-shadow: 0 0 calc(var(--ts-width) * 0.06667) #f4f4f4;
+    }
+
+    .cloud {
+      position: absolute;
+      transition: 1s;
+      border-radius: calc(var(--ts-width) * 0.16667);
+      background-color: white;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      background-color: white;
+    }
+
+    .cloud1 {
+      top: calc(var(--ts-width) * 0.1);
+      left: calc(var(--ts-width) * 0.46667);
+      width: calc(var(--ts-width) * 0.33333);
+      height: calc(var(--ts-width) * 0.1);
+    }
+
+    .cloud1::before {
+      top: calc(var(--ts-width) * -0.08333);
+      left: calc(var(--ts-width) * 0.03333);
+      width: calc(var(--ts-width) * 0.16667);
+      height: calc(var(--ts-width) * 0.16667);
+    }
+
+    .cloud1::after {
+      top: calc(var(--ts-width) * -0.06667);
+      right: calc(var(--ts-width) * 0.03333);
+      width: calc(var(--ts-width) * 0.13333);
+      height: calc(var(--ts-width) * 0.13333);
+    }
+
+    .cloud2 {
+      top: calc(var(--ts-width) * 0.26667);
+      left: calc(var(--ts-width) * 0.66667);
+      width: calc(var(--ts-width) * 0.2);
+      height: calc(var(--ts-width) * 0.06667);
+    }
+
+    .cloud2::before {
+      top: calc(var(--ts-width) * -0.08333);
+      left: calc(var(--ts-width) * 0.01667);
+      width: calc(var(--ts-width) * 0.1);
+      height: calc(var(--ts-width) * 0.1);
+    }
+
+    .cloud2::after {
+      top: calc(var(--ts-width) * -0.04);
+      right: calc(var(--ts-width) * 0.01667);
+      width: calc(var(--ts-width) * 0.08333);
+      height: calc(var(--ts-width) * 0.08333);
+    }
+
+    .star {
+      position: absolute;
+      transition: 1s;
+      opacity: 0;
+      background-color: white;
+      -webkit-clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+      );
+      clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+      );
+    }
+
+    .star1 {
+      top: calc(var(--ts-width) * 0.1);
+      left: calc(var(--ts-width) * 0.13333);
+      width: calc(var(--ts-width) * 0.06667);
+      height: calc(var(--ts-width) * 0.06667);
+    }
+    .star2 {
+      top: calc(var(--ts-width) * 0.2);
+      left: calc(var(--ts-width) * 0.26667);
+      width: calc(var(--ts-width) * 0.05);
+      height: calc(var(--ts-width) * 0.05);
+    }
+    .star3 {
+      top: calc(var(--ts-width) * 0.33333);
+      left: calc(var(--ts-width) * 0.2);
+      width: calc(var(--ts-width) * 0.03333);
+      height: calc(var(--ts-width) * 0.03333);
+    }
+    .star4 {
+      top: calc(var(--ts-width) * 0.13333);
+      left: calc(var(--ts-width) * 0.4);
+      width: calc(var(--ts-width) * 0.04);
+      height: calc(var(--ts-width) * 0.04);
+    }
+    .star5 {
+      top: calc(var(--ts-width) * 0.26667);
+      left: calc(var(--ts-width) * 0.46667);
+      width: calc(var(--ts-width) * 0.02667);
+      height: calc(var(--ts-width) * 0.02667);
+    }
+
+    input:checked + .slider {
+      background: linear-gradient(0deg, #1a1a2e 0%, #16213e 100%);
+    }
+
+    input:checked + .slider .sun {
+      left: calc(var(--ts-width) * -0.4);
+      transform: scale(0);
+    }
+
+    input:checked + .slider .moon {
+      right: calc(var(--ts-width) * 0.08333);
+      transform: scale(1);
+    }
+
+    input:checked + .slider .cloud {
+      transform: translateX(var(--ts-width)) scale(0);
+    }
+
+    input:checked + .slider .star {
+      transform: scale(1.5);
+      opacity: 1;
+    }
+
+    @-webkit-keyframes twinkle {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes twinkle {
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    input:checked + .slider .star {
+      -webkit-animation: twinkle 2s infinite;
+      animation: twinkle 2s infinite;
+    }
+
+    input:checked + .slider .star1 {
+      -webkit-animation-delay: 0s;
+      animation-delay: 0s;
+    }
+    input:checked + .slider .star2 {
+      -webkit-animation-delay: 0.4s;
+      animation-delay: 0.4s;
+    }
+    input:checked + .slider .star3 {
+      -webkit-animation-delay: 0.8s;
+      animation-delay: 0.8s;
+    }
+    input:checked + .slider .star4 {
+      -webkit-animation-delay: 1.2s;
+      animation-delay: 1.2s;
+    }
+    input:checked + .slider .star5 {
+      -webkit-animation-delay: 1.6s;
+      animation-delay: 1.6s;
+    }
+  }
+}

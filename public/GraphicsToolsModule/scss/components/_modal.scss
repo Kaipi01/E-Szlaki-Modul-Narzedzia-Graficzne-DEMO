@@ -1,0 +1,102 @@
+@use "../functions/toRem" as fun;
+@use "../base/variables" as *;
+@use "./loading" as *;
+
+#graphics-tools-module {
+  --modal-transition-duration: 0.3s;
+
+  .modal {
+    width: 100%;
+    max-width: none;
+    min-height: 100%;
+    border: 0;
+    z-index: 800;
+    background: transparent;
+    color: var(--font-color);
+
+    &[open] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+      animation: fade-in var(--modal-transition-duration) forwards;
+    }
+    &[open]::-webkit-backdrop {
+      -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+      animation: fade-in var(--modal-transition-duration) forwards;
+    }
+    &[open]::backdrop {
+      -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+      animation: fade-in var(--modal-transition-duration) forwards;
+    }
+
+    &__content {
+      position: relative;
+      width: 97.5% !important;
+      max-width: 50rem;
+      max-height: 95vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      border-radius: 20px;
+      background: var(--background);
+    }
+
+    &__close-btn {
+      position: absolute;
+      z-index: 3;
+      top: 0.3rem;
+      right: 0.3rem;
+      transition: 0.2s;
+      border-radius: 50%;
+
+      @media (min-width: $content-breakpoint-tablet-small) {
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+    &__close-btn-icon {
+      display: block;
+      width: 100% !important;
+    }
+
+    &__close-btn--inner {
+      width: 2.5rem;
+      height: 2.5rem;
+      transition: 0.3s;
+      box-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.075),
+        0 0.3px 0.4px rgba(0, 0, 0, 0.025), 0 0.9px 1.5px rgba(0, 0, 0, 0.05),
+        0 3.5px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    &__close-btn--inner:hover,
+    &__close-btn--inner:focus {
+      transform: rotate(180deg) scale(1.05);
+    }
+  }
+
+  .modal::-webkit-backdrop {
+    opacity: 0;
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .modal::backdrop {
+    opacity: 0;
+    background: rgb(0 0 0 / 0.5);
+  }
+
+  .modal[closing] {
+    -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+    animation: fade-out var(--modal-transition-duration) forwards;
+    pointer-events: none;
+  }
+
+  .modal[closing]::-webkit-backdrop {
+    -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+    animation: fade-out var(--modal-transition-duration) forwards;
+  }
+
+  .modal[closing]::backdrop {
+    -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+    animation: fade-out var(--modal-transition-duration) forwards;
+  }
+}

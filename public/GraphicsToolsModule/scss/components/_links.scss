@@ -1,0 +1,160 @@
+#graphics-tools-module {
+  .link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+    padding: 1.2rem 2rem;
+    transition: 0.3s;
+    border-radius: 0.5em;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    white-space: nowrap;
+    gap: 0.5rem;
+
+    &-100 {
+      width: 100%;
+    }
+
+    &.small {
+      padding: 0.65rem 1.5rem;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+      font-size: 0.9rem;
+      font-weight: normal;
+    }
+    &.medium {
+      padding: 0.65rem 1.5rem;
+      box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+        rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+      font-size: 1rem;
+      font-weight: normal;
+    }
+  }
+
+  .link.variant1 {
+    background-color: var(--very-light-green);
+    font-size: inherit;
+
+    &:hover,
+    &:focus,
+    &:active {
+      background-color: var(--light-green);
+    }
+
+    &:disabled {
+      background-color: var(--very-light-green-opacity);
+      cursor: default;
+    }
+
+    &.medium {
+      font-size: 1rem;
+    }
+    &.small {
+      font-size: 0.9rem;
+    }
+  }
+  .link.variant2 {
+    background-color: var(--green);
+    font-size: inherit;
+    vertical-align: middle;
+
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      background-color: var(--light-green);
+    }
+
+    &:disabled {
+      background-color: var(--green-opacity);
+      cursor: default;
+    }
+
+    &.small {
+      font-size: 0.9rem;
+    }
+    &.medium {
+      font-size: 1rem;
+    }
+
+    .link-icon {
+      font-size: larger;
+    }
+  }
+
+  .link.variant3 {
+    background-color: var(--blue);
+    font-size: inherit;
+    vertical-align: middle;
+
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      background-color: var(--light-blue);
+    }
+
+    &:disabled {
+      background-color: var(--light-blue-opacity);
+      cursor: default;
+    }
+
+    &.small {
+      font-size: 0.9rem;
+    }
+    &.medium {
+      font-size: 1rem;
+    }
+
+    .link-icon {
+      font-size: larger;
+    }
+  }
+
+  .link.variant4 {
+    position: relative;
+    width: 100%;
+    padding-block: 1rem;
+    overflow: hidden;
+    transition: all 0.4s ease-in-out;
+    border: none;
+    background-color: var(--blue);
+    * {
+      position: relative;
+      z-index: 3;
+    }
+
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      width: 150%;
+      height: 100%;
+      transition: all 0.4s ease-in-out;
+      background: var(--green);
+    }
+
+    &:disabled {
+      background-color: var(--light-blue-opacity);
+      cursor: default;
+
+      &::before {
+        background: var(--green-opacity);
+      }
+    }
+
+    &:hover::before,
+    &:focus::before,
+    &:active::before {
+      transform: translateX(-110%);
+    }
+  }
+}

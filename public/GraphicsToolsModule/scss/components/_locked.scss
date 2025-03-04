@@ -1,0 +1,25 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .locked {
+    position: relative;
+    -webkit-filter: grayscale(100%) brightness(0.7) !important;
+    filter: grayscale(100%) brightness(0.7) !important;
+
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: 6;
+      top: 50%;
+      left: 50%;
+      width: 55%;
+      height: 55%;
+      transform: translate(-50%, -50%);
+      background-image: var(--blocked-icon);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+  }
+}

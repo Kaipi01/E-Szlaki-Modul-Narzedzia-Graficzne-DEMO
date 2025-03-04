@@ -17,6 +17,8 @@
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
+/public/*/node_modules/
+/public/*/npm-cache/
 /npm-cache
 /design
 /development

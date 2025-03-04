@@ -1,0 +1,94 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .animated-progress {
+    --progress-bar-height: 1.25rem;
+    --progress-bar-label-color: var(--green);
+    --progress-bar-border-radius: 10px;
+
+    width: 100%;
+
+    &--no-label {
+      .animated-progress-per {
+        &::before,
+        &::after {
+          content: none;
+        }
+      }
+    }
+
+    &-name { 
+      font-size: 0.9rem;
+      font-weight: 700; 
+      text-transform: uppercase;
+    }
+
+    &-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 0.45rem;
+    }
+
+    &-stats {
+      font-weight: bold;
+      text-align: right; 
+    }
+
+    &-bar {
+      display: flex;
+      align-items: center;
+      height: var(--progress-bar-height);
+      margin-top: 3rem;
+      border-radius: var(--progress-bar-border-radius);
+      background: #ffffff2b;
+      box-shadow: inset rgba(0, 0, 0, 0.45) 0px 5px 15px,
+        rgba(0, 0, 0, 0.34) 0px 3px 8px;
+    }
+
+    &-icon {
+      position: relative;
+      max-width: toRem(70);
+    }
+
+    &-per {
+      position: relative;
+      width: 0;
+      height: var(--progress-bar-height);
+      transition: 1s linear;
+      border-radius: var(--progress-bar-border-radius);
+      background: var(--green);
+      background: linear-gradient(to right, var(--green-opacity), var(--green));
+
+      &::before {
+        content: attr(per) "%";
+        position: absolute;
+        z-index: 2;
+        top: -2.25rem; 
+        right: 0;
+        padding: 0.325rem 0.6rem;
+        transform: translateX(50%) translateZ(0);
+        border-radius: 4px;
+        background-color: var(--progress-bar-label-color);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: bold;
+        will-change: transform;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: -1rem; 
+        right: 0;
+        width: 0.6rem;
+        height: 0.6rem;
+        transform: translateX(50%) rotate(45deg) translateZ(0);
+        border-radius: 2px;
+        background-color: var(--progress-bar-label-color);
+        will-change: transform;
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .green-list {
+    &.list {
+      & .li-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        order: -1;
+        min-width: 3rem;
+        height: 3rem;
+        border-radius: toRem(10);
+        background-color: var(--green);
+        box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 15px;
+      }
+
+      & .li-icon i {
+        color: #fff;
+        font-size: 1.5rem;
+      }
+    }
+
+    &--variant2 {
+      &.list {
+        & > li {
+          padding: toRem(15) toRem(16);
+          border-radius: toRem(15);
+          box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 15px;
+        }
+      }
+    }
+
+    &.list {
+      & > li {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      & .li-title {
+        display: block;
+        padding-bottom: 0.25rem;
+        color: var(--font-color);
+        font-size: 1rem;
+        font-weight: bold;
+      }
+    }
+  }
+}

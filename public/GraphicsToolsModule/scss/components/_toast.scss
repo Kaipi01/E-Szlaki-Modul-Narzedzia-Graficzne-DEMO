@@ -1,0 +1,201 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as fun;
+
+#graphics-tools-module {
+  .toast {
+    --primary: #2659ffd3;
+    --secondary: #fff;
+
+    display: flex;
+    z-index: 999;
+    align-items: center;
+    justify-content: space-between;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    max-width: fun.toRem(600);
+    padding: 0.75rem 1.5rem;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--primary);
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    color: var(--secondary);
+
+    &-container {
+      display: flex;
+      position: fixed;
+      z-index: 989;
+      top: 1rem;
+      right: 0.15rem;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.5rem;
+
+      @media (min-width: $content-breakpoint-phone-large) {
+        right: 1.5rem;
+      }
+    }
+
+    &.success {
+      --primary: #00c11ad3;
+    }
+
+    &.warning {
+      --primary: #cf7900d3;
+    }
+
+    &.error {
+      --primary: #e40000d3;
+    }
+
+    &.info {
+      --primary: #3665ffd3;
+    }
+
+    .icon {
+      color: inherit;
+      font-size: 1.75rem;
+    }
+
+    .toast-message {
+      padding: fun.toRem(5) fun.toRem(15);
+
+      &-title,
+      &-text {
+        margin: 0;
+        line-height: 1.2em;
+      }
+      &-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+      &-text {
+        font-size: 1rem;
+      }
+    }
+
+    .toast-close {
+      position: relative;
+      padding: fun.toRem(12);
+      transform: scale(1.5);
+      transition: all 0.3s ease-in-out;
+      border: none;
+      border-radius: 5px;
+      background: rgba(0, 0, 0, 0);
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.8);
+        background: rgba(0, 0, 0, 0.1);
+      }
+      &::before,
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: fun.toRem(2);
+        height: fun.toRem(12);
+        transition: background 0.2s ease-in-out;
+        border-radius: 5px;
+        background: var(--secondary);
+      }
+      &:hover::before,
+      &:hover::after {
+        background: var(--secondary);
+      }
+      &::before {
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+      &::after {
+        transform: translate(-50%, -50%) rotate(-45deg);
+      }
+    }
+
+    @-webkit-keyframes close {
+      from {
+        visibility: visible;
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        visibility: hidden;
+        transform: scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    @keyframes close {
+      from {
+        visibility: visible;
+        transform: scale(1);
+        opacity: 1;
+      }
+      to {
+        visibility: hidden;
+        transform: scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    @-webkit-keyframes open {
+      from {
+        visibility: hidden;
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      to {
+        visibility: visible;
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes open {
+      from {
+        visibility: hidden;
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      to {
+        visibility: visible;
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .timer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: fun.toRem(4);
+      border-top-right-radius: 5px;
+      background: var(--secondary);
+      box-shadow: 0 0 8px var(--secondary);
+
+      &-animation {
+        -webkit-animation: countdown 5s linear forwards;
+        animation: countdown 5s linear forwards;
+      }
+    }
+
+    @-webkit-keyframes countdown {
+      from {
+        width: 100%;
+      }
+      to {
+        width: 0%;
+      }
+    }
+
+    @keyframes countdown {
+      from {
+        width: 100%;
+      }
+      to {
+        width: 0%;
+      }
+    }
+  }
+}

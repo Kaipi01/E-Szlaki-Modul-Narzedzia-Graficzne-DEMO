@@ -1,0 +1,110 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .custom-select-green {
+    $background: var(--green);
+    $select-color: #fff;
+    $select-background: $background;
+
+    --box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    --border-radius: 5px;
+
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    min-height: toRem(47);
+    color: $select-color;
+    font-size: 1rem;
+    cursor: pointer; 
+
+    &-hidden { 
+      display: none;
+      visibility: hidden;
+      padding-right: toRem(10);
+    }
+
+    &-styled {
+      display: flex;
+      position: relative;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      align-items: center;
+      gap: toRem(15);
+      height: 100%;
+      min-height: toRem(47);
+      padding: 0.75rem 0.9375rem;
+      transition: all 0.2s ease-in;
+      border-radius: var(--border-radius);
+      background-color: $select-background;
+      box-shadow: var(--box-shadow);
+
+      &:after {
+        content: "";
+        position: absolute;
+        top: calc(50% + 3.5px);
+        right: 0.9375rem;
+        width: 0;
+        height: 0;
+        transform: translateY(-50%);
+        transition: all 0.3s ease;
+        border: toRem(7) solid transparent;
+        border-color: $select-color transparent transparent transparent; 
+      }
+      &:hover,
+      &:active,
+      &.active {
+        background-color: var(--dark-green);
+
+        &:after {
+          transform: translateY(-100%) rotate(180deg);
+        }
+      }
+
+      &.active {
+        background-color: var(--dark-green);
+
+        &:after {
+          transform: translateY(-100%) rotate(180deg);
+        }
+      }
+    }
+
+    &-options {
+      display: none;
+      position: absolute;
+      z-index: 999; 
+      top: 94%;
+      right: 0;
+      left: 0;
+      margin: 0;
+      padding: 0.75rem 0;
+      border-bottom-right-radius: var(--border-radius);
+      border-bottom-left-radius: var(--border-radius);
+      background-color: var(--dark-green);
+      box-shadow: var(--box-shadow);
+      list-style: none;
+
+      li {
+        display: inline-flex;
+        gap: 0;
+        width: 100%;
+        margin: 0;
+        padding: toRem(12) 0;
+        transition: all 0.15s ease-in;
+        border-top: toRem(1) solid var(--dark-green);
+        text-indent: toRem(15);
+        &:hover,
+        &.is-selected {
+          background: $select-background;
+          color: $select-color;
+        }
+        &[rel="hide"] {
+          display: none;
+        }
+      }
+    }
+  }
+}

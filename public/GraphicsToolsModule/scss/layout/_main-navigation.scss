@@ -1,0 +1,84 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .main-navigation {
+    --navigation-links-number: 3;
+    --link-item-width: calc(100% / var(--navigation-links-number));
+    --nav-translate: 0%;
+
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding-inline: 0.85rem;
+    background-color: transparent;
+
+    @media (min-width: $content-breakpoint-phone) {
+      padding-inline: 1rem;
+    }
+
+    @media (min-width: $content-breakpoint-tablet) {
+      padding-inline: 1.5rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-large) {
+      padding-inline: 2rem;
+    }
+
+    &-list {
+      display: flex;
+      position: relative;
+      width: 100%;
+      max-width: toRem(750);
+      list-style: none;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: var(--link-item-width);
+        height: toRem(4);
+        transform: translateX(var(--nav-translate));
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 100vmax;
+        background-color: var(--green);
+        will-change: transform;
+      }
+    }
+
+    &-item {
+      width: var(--link-item-width);
+    }
+
+    &-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem 0;
+      transition: 0.3s;
+      color: var(--green);
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      gap: 0.5rem;
+
+      @media (min-width: $content-breakpoint-tablet) {
+        font-size: 1.15rem;
+      }
+
+      &-text {
+        display: none;
+
+        @media (min-width: $content-breakpoint-tablet) {
+          display: inline;
+        }
+      }
+
+      &-icon {
+        max-width: 2.25rem;
+      }
+    }
+  }
+}

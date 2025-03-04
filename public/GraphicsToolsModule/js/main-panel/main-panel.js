@@ -1,5 +1,7 @@
-import PIXI from "./libs/pixi-modules.min.js";
-import Cropper from "./libs/cropper.min.js"; 
+import PIXI from "../libs/pixi-modules.min.js";
+import Cropper from "../libs/cropper.min.js"; 
+
+console.log('hello main-panel.js !')
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -50,7 +52,7 @@ function initTestPixiLib() {
 
     // Załaduj obraz
     // const image = PIXI.Sprite.from('./images/place-img-2.webp');
-    const image = PIXI.Sprite.from('/ImageEditingToolsModule/images/place-img-2.webp');
+    const image = PIXI.Sprite.from('/GraphicsToolsModule/images/place-img-2.webp');
     
     app.stage.addChild(image);
 

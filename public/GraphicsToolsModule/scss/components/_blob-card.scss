@@ -1,0 +1,67 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .blob-card {
+    --blob-1-color-1: var(--light-green);
+    --blob-1-color-2: var(--very-light-green);
+    --blob-2-color-1: var(--green);
+    --blob-2-color-2: var(--green);
+
+    display: grid;
+    position: relative;
+    width: 100%;
+    max-width: 7.5rem;
+    color: #fff;
+    isolation: isolate;
+    place-items: center;
+    aspect-ratio: 1.25/1;
+
+    &:hover {
+      &::before {
+        border-radius: 70% 30% 50% 50% / 40% 40% 60% 60%;
+      }
+
+      &::after {
+        border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+      }
+    }
+
+    & > * {
+      grid-area: 1 / 1;
+    }
+
+    &::before,
+    &::after {
+      content: "";
+      display: inline-block;
+      z-index: -1;
+      grid-area: 1 / 1;
+      width: 100%;
+      height: 100%;
+      transition: 0.3s ease;
+      opacity: 0.75;
+      filter: drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));
+    }
+
+    &::before {
+      width: 80%;
+      border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+      background: var(--blob-1-color-1);
+      background: linear-gradient(
+        to right,
+        var(--blob-1-color-2),
+        var(--blob-1-color-1)
+      );
+    }
+    &::after {
+      border-radius: 70% 30% 50% 50% / 40% 40% 60% 60%;
+      background: var(--blob-2-color-1);
+      background: linear-gradient(
+        to right,
+        var(--blob-2-color-2),
+        var(--blob-2-color-1)
+      );
+    }
+  }
+}

@@ -1,0 +1,172 @@
+@use "./variables" as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  font-size: 16px;
+}
+
+body {
+  color: #000;
+  font-family: sans-serif;
+
+  &::after {
+    content: "";
+    position: fixed;
+    z-index: -9;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(../images/topography.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  &.theme-dark {
+    background-color: #252525;
+
+    &::after {
+      opacity: 0.15;
+    }
+  }
+}
+
+#graphics-tools-module {
+  .container {
+    max-width: 83.5rem;
+    margin: 0 auto;
+    padding-inline: 0rem;
+
+    @media (min-width: $content-breakpoint-phone) {
+      padding-inline: 1.25rem;
+    }
+
+    @media (min-width: 31.25em) {
+      padding-inline: 2rem;
+    }
+
+    @media (min-width: 62.5em) {
+      padding-inline: 4rem;
+    }
+
+    @media (min-width: 87.5em) {
+      padding-inline: 0rem;
+    }
+
+    @media (min-width: 87.5em) {
+      padding-inline: 0rem;
+    }
+
+    @media (min-width: 103.125em) {
+      max-width: 95rem;
+    }
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    * {
+      /* ważne */
+      pointer-events: none;
+    }
+  }
+
+  i {
+    font-style: normal;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+
+    * {
+      /* ważne */
+      pointer-events: none;
+    }
+  }
+
+  .hide,
+  [hidden] {
+    display: none !important;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hr {
+    width: 100%;
+    margin-block: 0.5rem;
+  }
+
+  .header {
+    font-size: 1.1rem;
+    font-weight: bold;
+
+    @media (min-width: 31.25em) {
+      font-size: 1.25rem;
+    }
+
+    @media (min-width: 50em) {
+      font-size: 1.5rem;
+    }
+  }
+
+  .big-header {
+    font-size: 2rem;
+    font-weight: bold;
+
+    @media (min-width: 31.25em) {
+      font-size: 2.5rem;
+    }
+
+    @media (min-width: 50em) {
+      font-size: 3rem;
+    }
+  }
+
+  .sub-header {
+    padding-top: 0.5rem;
+    padding-bottom: 1rem;
+    color: var(--green);
+    font-size: 1rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    @media (min-width: 31.25em) {
+      font-size: 1rem;
+    }
+  }
+
+  .small-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    @media (min-width: 31.25em) {
+      font-size: 1.2rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop) {
+      font-size: 1.3rem;
+    }
+  }
+
+  .opacity-0 {
+    transition: 0.3s ease;
+    opacity: 0;
+  }
+}

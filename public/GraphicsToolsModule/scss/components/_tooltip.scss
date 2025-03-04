@@ -1,0 +1,64 @@
+@use "../base/variables" as *;
+
+#graphics-tools-module {
+  .tooltip {
+    position: relative;
+
+    .tooltip-content {
+      display: none;
+
+      @media (min-width: 65em) {
+        display: block;
+        visibility: hidden;
+        position: absolute;
+        z-index: 2;
+        top: -1rem;
+        left: 8%;
+        width: -webkit-max-content;
+        width: -moz-max-content;
+        width: max-content;
+        max-width: 30ch;
+        padding: 0.25rem 0.5rem;
+        padding: 0.5rem 0.75rem;
+        transform: translateY(-100%);
+        transition: 0.3s;
+        border-radius: 5px;
+        opacity: 0;
+        background-color: var(--dark-green);
+        color: #fff;
+        cursor: help;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -5px;
+        left: 7%;
+        width: 10px;
+        height: 10px;
+        transform: rotate(45deg);
+        background-color: var(--dark-green);
+      }
+
+      @media (min-width: $content-breakpoint-desktop) {
+        top: -1rem;
+        left: 50%;
+        transform: translateY(-100%) translateX(-50%);
+
+        &::after {
+          bottom: -5px;
+          left: 50%;
+          transform: translateX(-50%) rotate(45deg);
+        }
+      }
+    }
+
+    &:focus-within .tooltip-content,
+    &:hover .tooltip-content,
+    &:focus .tooltip-content,
+    &:active .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+}

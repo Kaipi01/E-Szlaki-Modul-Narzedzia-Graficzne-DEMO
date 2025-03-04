@@ -1,0 +1,41 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .loading {
+    position: relative;
+    // z-index: 4;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: 28;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      background-color: var(--background-50);
+      -webkit-backdrop-filter: blur(15px);
+      backdrop-filter: blur(15px);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: 29;
+      top: 50%;
+      left: 50% ;
+      width: min(40%, 12.5rem);
+      height: min(40%, 12.5rem);
+      transform: translate(-50%, -50%);
+      -webkit-animation: var(--loading-icon-animation);
+      animation: var(--loading-icon-animation);
+      background-image: var(--loading-icon);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+  }
+}

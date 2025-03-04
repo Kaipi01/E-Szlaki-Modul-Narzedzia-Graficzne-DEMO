@@ -1,0 +1,63 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .pulse-animation { 
+    -webkit-animation: pulse-animation 1.9s infinite; 
+            animation: pulse-animation 1.9s infinite;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      -webkit-animation: pulse-animation 2s infinite;
+              animation: pulse-animation 2s infinite;
+      border-radius: inherit;
+      box-shadow: 0 0 0 0 var(--yellow-opacity);
+    }
+
+    &::before {
+      -webkit-animation-delay: 0.4s;
+              animation-delay: 0.4s;
+    }
+
+    &::after {
+      -webkit-animation-delay: 0.6s;
+              animation-delay: 0.6s;
+    }
+
+    @-webkit-keyframes pulse-animation {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 var(--yellow-opacity);
+      }
+      70% {
+        transform: scale(1.075);
+        box-shadow: 0 0 0 20px rgba(255, 140, 0, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+      }
+    }
+
+    @keyframes pulse-animation {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 var(--yellow-opacity);
+      }
+      70% {
+        transform: scale(1.075);
+        box-shadow: 0 0 0 20px rgba(255, 140, 0, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 140, 0, 0);
+      }
+    }
+  }
+}
