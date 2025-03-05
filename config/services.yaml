@@ -28,3 +28,26 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+
+    # Post-procesory dla LiipImagineBundle
+    app.image_optimizer.jpeg:
+        class: App\Service\GraphicsToolsModule\ImageOptimizer\JpegOptimizer
+        tags:
+            - { name: liip_imagine.filter.post_processor, post_processor: jpegoptim }
+
+    app.image_optimizer.png:
+        class: App\Service\GraphicsToolsModule\ImageOptimizer\PngOptimizer
+        tags:
+            - { name: liip_imagine.filter.post_processor, post_processor: pngquant }
+
+    app.image_optimizer.webp:
+        class: App\Service\GraphicsToolsModule\ImageOptimizer\WebpOptimizer
+        tags:
+            - { name: liip_imagine.filter.post_processor, post_processor: webp }
+
+    App\Command\CleanTempImagesCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+        tags:
+            - { name: 'console.command' }

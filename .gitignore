@@ -30,3 +30,7 @@ notes.txt
 *.odt
 *.excalidraw
 ###< symfony/webpack-encore-bundle ###
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###

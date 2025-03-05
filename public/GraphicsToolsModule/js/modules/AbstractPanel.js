@@ -6,11 +6,10 @@ import Toast from './Toast.js'
 export default class AbstractPanel {
     static ERROR_EVENT = "panel-error-occur-event" 
  
-    /** @param {string} containerSelector */
-    constructor(containerSelector) { 
-        this.containerSelector = containerSelector
+    /** @param {HTMLElement | string} container */
+    constructor(container) {  
         /** @type {HTMLElement} */
-        this.container = document.querySelector(containerSelector);
+        this.container = container instanceof HTMLElement ? container : document.querySelector(container);
         this.apiService = ApiService.getInstance()  
         this.panelName = null 
         

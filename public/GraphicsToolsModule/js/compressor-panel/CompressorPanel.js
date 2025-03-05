@@ -14,22 +14,16 @@ import Toast from '../modules/Toast.js';
 export default class CompressorPanel extends AbstractPanel {
     /**
      * Konstruktor klasy CompressorPanel
-     * @param {string} containerSelector
+     * @param {HTMLElement | string} container 
      * @param {Object} options - Opcje konfiguracyjne
      * @param {string} options.uploadUrl - URL endpointu do kompresji obrazów
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
      * @param {Array} options.allowedTypes - Dozwolone typy plików
      * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
      */
-    constructor(containerSelector, options = {}) {
-        super(containerSelector)
-        // Konfiguracja z domyślnymi wartościami
-        this.config = {
-            uploadUrl: options.uploadUrl,
-            maxFileSize: options.maxFileSize || 10 * 1024 * 1024, // 10MB
-            allowedTypes: options.allowedTypes || ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
-            maxConcurrentUploads: options.maxConcurrentUploads || 3
-        };
+    constructor(container, options = {}) {
+        super(container) 
+        this.config = options;
 
         // Stan aplikacji
         this.state = {
@@ -109,8 +103,7 @@ export default class CompressorPanel extends AbstractPanel {
      */
     uploadSingleFile(file) {
         const formData = this.prepareFileFormData(file);
-        const xhr = new XMLHttpRequest();
-        const self = this;
+        const xhr = new XMLHttpRequest(); 
 
         // Obsługa postępu wysyłania
         xhr.upload.addEventListener('progress', (event) => {
@@ -118,17 +111,17 @@ export default class CompressorPanel extends AbstractPanel {
                 const filePercentComplete = Math.round((event.loaded / event.total) * 100);
 
                 // Aktualizacja postępu dla tego pliku
-                self.state.totalProgress[file.name] = filePercentComplete;
+                this.state.totalProgress[file.name] = filePercentComplete;
 
                 // Obliczenie łącznego postępu
-                self.updateTotalProgress();
+                this.updateTotalProgress();
             }
         });
 
         // Obsługa zakończenia wysyłania
         xhr.addEventListener('load', () => {
             // Zmniejszenie licznika aktywnych wysyłań
-            self.state.activeUploads--;
+            this.state.activeUploads--;
 
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
@@ -136,28 +129,28 @@ export default class CompressorPanel extends AbstractPanel {
                     // Możesz tutaj obsłużyć odpowiedź dla pojedynczego pliku
                     console.log(`Plik ${file.name} został pomyślnie wysłany.`);
                 } catch (error) {
-                    self.showError(`Błąd podczas przetwarzania odpowiedzi dla pliku "${file.name}".`);
+                    this.showError(`Błąd podczas przetwarzania odpowiedzi dla pliku "${file.name}".`);
                 }
             } else {
-                self.showError(`Błąd serwera dla pliku "${file.name}": ${xhr.status} ${xhr.statusText}`);
+                this.showError(`Błąd serwera dla pliku "${file.name}": ${xhr.status} ${xhr.statusText}`);
             }
 
             // Kontynuuj przetwarzanie kolejki
-            self.processUploadQueue();
+            this.processUploadQueue();
         });
 
         // Obsługa błędu wysyłania
         xhr.addEventListener('error', () => {
-            self.showError(`Błąd połączenia podczas wysyłania pliku "${file.name}".`);
-            self.state.activeUploads--;
-            self.processUploadQueue();
+            this.showError(`Błąd połączenia podczas wysyłania pliku "${file.name}".`);
+            this.state.activeUploads--;
+            this.processUploadQueue();
         });
 
         // Obsługa przerwania wysyłania
         xhr.addEventListener('abort', () => {
-            self.showError(`Wysyłanie pliku "${file.name}" zostało przerwane.`);
-            self.state.activeUploads--;
-            self.processUploadQueue();
+            this.showError(`Wysyłanie pliku "${file.name}" zostało przerwane.`);
+            this.state.activeUploads--;
+            this.processUploadQueue();
         });
 
         // Wysłanie żądania
@@ -241,9 +234,9 @@ export default class CompressorPanel extends AbstractPanel {
         this.elements.compressButton.addEventListener('click', this.handleCompression.bind(this));
         this.elements.clearButton.addEventListener('click', this.clearGallery.bind(this));
 
-        // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików
-        document.addEventListener('dragover', this.preventBrowserDefaults);
-        document.addEventListener('drop', this.preventBrowserDefaults);
+        // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
+        document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
+        document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
     }
 
     /**
@@ -298,7 +291,11 @@ export default class CompressorPanel extends AbstractPanel {
         const newFiles = Array.from(fileList).filter(file => {
             // Sprawdzenie czy plik jest obrazem o dozwolonym typie
             if (!this.config.allowedTypes.includes(file.type)) {
-                this.showError(`Plik "${file.name}" ma niedozwolony format. Dozwolone formaty: JPG, PNG, GIF, WebP, BMP.`);
+                const allowedTypesList = this.config.allowedTypes.map(format => {
+                    return format.replace('image/' , '').toUpperCase()
+                })
+                
+                this.showError(`Plik "${file.name}" ma niedozwolony format. Dozwolone formaty: ${allowedTypesList.join(', ')}.`);
                 return false;
             }
 
@@ -342,10 +339,9 @@ export default class CompressorPanel extends AbstractPanel {
      * Renderowanie miniatury obrazu
      */
     renderThumbnail(file) {
-        const reader = new FileReader();
-        const self = this;
+        const reader = new FileReader(); 
 
-        reader.onload = function (event) {
+        reader.onload = (event) => {
             const thumbnailContainer = document.createElement('div');
             thumbnailContainer.className = 'image-compressor__thumbnail-container';
             thumbnailContainer.dataset.fileName = file.name;
@@ -357,18 +353,18 @@ export default class CompressorPanel extends AbstractPanel {
 
             const info = document.createElement('div');
             info.className = 'image-compressor__thumbnail-info';
-            info.textContent = self.formatFileSize(file.size);
+            info.textContent = this.formatFileSize(file.size);
 
             const removeButton = document.createElement('div');
             removeButton.className = 'image-compressor__thumbnail-remove';
             removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-            removeButton.addEventListener('click', () => self.removeFile(file.name));
+            removeButton.addEventListener('click', () => this.removeFile(file.name));
 
             thumbnailContainer.appendChild(img);
             thumbnailContainer.appendChild(info);
             thumbnailContainer.appendChild(removeButton);
 
-            self.elements.imageGallery.appendChild(thumbnailContainer);
+            this.elements.imageGallery.appendChild(thumbnailContainer);
         };
 
         reader.onerror = () => {
@@ -439,14 +435,13 @@ export default class CompressorPanel extends AbstractPanel {
      * Wysłanie obrazów na serwer
      */
     uploadImages(formData) {
-        const xhr = new XMLHttpRequest();
-        const self = this;
+        const xhr = new XMLHttpRequest(); 
 
         // Obsługa postępu wysyłania
         xhr.upload.addEventListener('progress', (event) => {
             if (event.lengthComputable) {
                 const percentComplete = Math.round((event.loaded / event.total) * 100);
-                self.updateProgress(percentComplete);
+                this.updateProgress(percentComplete);
             }
         });
 
@@ -455,7 +450,7 @@ export default class CompressorPanel extends AbstractPanel {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const response = JSON.parse(xhr.responseText);
-                    self.handleSuccessResponse(response);
+                    this.handleSuccessResponse(response);
                 } catch (error) {
                     this.showError('Błąd podczas przetwarzania odpowiedzi serwera');
                 }
@@ -463,19 +458,19 @@ export default class CompressorPanel extends AbstractPanel {
                 this.showError(`Błąd serwera: ${xhr.status} ${xhr.statusText}`);
             }
 
-            self.finishUpload();
+            this.finishUpload();
         });
 
         // Obsługa błędu wysyłania
         xhr.addEventListener('error', () => {
             this.showError('Błąd połączenia z serwerem.');
-            self.finishUpload();
+            this.finishUpload();
         });
 
         // Obsługa przerwania wysyłania
         xhr.addEventListener('abort', () => {
             this.showError('Wysyłanie zostało przerwane.');
-            self.finishUpload();
+            this.finishUpload();
         });
 
         // Wysłanie żądania

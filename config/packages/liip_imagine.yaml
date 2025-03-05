@@ -1,0 +1,67 @@
+# config/packages/liip_imagine.yaml
+liip_imagine:
+    # Sterownik do przetwarzania obrazów (gd lub imagick)
+    driver: "gd" # Użyj "imagick" jeśli jest dostępny, oferuje lepszą jakość
+
+    # Konfiguracja resolverów (odpowiadają za dostęp do obrazów)
+    resolvers:
+        default:
+            web_path: ~
+
+    # Konfiguracja loaderów (odpowiadają za ładowanie obrazów)
+    loaders:
+        default:
+            filesystem:
+                data_root: "%kernel.project_dir%/public"
+
+    # Konfiguracja cache
+    cache: default
+
+    # Definicja filtrów
+    filter_sets:
+        # Filtr do kompresji JPEG
+        jpeg_optimized:
+            format: jpeg
+            quality: 80
+            filters:
+                strip: ~  # Usuwa metadane
+            post_processors:
+                jpegoptim: { service: app.image_optimizer.jpeg }
+
+        # Filtr do kompresji PNG
+        png_optimized:
+            format: png
+            quality: 85
+            filters:
+                strip: ~
+            post_processors:
+                pngquant: { service: app.image_optimizer.png }
+
+        # Filtr do konwersji do WebP
+        webp_conversion:
+            format: webp
+            quality: 80
+            filters:
+                strip: ~
+            post_processors:
+                webp: { service: app.image_optimizer.webp }
+
+        # Filtr do tworzenia miniatur JPEG
+        thumbnail_jpeg:
+            format: jpeg
+            quality: 80
+            filters:
+                thumbnail: { size: [300, 300], mode: outbound }
+                strip: ~
+            post_processors:
+                jpegoptim: { service: app.image_optimizer.jpeg }
+
+        # Filtr do tworzenia miniatur WebP
+        thumbnail_webp:
+            format: webp
+            quality: 80
+            filters:
+                thumbnail: { size: [300, 300], mode: outbound }
+                strip: ~
+            post_processors:
+                webp: { service: app.image_optimizer.webp }
