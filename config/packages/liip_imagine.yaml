@@ -1,8 +1,8 @@
 # config/packages/liip_imagine.yaml
 liip_imagine:
     # Sterownik do przetwarzania obrazów (gd lub imagick)
-    driver: "gd" # Użyj "imagick" jeśli jest dostępny, oferuje lepszą jakość
-
+    driver: "gd" 
+    
     # Konfiguracja resolverów (odpowiadają za dostęp do obrazów)
     resolvers:
         default:

@@ -1,4 +1,4 @@
-import { ID } from "../utils/constants.js";
+import { GRAPHICS_TOOLS_MODULE } from "../utils/constants.js";
 import { generateId } from "../utils/generateId.js";
 
 export default class Toast {
@@ -39,7 +39,7 @@ export default class Toast {
     let container = Toast.cache.container
 
     if (! context) {
-      context = document.querySelector(`#${ID.MODULE}`);
+      context = document.querySelector(`#${GRAPHICS_TOOLS_MODULE.ID}`);
       Toast.cache.context = context
     }
     if (! container) {

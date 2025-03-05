@@ -18,7 +18,7 @@ class ImagesCompressorService implements ImagesCompressorInterface
         $compressedImages = [];
 
         // Katalog tymczasowy do zapisu przesłanych plików
-        $uploadDir = $projectDir . '/public/uploads/temp/';
+        $uploadDir = $projectDir . '/public/GraphicsToolsModule/uploads/temp/';
 
         // Upewnij się, że katalog istnieje
         if (!file_exists($uploadDir)) {
@@ -62,7 +62,7 @@ class ImagesCompressorService implements ImagesCompressorInterface
                 $originalSize = filesize($uploadDir . $newFilename);
 
                 // Pobierz rozmiar skompresowanego pliku
-                $compressedFilePath = $projectDir . '/public/media/cache/' . $filterName . '/' . $relativePath;
+                $compressedFilePath = $projectDir . '/public/GraphicsToolsModule/media/cache/' . $filterName . '/' . $relativePath;
                 $compressedSize = file_exists($compressedFilePath) ? filesize($compressedFilePath) : 0;
 
                 // Dodaj informacje o skompresowanym obrazie do wyników

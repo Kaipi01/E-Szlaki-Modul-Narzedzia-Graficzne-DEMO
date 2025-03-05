@@ -2,14 +2,17 @@
 
 import AbstractPanel from '../modules/AbstractPanel.js';
 import Toast from '../modules/Toast.js';
+import FileManager from './FileManager.js';
+import UICompressorManager from './UICompressorManager.js';
+import UploadService from './UploadService.js';
 
 /**
  * Klasa CompressorPanel służąca do kompresji obrazów 
  * 
  * Odpowiedzialna za:
- * - Wczytywanie obrazów przez input file lub drag & drop
- * - Wyświetlanie miniatur obrazów
- * - Wysyłanie obrazów na serwer do kompresji
+ * - Koordynację pracy pomiędzy komponentami
+ * - Inicjalizację modułów
+ * - Zarządzanie przepływem danych
  */
 export default class CompressorPanel extends AbstractPanel {
     /**
@@ -20,184 +23,23 @@ export default class CompressorPanel extends AbstractPanel {
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
      * @param {Array} options.allowedTypes - Dozwolone typy plików
      * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
+     * @param {number} options.maxBatchSize - Maksymalna liczba plików w jednej partii
+     * @param {number} options.maxBatchSizeBytes - Maksymalny rozmiar partii w bajtach
      */
     constructor(container, options = {}) {
-        super(container) 
-        this.config = options;
+        super(container);
 
-        // Stan aplikacji
+        // Stan panelu
         this.state = {
-            files: [], // Przechowuje obiekty plików
-            uploading: false, 
-            uploadQueue: [], // Kolejka plików do wysłania
-            activeUploads: 0, // Aktualnie aktywne wysyłania
-            totalProgress: {} // Postęp dla każdego pliku
+            uploading: false
         };
 
         // Inicjalizacja elementów DOM
-        this.initElements();
-
-        // Inicjalizacja nasłuchiwania zdarzeń
-        this.attachEventListeners();
-    } 
-
-    /**
-     * Przygotowanie danych formularza do wysłania
-     * Metoda zmodyfikowana do obsługi pojedynczych plików
-     */
-    prepareFileFormData(file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('filename', file.name);
-        return formData;
+        this.initElements(); 
+        // Inicjalizacja komponentów
+        this.initComponents(options); 
     }
-
-    /**
-     * Obsługa kompresji obrazów
-     */
-    handleCompression() {
-        if (this.state.files.length === 0 || this.state.uploading) return;
-
-        this.state.uploading = true;
-        this.updateUI();
-
-        // Pokazanie paska postępu
-        this.elements.progressContainer.style.display = 'block';
-        this.elements.progressBar.style.width = '0%';
-        this.elements.progressText.textContent = '0%';
-
-        // Inicjalizacja kolejki i postępu
-        this.state.uploadQueue = [...this.state.files];
-        this.state.activeUploads = 0;
-        this.state.totalProgress = {};
-
-        // Inicjalizacja postępu dla każdego pliku
-        this.state.files.forEach(file => {
-            this.state.totalProgress[file.name] = 0;
-        });
-
-        // Rozpoczęcie procesu wysyłania
-        this.processUploadQueue();
-    } 
-
-    /**
-     * Przetwarzanie kolejki wysyłania
-     */
-    processUploadQueue() {
-        // Jeśli kolejka jest pusta, zakończ proces
-        if (this.state.uploadQueue.length === 0 && this.state.activeUploads === 0) {
-            this.finishUpload();
-            return;
-        }
-
-        // Dopóki można rozpocząć nowe wysyłanie, rozpocznij je
-        while (this.state.activeUploads < this.config.maxConcurrentUploads && this.state.uploadQueue.length > 0) {
-            const file = this.state.uploadQueue.shift();
-            this.state.activeUploads++;
-            this.uploadSingleFile(file);
-        }
-    }
-
-    /**
-     * Wysyłanie pojedynczego pliku
-     */
-    uploadSingleFile(file) {
-        const formData = this.prepareFileFormData(file);
-        const xhr = new XMLHttpRequest(); 
-
-        // Obsługa postępu wysyłania
-        xhr.upload.addEventListener('progress', (event) => {
-            if (event.lengthComputable) {
-                const filePercentComplete = Math.round((event.loaded / event.total) * 100);
-
-                // Aktualizacja postępu dla tego pliku
-                this.state.totalProgress[file.name] = filePercentComplete;
-
-                // Obliczenie łącznego postępu
-                this.updateTotalProgress();
-            }
-        });
-
-        // Obsługa zakończenia wysyłania
-        xhr.addEventListener('load', () => {
-            // Zmniejszenie licznika aktywnych wysyłań
-            this.state.activeUploads--;
-
-            if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    // Możesz tutaj obsłużyć odpowiedź dla pojedynczego pliku
-                    console.log(`Plik ${file.name} został pomyślnie wysłany.`);
-                } catch (error) {
-                    this.showError(`Błąd podczas przetwarzania odpowiedzi dla pliku "${file.name}".`);
-                }
-            } else {
-                this.showError(`Błąd serwera dla pliku "${file.name}": ${xhr.status} ${xhr.statusText}`);
-            }
-
-            // Kontynuuj przetwarzanie kolejki
-            this.processUploadQueue();
-        });
-
-        // Obsługa błędu wysyłania
-        xhr.addEventListener('error', () => {
-            this.showError(`Błąd połączenia podczas wysyłania pliku "${file.name}".`);
-            this.state.activeUploads--;
-            this.processUploadQueue();
-        });
-
-        // Obsługa przerwania wysyłania
-        xhr.addEventListener('abort', () => {
-            this.showError(`Wysyłanie pliku "${file.name}" zostało przerwane.`);
-            this.state.activeUploads--;
-            this.processUploadQueue();
-        });
-
-        // Wysłanie żądania
-        xhr.open('POST', this.config.uploadUrl);
-        xhr.send(formData);
-    }
-
-    /**
-     * Aktualizacja łącznego postępu wysyłania
-     */
-    updateTotalProgress() {
-        const fileNames = Object.keys(this.state.totalProgress);
-        if (fileNames.length === 0) return;
-
-        // Obliczenie średniego postępu wszystkich plików
-        const totalProgress = fileNames.reduce((sum, fileName) => {
-            return sum + this.state.totalProgress[fileName];
-        }, 0) / fileNames.length;
-
-        // Aktualizacja paska postępu
-        this.updateProgress(Math.round(totalProgress));
-    }
-
-    /**
-     * Obsługa odpowiedzi z serwera po zakończeniu wszystkich wysyłek
-     */
-    finishUpload() {
-        // Wyświetlenie komunikatu o sukcesie
-        this.showSuccess('Wszystkie obrazy zostały pomyślnie skompresowane!');
-
-        // Reset stanu
-        this.state.uploading = false;
-        this.state.activeUploads = 0;
-        this.state.uploadQueue = [];
-        this.state.totalProgress = {};
-
-        this.updateUI();
-
-        // Ukrycie paska postępu po krótkim opóźnieniu
-        setTimeout(() => {
-            this.elements.progressContainer.style.display = 'none';
-        }, 1000);
-    }  
-
-    /**
-     * Inicjalizacja referencji do elementów DOM
-     */
+ 
     initElements() {
         this.elements = {
             dropZone: this.getByAttribute('data-drop-zone'),
@@ -213,339 +55,164 @@ export default class CompressorPanel extends AbstractPanel {
         };
     }
 
-    /**
-     * Podpięcie nasłuchiwania zdarzeń
-     */
-    attachEventListeners() {
-        // Obsługa wyboru plików przez input
-        this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-
-        // Obsługa przycisku wyboru plików
-        this.elements.selectButton.addEventListener('click', () => {
-            this.elements.fileInput.click();
+    /** @param {Object} options - Opcje konfiguracyjne */
+    initComponents(options) { 
+        this.fileManager = new FileManager({
+            allowedTypes: options.allowedTypes,
+            maxFileSize: options.maxFileSize,
+            onFileAdded: this.handleFileAdded.bind(this),
+            onFileRemoved: this.handleFileRemoved.bind(this),
+            onError: this.showError.bind(this)
         });
-
-        // Obsługa drag & drop
-        this.elements.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.elements.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        this.elements.dropZone.addEventListener('drop', this.handleDrop.bind(this));
-
-        // Obsługa przycisków akcji
-        this.elements.compressButton.addEventListener('click', this.handleCompression.bind(this));
-        this.elements.clearButton.addEventListener('click', this.clearGallery.bind(this));
-
-        // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
-        document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
-        document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
-    }
-
-    /**
-     * Zapobiega domyślnym akcjom przeglądarki
-     */
-    preventBrowserDefaults(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    /**
-     * Obsługa zdarzenia przeciągania plików nad obszarem drop zone
-     */
-    handleDragOver(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.add('drag-over');
-    }
-
-    /**
-     * Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania
-     */
-    handleDragLeave(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-    }
-
-    /**
-     * Obsługa zdarzenia upuszczenia plików w obszarze drop zone
-     */
-    handleDrop(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-
-        const droppedFiles = event.dataTransfer.files;
-        this.processFiles(droppedFiles);
-    }
-
-    /**
-     * Obsługa zdarzenia wyboru plików przez input
-     */
-    handleFileSelect(event) {
-        const selectedFiles = event.target.files;
-        this.processFiles(selectedFiles);
-    }
-
-    /**
-     * Przetwarzanie wybranych plików
-     */
-    processFiles(fileList) {
-        if (!fileList || fileList.length === 0) return;
-
-        const newFiles = Array.from(fileList).filter(file => {
-            // Sprawdzenie czy plik jest obrazem o dozwolonym typie
-            if (!this.config.allowedTypes.includes(file.type)) {
-                const allowedTypesList = this.config.allowedTypes.map(format => {
-                    return format.replace('image/' , '').toUpperCase()
-                })
-                
-                this.showError(`Plik "${file.name}" ma niedozwolony format. Dozwolone formaty: ${allowedTypesList.join(', ')}.`);
-                return false;
-            }
-
-            // Sprawdzenie rozmiaru pliku
-            if (file.size > this.config.maxFileSize) {
-                this.showError(`Plik "${file.name}" jest zbyt duży. Maksymalny rozmiar pliku to ${this.config.maxFileSize / (1024 * 1024)}MB.`);
-                return false;
-            }
-
-            // Sprawdzenie czy plik nie został już dodany
-            const isDuplicate = this.state.files.some(existingFile =>
-                existingFile.name === file.name &&
-                existingFile.size === file.size &&
-                existingFile.lastModified === file.lastModified
-            );
-
-            if (isDuplicate) {
-                this.showError(`Plik "${file.name}" został już dodany.`);
-                return false;
-            }
-
-            return true;
+ 
+        this.uiManager = new UICompressorManager(this.elements, {
+            onFileSelect: this.handleFileSelect.bind(this),
+            onFileRemove: this.handleFileRemove.bind(this),
+            onCompress: this.handleCompression.bind(this),
+            onClear: this.handleClear.bind(this)
         });
-
-        if (newFiles.length === 0) return;
-
-        // Dodanie nowych plików do stanu aplikacji
-        this.state.files = [...this.state.files, ...newFiles];
-
-        // Renderowanie miniatur
-        newFiles.forEach(file => this.renderThumbnail(file));
-
-        // Aktualizacja UI
-        this.updateUI();
-
-        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
-        this.elements.fileInput.value = '';
-    }
-
-    /**
-     * Renderowanie miniatury obrazu
-     */
-    renderThumbnail(file) {
-        const reader = new FileReader(); 
-
-        reader.onload = (event) => {
-            const thumbnailContainer = document.createElement('div');
-            thumbnailContainer.className = 'image-compressor__thumbnail-container';
-            thumbnailContainer.dataset.fileName = file.name;
-
-            const img = document.createElement('img');
-            img.className = 'image-compressor__thumbnail';
-            img.src = event.target.result;
-            img.alt = file.name;
-
-            const info = document.createElement('div');
-            info.className = 'image-compressor__thumbnail-info';
-            info.textContent = this.formatFileSize(file.size);
-
-            const removeButton = document.createElement('div');
-            removeButton.className = 'image-compressor__thumbnail-remove';
-            removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-            removeButton.addEventListener('click', () => this.removeFile(file.name));
-
-            thumbnailContainer.appendChild(img);
-            thumbnailContainer.appendChild(info);
-            thumbnailContainer.appendChild(removeButton);
-
-            this.elements.imageGallery.appendChild(thumbnailContainer);
-        };
-
-        reader.onerror = () => {
-            this.showError(`Błąd podczas wczytywania pliku "${file.name}".`);
-        };
-
-        reader.readAsDataURL(file);
-    }
-
-    /** @param {string} message */
-    showError(message) {
-        super.showError(message, this.elements.compressorAlerts)
-    }
-
-    /**
-     * Usuwanie pliku z galerii
-     */
-    removeFile(fileName) {
-        // Usunięcie pliku ze stanu
-        this.state.files = this.state.files.filter(file => file.name !== fileName);
-
-        // Usunięcie miniatury z DOM
-        const thumbnailToRemove = this.elements.imageGallery.querySelector(`[data-file-name="${fileName}"]`);
-        if (thumbnailToRemove) {
-            this.elements.imageGallery.removeChild(thumbnailToRemove);
-        }
-
-        // Aktualizacja UI
-        this.updateUI();
-    }
-
-    /**
-     * Aktualizacja interfejsu użytkownika
-     */
-    updateUI() {
-        const hasFiles = this.state.files.length > 0;
-
-        // Aktualizacja przycisków
-        this.elements.compressButton.disabled = !hasFiles || this.state.uploading;
-        this.elements.clearButton.disabled = !hasFiles || this.state.uploading;
-
-        // Aktualizacja klasy dla obszaru drop zone
-        if (hasFiles) {
-            this.elements.dropZone.classList.add('has-files');
-        } else {
-            this.elements.dropZone.classList.remove('has-files');
-        }
+ 
+        this.uploadService = new UploadService({
+            uploadUrl: options.uploadUrl,
+            maxBatchSize: options.maxBatchSize,
+            maxBatchSizeBytes: options.maxBatchSizeBytes,
+            maxConcurrentUploads: options.maxConcurrentUploads,
+            onProgress: this.handleUploadProgress.bind(this),
+            onSuccess: this.handleUploadSuccess.bind(this),
+            onError: this.handleUploadError.bind(this),
+            onComplete: this.handleUploadComplete.bind(this)
+        });
     } 
 
     /**
-     * Przygotowanie danych formularza do wysłania
+     * Obsługa wyboru plików przez użytkownika
+     * @param {FileList} fileList - Lista wybranych plików
      */
-    prepareFormData() {
-        const formData = new FormData();
+    handleFileSelect(fileList) {
+        const newFiles = this.fileManager.addFiles(fileList);
 
-        // Dodanie plików do formData
-        this.state.files.forEach((file, index) => {
-            formData.append(`image_${index}`, file);
+        // Renderowanie miniatur dla nowych plików
+        newFiles.forEach(file => {
+            const fileDetails = this.fileManager.getFileDetails(file);
+            this.uiManager.renderThumbnail(file, fileDetails.formattedSize)
+                .catch(error => this.showError(`Błąd podczas wczytywania pliku "${file.name}".`));
         });
 
-        // Można dodać dodatkowe parametry, np. poziom kompresji
-        formData.append('count', this.state.files.length);
+        // Aktualizacja UI
+        this.updateUI();
+    }
 
-        return formData;
+    /** @param {File} file - Dodany plik */
+    handleFileAdded(file) {
+        // Ten callback jest wywoływany przez FileManager
+        // Możemy tutaj wykonać dodatkowe operacje po dodaniu pliku
+        // TODO: dokończ
+        console.log(`Dodano plik: ${file.name}`);
     }
 
     /**
-     * Wysłanie obrazów na serwer
+     * Obsługa usunięcia pliku przez użytkownika
+     * @param {string} fileName - Nazwa pliku do usunięcia
      */
-    uploadImages(formData) {
-        const xhr = new XMLHttpRequest(); 
+    handleFileRemove(fileName) {
+        this.fileManager.removeFile(fileName);
+        this.uiManager.removeThumbnail(fileName);
+        this.updateUI();
+    }
 
-        // Obsługa postępu wysyłania
-        xhr.upload.addEventListener('progress', (event) => {
-            if (event.lengthComputable) {
-                const percentComplete = Math.round((event.loaded / event.total) * 100);
-                this.updateProgress(percentComplete);
-            }
-        });
+    /** 
+     * @param {File} file - Usunięty plik
+     */
+    handleFileRemoved(file) {
+        // Ten callback jest wywoływany przez FileManager
+        // Możemy tutaj wykonać dodatkowe operacje po usunięciu pliku
+        console.log(`Usunięto plik: ${file.name}`);
+        // TODO: dokończ
+    }
+ 
+    handleCompression() {
+        if (!this.fileManager.hasFiles() || this.state.uploading) return;
 
-        // Obsługa zakończenia wysyłania
-        xhr.addEventListener('load', () => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    this.handleSuccessResponse(response);
-                } catch (error) {
-                    this.showError('Błąd podczas przetwarzania odpowiedzi serwera');
-                }
-            } else {
-                this.showError(`Błąd serwera: ${xhr.status} ${xhr.statusText}`);
-            }
+        this.state.uploading = true;
+        this.updateUI();
 
-            this.finishUpload();
-        });
+        // Pokazanie paska postępu
+        this.uiManager.showProgressBar();
 
-        // Obsługa błędu wysyłania
-        xhr.addEventListener('error', () => {
-            this.showError('Błąd połączenia z serwerem.');
-            this.finishUpload();
-        });
+        // Rozpoczęcie procesu wysyłania
+        const files = this.fileManager.getAllFiles();
+        this.uploadService.uploadFiles(files);
+    }
+ 
+    handleClear() {
+        if (this.state.uploading) return;
 
-        // Obsługa przerwania wysyłania
-        xhr.addEventListener('abort', () => {
-            this.showError('Wysyłanie zostało przerwane.');
-            this.finishUpload();
-        });
+        this.fileManager.clearFiles();
+        this.uiManager.clearGallery();
+        this.updateUI();
+    }
 
-        // Wysłanie żądania
-        xhr.open('POST', this.config.uploadUrl);
-        xhr.send(formData);
+    /** 
+     * @param {number} percent - Procent postępu (0-100)
+     * @param {Array|string} files - Pliki, których dotyczy postęp
+     */
+    handleUploadProgress(percent, files) {
+        this.uiManager.updateProgress(percent);
     }
 
     /**
-     * Aktualizacja paska postępu
+     * Obsługa udanego wysłania
+     * @param {Object} response - Odpowiedź z serwera
+     * @param {Array|File} files - Pliki, których dotyczy odpowiedź
      */
-    updateProgress(percent) {
-        this.elements.progressBar.style.width = `${percent}%`;
-        this.elements.progressText.textContent = `${percent}%`;
-    }
-
-    /**
-     * Obsługa udanej odpowiedzi serwera
-     */
-    handleSuccessResponse(response) {
-        // Wyświetlenie toastu z informacją o sukcesie
-        this.showSuccess('Obrazy zostały pomyślnie skompresowane!');
-
-        // Jeśli serwer zwraca linki do skompresowanych obrazów, można je wyświetlić
+    handleUploadSuccess(response, files) {
+        // Jeśli serwer zwraca linki do skompresowanych obrazów, aktualizujemy informacje w widoku listy
         if (response.compressedImages && Array.isArray(response.compressedImages)) {
-            // Implementacja wyświetlania skompresowanych obrazów
-            // ...
+            response.compressedImages.forEach(image => {
+                this.uiManager.updateCompressedImageInfo(
+                    image.originalName,
+                    image.compressedSize,
+                    image.compressionRatio
+                );
+            });
         }
     }
 
     /**
-     * Zakończenie procesu wysyłania
+     * Obsługa błędu wysyłania
+     * @param {string} message - Komunikat błędu
+     * @param {Array|File} files - Pliki, których dotyczy błąd
      */
-    finishUpload() {
+    handleUploadError(message, files) {
+        this.showError(message);
+
+        // TODO: dokończ
+    }
+ 
+    handleUploadComplete() {
+        // Wyświetlenie komunikatu o sukcesie
+        this.showSuccess('Wszystkie obrazy zostały pomyślnie skompresowane!');
+
+        // Reset stanu
         this.state.uploading = false;
         this.updateUI();
 
         // Ukrycie paska postępu po krótkim opóźnieniu
-        setTimeout(() => {
-            this.elements.progressContainer.style.display = 'none';
-        }, 1000);
+        this.uiManager.hideProgressBar(1000);
+    } 
+
+    /** @param {string} message - Treść komunikatu */
+    showError(message) {
+        super.showError(message, this.elements.compressorAlerts) 
     }
 
-    /**
-     * Czyszczenie galerii
-     */
-    clearGallery() {
-        if (this.state.uploading) return;
-
-        // Wyczyszczenie stanu
-        this.state.files = [];
-
-        // Wyczyszczenie galerii
-        this.elements.imageGallery.innerHTML = '';
-
-        // Aktualizacja UI
-        this.updateUI();
-    }
-
-    /**
-     * Wyświetlenie komunikatu o sukcesie
-     */
-    showSuccess(message) {
+    /** @param {string} message - Treść komunikatu */
+    showSuccess(message) { 
         Toast.show(Toast.SUCCESS, message);
     }
-
-    /**
-     * Formatowanie rozmiaru pliku do czytelnej postaci
-     */
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 B';
-
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+ 
+    updateUI() {
+        const hasFiles = this.fileManager.hasFiles();
+        this.uiManager.updateUI(hasFiles, this.state.uploading);
     }
 }

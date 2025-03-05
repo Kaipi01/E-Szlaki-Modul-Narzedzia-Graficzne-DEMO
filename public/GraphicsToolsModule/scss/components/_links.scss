@@ -16,6 +16,12 @@
     white-space: nowrap;
     gap: 0.5rem;
 
+    &:disabled {
+      opacity: 0.65;
+      cursor: default !important;
+      pointer-events: none;
+    }
+
     &-100 {
       width: 100%;
     }
@@ -44,12 +50,7 @@
     &:focus,
     &:active {
       background-color: var(--light-green);
-    }
-
-    &:disabled {
-      background-color: var(--very-light-green-opacity);
-      cursor: default;
-    }
+    } 
 
     &.medium {
       font-size: 1rem;
@@ -68,12 +69,7 @@
     &:active,
     &.active {
       background-color: var(--light-green);
-    }
-
-    &:disabled {
-      background-color: var(--green-opacity);
-      cursor: default;
-    }
+    } 
 
     &.small {
       font-size: 0.9rem;
@@ -87,7 +83,7 @@
     }
   }
 
-  .link.variant3 {
+  .link.variant-blue {
     background-color: var(--blue);
     font-size: inherit;
     vertical-align: middle;
@@ -97,12 +93,7 @@
     &:active,
     &.active {
       background-color: var(--light-blue);
-    }
-
-    &:disabled {
-      background-color: var(--light-blue-opacity);
-      cursor: default;
-    }
+    } 
 
     &.small {
       font-size: 0.9rem;
@@ -114,47 +105,29 @@
     .link-icon {
       font-size: larger;
     }
-  }
+  } 
 
-  .link.variant4 {
-    position: relative;
-    width: 100%;
-    padding-block: 1rem;
-    overflow: hidden;
-    transition: all 0.4s ease-in-out;
-    border: none;
-    background-color: var(--blue);
-    * {
-      position: relative;
-      z-index: 3;
+  .link.variant-red {
+    background-color: var(--red);
+    font-size: inherit;
+    vertical-align: middle;
+
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      background-color: var(--light-red);
+    } 
+
+    &.small {
+      font-size: 0.9rem;
+    }
+    &.medium {
+      font-size: 1rem;
     }
 
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      width: 150%;
-      height: 100%;
-      transition: all 0.4s ease-in-out;
-      background: var(--green);
+    .link-icon {
+      font-size: larger;
     }
-
-    &:disabled {
-      background-color: var(--light-blue-opacity);
-      cursor: default;
-
-      &::before {
-        background: var(--green-opacity);
-      }
-    }
-
-    &:hover::before,
-    &:focus::before,
-    &:active::before {
-      transform: translateX(-110%);
-    }
-  }
+  } 
 }

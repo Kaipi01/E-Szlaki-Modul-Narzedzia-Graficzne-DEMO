@@ -3,11 +3,13 @@
 
 @use "./components/modern-card";
 @use "./components/theme-switcher";
+@use "./components/links";
+@use "./components/sr-only";
 
 @use "./layout/main-layout";
+@use "./layout/main-navigation";
 
-// @use "./components/links";
-// @use "./components/sr-only";
+
 // @use "./components/toast";
 // @use "./components/loading";
 // @use "./components/modal";

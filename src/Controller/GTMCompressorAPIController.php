@@ -18,7 +18,7 @@ class GTMCompressorAPIController extends AbstractController
         methods: ['POST'])
     ]
     public function compress_images(Request $request): JsonResponse
-    {
+    { 
         $projectDir = $this->getParameter('kernel.project_dir');
         $jsonData = []; 
 

@@ -9,26 +9,47 @@
 
 <div id="graphics-tools-module">
 
-    <div class="modern-card container">
+    <div class="modern-card container">   
 
-        <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
+        <!-- MAIN NAVIGATION START -->
+        <nav class="main-navigation">
 
-        <nav>
-            <ul>
-                <li>
-                    <a href="{{ path('app_gtm_main_panel') }}">Panel Główny</a>
+            {% set currentPath = app.request.pathInfo %}
+            {% set mainPanelPath = path('app_gtm_main_panel') %}
+            {% set compressorPanelPath = path('app_gtm_compressor_panel') %}
+            {% set converterPanelPath = path('app_gtm_converter_panel') %}
+            {% set editorPanelPath = path('app_gtm_editor_panel') %}  
+
+            <ul class="main-navigation-list modern-card">
+                <li class="main-navigation-item">
+                    <a class="main-navigation-link {{ currentPath == mainPanelPath ? 'active' : '' }}" href="{{ mainPanelPath }}">
+                        <i class="main-navigation-link-icon fa-solid fa-house"></i>
+                        <span class="main-navigation-link-text">Panel Główny</span>
+                    </a>
                 </li>
-                <li>
-                    <a href="{{ path('app_gtm_compressor_panel') }}">Kompresor</a>
+                <li class="main-navigation-item">
+                    <a class="main-navigation-link {{ currentPath == compressorPanelPath ? 'active' : '' }}" href="{{ compressorPanelPath }}">
+                        <i class="main-navigation-link-icon fa-solid fa-list-check"></i>
+                        <span class="main-navigation-link-text">Kompresor</span>
+                    </a>
                 </li>
-                <li>
-                    <a href="{{ path('app_gtm_converter_panel') }}">Konwerter</a>
-                </li>
-                <li>
-                    <a href="{{ path('app_gtm_editor_panel') }}">Edytor Zdjęć</a>
-                </li>
+                <li class="main-navigation-item">
+                    <a class="main-navigation-link {{ currentPath == converterPanelPath ? 'active' : '' }}" href="{{ converterPanelPath }}">
+                        <i class="main-navigation-link-icon fa-solid fa-icons"></i>
+                        <span class="main-navigation-link-text">Konwerter</span>
+                    </a>
+                </li> 
+                <li class="main-navigation-item">
+                    <a class="main-navigation-link {{ currentPath == editorPanelPath ? 'active' : '' }}" href="{{ editorPanelPath }}">
+                        <i class="main-navigation-link-icon fa-regular fa-folder"></i>
+                        <span class="main-navigation-link-text">Edytor Zdjęć</span>
+                    </a>
+                </li>  
             </ul>
+
+            <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
         </nav>
+        <!-- MAIN NAVIGATION START -->  
 
         {% block panel_content %}{% endblock %}
 
