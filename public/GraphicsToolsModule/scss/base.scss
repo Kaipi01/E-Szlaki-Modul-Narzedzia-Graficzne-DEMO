@@ -5,6 +5,8 @@
 @use "./components/theme-switcher";
 @use "./components/links";
 @use "./components/sr-only";
+@use "./components/tooltip"; 
+@use "./components/badge";
 
 @use "./layout/main-layout";
 @use "./layout/main-navigation";
@@ -23,9 +25,7 @@
 // @use "./components/custom-popover";
 // @use "./components/custom-select-green";
 // @use "./components/custom-switch";
-// @use "./components/search-form";
-// @use "./components/badges-awards";
-// @use "./components/items-awards";
+// @use "./components/search-form"; 
 // @use "./components/locked"; 
 // @use "./components/alert"; 
 // @use "./components/blob-card";
@@ -33,7 +33,7 @@
 // @use "./components/animation-chest";
 // @use "./components/achievement-notifications";
 // @use "./components/highlight-btn";
-// @use "./components/new-badge";
+// 
 
 // @use "./animations/shake-animation";
 // @use "./animations/fade-animation";

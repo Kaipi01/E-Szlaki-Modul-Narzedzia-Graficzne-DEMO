@@ -2,6 +2,8 @@
 @use "../functions/toRem" as *; 
 
 #graphics-tools-module { 
+  --panels-gap: 2rem;
+
   position: relative;
   width: 100%;
   min-height: 90vh;

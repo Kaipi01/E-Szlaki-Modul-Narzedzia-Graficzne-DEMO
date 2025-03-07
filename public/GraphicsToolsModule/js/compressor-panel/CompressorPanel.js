@@ -29,6 +29,8 @@ export default class CompressorPanel extends AbstractPanel {
     constructor(container, options = {}) {
         super(container);
 
+        this.options = options
+
         // Stan panelu
         this.state = {
             uploading: false
@@ -42,30 +44,33 @@ export default class CompressorPanel extends AbstractPanel {
  
     initElements() {
         this.elements = {
+            container: this.container,
             dropZone: this.getByAttribute('data-drop-zone'),
             fileInput: this.getByAttribute('data-file-input'),
             selectButton: this.getByAttribute('data-select-button'),
-            imageGallery: this.getByAttribute('data-image-gallery'),
+            imageTable: this.getByAttribute('data-image-table'),
             compressButton: this.getByAttribute('data-compress-button'),
             clearButton: this.getByAttribute('data-clear-button'),
             progressContainer: this.getByAttribute('data-progress-container'),
             progressBar: this.getByAttribute('data-progress-bar'),
             progressText: this.getByAttribute('data-progress-text'),
-            compressorAlerts: this.getByAttribute('data-compressor-alerts')
+            compressorAlerts: this.getByAttribute('data-compressor-alerts'),
+            maxFileSizeInfo: this.getByAttribute('max-file-size-info'),
+            tableHeadRow: this.getByAttribute('data-table-head-row')
         };
     }
 
     /** @param {Object} options - Opcje konfiguracyjne */
     initComponents(options) { 
         this.fileManager = new FileManager({
-            allowedTypes: options.allowedTypes,
-            maxFileSize: options.maxFileSize,
+            ...options,
             onFileAdded: this.handleFileAdded.bind(this),
             onFileRemoved: this.handleFileRemoved.bind(this),
             onError: this.showError.bind(this)
         });
  
         this.uiManager = new UICompressorManager(this.elements, {
+            ...options,
             onFileSelect: this.handleFileSelect.bind(this),
             onFileRemove: this.handleFileRemove.bind(this),
             onCompress: this.handleCompression.bind(this),
@@ -73,10 +78,7 @@ export default class CompressorPanel extends AbstractPanel {
         });
  
         this.uploadService = new UploadService({
-            uploadUrl: options.uploadUrl,
-            maxBatchSize: options.maxBatchSize,
-            maxBatchSizeBytes: options.maxBatchSizeBytes,
-            maxConcurrentUploads: options.maxConcurrentUploads,
+            ...options,
             onProgress: this.handleUploadProgress.bind(this),
             onSuccess: this.handleUploadSuccess.bind(this),
             onError: this.handleUploadError.bind(this),
@@ -94,7 +96,8 @@ export default class CompressorPanel extends AbstractPanel {
         // Renderowanie miniatur dla nowych plików
         newFiles.forEach(file => {
             const fileDetails = this.fileManager.getFileDetails(file);
-            this.uiManager.renderThumbnail(file, fileDetails.formattedSize)
+            this.uiManager
+                .renderImagesInfoTable(file, fileDetails.formattedSize)
                 .catch(error => this.showError(`Błąd podczas wczytywania pliku "${file.name}".`));
         });
 
@@ -120,9 +123,7 @@ export default class CompressorPanel extends AbstractPanel {
         this.updateUI();
     }
 
-    /** 
-     * @param {File} file - Usunięty plik
-     */
+    /** @param {File} file - Usunięty plik */
     handleFileRemoved(file) {
         // Ten callback jest wywoływany przez FileManager
         // Możemy tutaj wykonać dodatkowe operacje po usunięciu pliku
@@ -148,7 +149,7 @@ export default class CompressorPanel extends AbstractPanel {
         if (this.state.uploading) return;
 
         this.fileManager.clearFiles();
-        this.uiManager.clearGallery();
+        this.uiManager.clearTable();
         this.updateUI();
     }
 
@@ -167,12 +168,23 @@ export default class CompressorPanel extends AbstractPanel {
      */
     handleUploadSuccess(response, files) {
         // Jeśli serwer zwraca linki do skompresowanych obrazów, aktualizujemy informacje w widoku listy
-        if (response.compressedImages && Array.isArray(response.compressedImages)) {
-            response.compressedImages.forEach(image => {
-                this.uiManager.updateCompressedImageInfo(
+        const { compressedImages } = response
+
+        console.log("--------------- handleUploadSuccess --------------")
+        console.log("response: ", response)
+        console.log("files: ", files)
+        console.log("compressedImages: ", compressedImages)
+        console.log("--------------------------------------------------")
+        
+        if (compressedImages && Array.isArray(compressedImages)) { 
+            this.uiManager.updateTableHead()
+
+            compressedImages.forEach(image => {
+                this.uiManager.updateTableAfterCompression(
                     image.originalName,
                     image.compressedSize,
-                    image.compressionRatio
+                    image.compressionRatio,
+                    image.imageDownloadURL
                 );
             });
         }
@@ -198,7 +210,7 @@ export default class CompressorPanel extends AbstractPanel {
         this.updateUI();
 
         // Ukrycie paska postępu po krótkim opóźnieniu
-        this.uiManager.hideProgressBar(1000);
+        this.uiManager.hideProgressBar();
     } 
 
     /** @param {string} message - Treść komunikatu */

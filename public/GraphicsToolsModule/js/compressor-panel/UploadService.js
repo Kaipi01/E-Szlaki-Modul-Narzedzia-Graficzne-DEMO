@@ -1,5 +1,3 @@
-import { GRAPHICS_TOOLS_MODULE } from "../utils/constants.js";
-
 /**
  * Klasa UploadService jest odpowiedzialna za:
  * - Wysyłanie plików na serwer (pojedynczo lub w partiach)
@@ -21,12 +19,7 @@ export default class UploadService {
      * @param {Function} options.onComplete - Callback wywoływany po zakończeniu wszystkich wysyłek
      */
     constructor(options = {}) {
-        this.config = {
-            uploadUrl: options.uploadUrl,
-            maxBatchSize: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE,
-            maxBatchSizeBytes: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE_BYTES, 
-            maxConcurrentUploads: GRAPHICS_TOOLS_MODULE.MAX_CONCURRENT_UPLOADS
-        };
+        this.config = options;
 
         if (!this.config.uploadUrl) {
             console.error('UploadServiceError: upload url is undefined!')
@@ -189,7 +182,7 @@ export default class UploadService {
                     this.onSuccess(response, file);
                 } catch (error) {
                     // Wywołanie callbacka błędu
-                    this.onError(`Błąd podczas przetwarzania odpowiedzi dla pliku "${file.name}".`, file);
+                    this.onError(`Błąd podczas przetwarzania odpowiedzi dla pliku "${file.name}". ${error.message}`, file);
                 }
             } else {
                 // Wywołanie callbacka błędu
@@ -257,7 +250,7 @@ export default class UploadService {
                     this.onSuccess(response, files);
                 } catch (error) {
                     // Wywołanie callbacka błędu
-                    this.onError(`Błąd podczas przetwarzania odpowiedzi dla partii plików.`, files);
+                    this.onError(`Błąd podczas przetwarzania odpowiedzi dla partii plików. ${error.message}`, files);
                 }
             } else {
                 // Wywołanie callbacka błędu
@@ -319,7 +312,7 @@ export default class UploadService {
                     this.onSuccess(response, files);
                 } catch (error) {
                     // Wywołanie callbacka błędu
-                    this.onError('Błąd podczas przetwarzania odpowiedzi serwera', files);
+                    this.onError(`Błąd podczas przetwarzania odpowiedzi serwera. ${error.message}`, files);
                 }
             } else {
                 // Wywołanie callbacka błędu

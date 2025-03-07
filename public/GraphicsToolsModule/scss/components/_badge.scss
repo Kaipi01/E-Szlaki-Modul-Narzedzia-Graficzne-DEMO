@@ -1,0 +1,27 @@
+@use "../functions/toRem" as *;
+@use "../base/variables" as *;
+
+#graphics-tools-module {
+  .badge {
+    display: block;
+    width: max-content;   
+    padding: toRem(5) toRem(12); 
+    border-radius: 5px;
+    background-color: var(--font-color);
+    box-shadow: rgba(0, 0, 0, 0.34) 0px 3px 6px;
+    color: var(--background);
+    font-size: 0.85rem;
+    font-weight: bold; 
+    text-transform: uppercase; 
+
+    &--green {
+      background-color: var(--green-opacity);
+      color: var(--font-color);
+    }
+
+    &--red {
+      background-color: var(--red);
+      color: #fff;
+    }
+  } 
+}

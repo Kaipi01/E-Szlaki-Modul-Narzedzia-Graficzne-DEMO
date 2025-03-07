@@ -1,17 +1,14 @@
+@use "../../functions/toRem" as *;
 @use "../../functions/flex-center" as *;
 
-#graphics-tools-module-compressor {
-  $primary-color: #3498db;
-  $primary-color-dark: #2980b9;
-  $secondary-color: #e74c3c;
-  $secondary-color-dark: #c0392b;
+#graphics-tools-module-compressor {  
   $success-color: #2ecc71;
   $light-gray: #f8f9fa;
   $medium-gray: #e9ecef;
   $dark-gray: #6c757d;
   $border-radius: 4px;
   $box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  $transition-speed: 0.3s; 
+  $transition-speed: 0.3s;
 
   // Główny kontener
   .image-compressor {
@@ -27,83 +24,19 @@
     }
 
     &__title {
-      margin: 0; 
-      font-size: 24px;
-    } 
+      margin: 0;
+      font-size: 2.75rem;
+    }
 
-    // Lista obrazów
     &__list-container {
-      margin-bottom: 20px;
-      overflow: hidden;
-      border: 1px solid $medium-gray;
-      border-radius: $border-radius;
-    }
+      margin-bottom: 2rem;
 
-    &__list-header {
-      display: flex;
-      border-bottom: 1px solid $medium-gray;
-      background-color: $light-gray;
-      font-weight: bold;
-    }
-
-    &__list {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    &__list-item {
-      display: flex;
-      transition: background-color $transition-speed;
-      border-bottom: 1px solid $medium-gray;
-
-      &:last-child {
-        border-bottom: none;
+      [data-preview-image] {
+        @media (min-width: 65rem) {
+          width: toRem(60);
+          max-height: toRem(60);
+        }
       }
-
-      &:hover {
-        background-color: rgba($primary-color, 0.05);
-      }
-    }
-
-    &__list-cell {
-      padding: 12px;
-
-      &--preview {
-        width: 80px;
-        @include flex-center;
-      }
-
-      &--name {
-        flex: 2;
-      }
-
-      &--type {
-        width: 100px;
-      }
-
-      &--size,
-      &--compressed-size {
-        width: 120px;
-        text-align: right;
-      }
-
-      &--ratio {
-        width: 100px;
-        text-align: center;
-      }
-
-      &--actions {
-        width: 80px;
-        text-align: center;
-      }
-    }
-
-    &__preview-image {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: $border-radius;
-      box-shadow: $box-shadow;
     }
 
     &__item-name {
@@ -134,123 +67,63 @@
     }
 
     &__item-remove {
-      width: 32px;
-      height: 32px;
-      transition: background-color $transition-speed;
+      transition: $transition-speed;
       border: none;
-      border-radius: 50%;
-      background-color: rgba($secondary-color, 0.1);
-      color: $secondary-color;
+      background-color: rgba(var(--red), 0.7);
+      color: var(--red);
       cursor: pointer;
       @include flex-center;
+      gap: 0.65rem;
+
+      &-icon {
+        transition: $transition-speed;
+        color: inherit;
+        font-size: 1rem;
+      }
 
       &:hover {
-        background-color: $secondary-color;
+        background-color: var(--red);
         color: white;
-      }
 
-      svg {
-        width: 16px;
-        height: 16px;
-      }
+        .image-compressor__item-remove-icon {
+          color: white;
+        }
+      } 
     }
 
-    // Przyciski akcji
-    &__actions {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 20px;
-    }  
-
-    // Pasek postępu
-    &__progress {
-      display: none;
-      position: relative;
-      height: 20px;
-      margin-top: 20px;
-      overflow: hidden;
-      border-radius: $border-radius;
-      background-color: $light-gray;
-
-      &.active {
-        display: block;
-      }
-    }
-
-    &__progress-bar {
-      width: 0%;
-      height: 100%;
-      transition: width 0.3s ease;
-      background-color: $primary-color;
-    }
-
-    &__progress-text {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0; 
-      font-size: 12px;
-      font-weight: bold;
+    &__item-download {
+      transition: $transition-speed;
+      border: none;
+      background-color: rgba(var(--blue), 0.7);
+      color: var(--blue);
+      cursor: pointer;
       @include flex-center;
-    }
-  }
+      gap: 0.65rem;
 
-  // Responsywność
-  @media (max-width: 992px) {
-    .image-compressor {
-      &__list-cell {
-        &--type {
-          display: none;
+      &-icon {
+        transition: $transition-speed;
+        color: inherit;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        background-color: var(--blue);
+        color: white;
+
+        .image-compressor__item-remove-icon {
+          color: white;
         }
-      }
+      } 
     }
-  }
 
-  @media (max-width: 768px) {
-    .image-compressor {
-      &__list-header {
-        display: none;
-      }
+    &__actions {
+      margin-block: var(--panels-gap);
 
-      &__list-item {
+      &-buttons {
+        display: flex;
         flex-wrap: wrap;
-        padding: 10px;
-      }
-
-      &__list-cell {
-        padding: 5px;
-
-        &--preview {
-          width: 60px;
-        }
-
-        &--name {
-          flex: 1;
-          min-width: 0;
-        }
-
-        &--type,
-        &--size,
-        &--compressed-size,
-        &--ratio {
-          width: auto;
-          margin-right: 10px;
-        }
-
-        &--actions {
-          width: auto;
-        }
-      }
-
-      &__actions {
-        flex-direction: column;
-      }
-
-      &__compress-button,
-      &__clear-button {
-        width: 100%;
+        justify-content: center;
+        gap: 15px;
       }
     }
   }

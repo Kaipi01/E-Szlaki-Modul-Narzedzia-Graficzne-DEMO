@@ -12,8 +12,8 @@
       padding: toRem(40) toRem(20);
       transition: border-color $transition-speed,
         background-color $transition-speed;
-      border: 2px dashed var(--gray);
-      border-radius: 5px;
+      border: 3px dashed var(--gray);
+      border-radius: 15px;
 
       &.drag-over {
         border-color: var(--green);
@@ -34,13 +34,14 @@
 
     &__upload-icon {
       margin-bottom: toRem(15);
-      fill: var(--font-color);
+      color: var(--green);
+      font-size: 3rem;
     }
 
     &__upload-text {
       margin: 0 0 toRem(15);
-      font-size: 1.2rem;
       color: var(--font-color-gray);
+      font-size: 1.2rem;
     }
 
     &__file-input {

@@ -1,4 +1,9 @@
-import { formatFileSize } from "../utils/file-helpers.js";
+import {
+    formatFileSize
+} from "../utils/file-helpers.js";
+import {
+    fadeAnimation
+} from "../utils/animations.js";
 
 /**
  * Klasa UICompressorManager
@@ -16,13 +21,14 @@ export default class UICompressorManager {
      * @param {HTMLElement} elements.dropZone - Element strefy upuszczania plików
      * @param {HTMLInputElement} elements.fileInput - Input typu file
      * @param {HTMLElement} elements.selectButton - Przycisk wyboru plików
-     * @param {HTMLElement} elements.imageGallery - Kontener galerii obrazów
+     * @param {HTMLElement} elements.imageTable - Kontener galerii obrazów
      * @param {HTMLButtonElement} elements.compressButton - Przycisk kompresji
      * @param {HTMLButtonElement} elements.clearButton - Przycisk czyszczenia
      * @param {HTMLElement} elements.progressContainer - Kontener paska postępu
      * @param {HTMLElement} elements.progressBar - Pasek postępu
      * @param {HTMLElement} elements.progressText - Tekst postępu
      * @param {HTMLElement} elements.compressorAlerts - Kontener alertów
+     * @param {HTMLElement} elements.tableHeadRow 
      * @param {Object} options - Opcje konfiguracyjne
      * @param {Function} options.onFileSelect - Callback wywoływany po wyborze plików
      * @param {Function} options.onFileRemove - Callback wywoływany po usunięciu pliku
@@ -31,7 +37,7 @@ export default class UICompressorManager {
      */
     constructor(elements, options = {}) {
         this.elements = elements;
-
+        this.options = options
         // Callbacki
         this.onFileSelect = options.onFileSelect || (() => {});
         this.onFileRemove = options.onFileRemove || (() => {});
@@ -40,6 +46,14 @@ export default class UICompressorManager {
 
         // Inicjalizacja nasłuchiwania zdarzeń
         this.attachEventListeners();
+        this.initUI()
+    }
+
+    initUI() {
+        if (this.elements.maxFileSizeInfo) {
+            this.elements.maxFileSizeInfo.textContent = this.options.maxFileSize / (1024 * 1024) + " MB"
+        }
+        this.elements.progressContainer.style.display = "none"
     }
 
     /**
@@ -115,85 +129,86 @@ export default class UICompressorManager {
     }
 
     /**
-     * Renderowanie miniatury obrazu w widoku listy
+     * Renderowanie miniatury obrazu w widoku tabeli
      * @param {File} file - Plik obrazu do wyświetlenia
      * @param {string} formattedSize - Sformatowany rozmiar pliku
      */
-    renderThumbnail(file, formattedSize) {
+    renderImagesInfoTable(file, formattedSize) {
+
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
 
             reader.onload = (event) => {
-                const listItem = document.createElement('div');
-                listItem.className = 'image-compressor__list-item';
-                listItem.dataset.fileName = file.name;
+                const row = document.createElement('tr');
+                row.dataset.fileName = file.name;
 
                 // Komórka z miniaturą
-                const previewCell = document.createElement('div');
-                previewCell.className = 'image-compressor__list-cell image-compressor__list-cell--preview';
-
-                const img = document.createElement('img');
-                img.className = 'image-compressor__preview-image';
-                img.src = event.target.result;
-                img.alt = file.name;
-
-                previewCell.appendChild(img);
+                const previewCell = this.createTableCell(`<img src="${event.target.result}" alt="${file.name}" class="preview-image">`, {
+                    'data-title': 'Podgląd',
+                    'data-preview-image': ''
+                });
 
                 // Komórka z nazwą pliku
-                const nameCell = document.createElement('div');
-                nameCell.className = 'image-compressor__list-cell image-compressor__list-cell--name';
-
-                const nameText = document.createElement('p');
-                nameText.className = 'image-compressor__item-name';
-                nameText.textContent = file.name;
-
-                nameCell.appendChild(nameText);
+                const nameCell = this.createTableCell(file.name, {
+                    'data-title': 'Nazwa pliku',
+                    'data-name': ''
+                });
 
                 // Komórka z typem pliku
-                const typeCell = document.createElement('div');
-                typeCell.className = 'image-compressor__list-cell image-compressor__list-cell--type';
-                typeCell.innerHTML = `<span class="image-compressor__item-type">${file.type}</span>`;
+                const typeCell = this.createTableCell(
+                    `<span class="mx-auto badge">${file.type.replace('image/', '').toUpperCase()}</span>`, {
+                        'data-title': 'Typ',
+                        'data-type': ''
+                    }
+                );
+
+                const statusCell = this.createTableCell('<span class="mx-auto badge badge--green">Gotowy</span>', {
+                    'data-title': 'Status',
+                    'data-status': ''
+                });
 
                 // Komórka z rozmiarem pliku
-                const sizeCell = document.createElement('div');
-                sizeCell.className = 'image-compressor__list-cell image-compressor__list-cell--size';
-                sizeCell.innerHTML = `<span class="image-compressor__item-size">${formattedSize}</span>`;
+                const sizeCell = this.createTableCell(formattedSize, {
+                    'data-title': 'Rozmiar',
+                    'data-size': ''
+                });
 
-                // Komórka z rozmiarem po kompresji (początkowo pusta)
-                const compressedSizeCell = document.createElement('div');
-                compressedSizeCell.className = 'image-compressor__list-cell image-compressor__list-cell--compressed-size';
-                compressedSizeCell.innerHTML = '<span class="image-compressor__item-compressed-size">-</span>';
+                const compressedSizeCell = this.createTableCell('-', {
+                    'data-title': 'Rozmiar po kompresji',
+                    'data-compressed-size': ''
+                });
+                compressedSizeCell.classList.add('sr-only')
 
-                // Komórka z współczynnikiem kompresji (początkowo pusta)
-                const ratioCell = document.createElement('div');
-                ratioCell.className = 'image-compressor__list-cell image-compressor__list-cell--ratio';
-                ratioCell.innerHTML = '<span class="image-compressor__compression-ratio">-</span>';
+                const compressedRatioCell = this.createTableCell('-', {
+                    'data-title': 'Współczynik kompresji',
+                    'data-compressed-ratio': ''
+                });
+                compressedRatioCell.classList.add('sr-only')
 
-                // Komórka z przyciskiem usuwania
-                const actionsCell = document.createElement('div');
-                actionsCell.className = 'image-compressor__list-cell image-compressor__list-cell--actions';
-
-                const removeButton = document.createElement('button');
-                removeButton.className = 'image-compressor__item-remove';
-                removeButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+                // Komórka z akcjami (przycisk usuwania)
+                const actionsCell = this.createTableCell(`
+                    <button class="mx-auto badge image-compressor__item-remove">
+                        <i class="fa-solid fa-cloud-arrow-up image-compressor__item-remove-icon"></i> 
+                        <span>Usuń</span>
+                    </button>
+                `, {
+                    'data-title': 'Akcje',
+                    'data-actions': ''
+                });
+                const removeButton = actionsCell.querySelector('button');
                 removeButton.addEventListener('click', () => this.onFileRemove(file.name));
-                removeButton.title = "Usuń plik";
 
-                actionsCell.appendChild(removeButton);
+                row.appendChild(previewCell);
+                row.appendChild(nameCell);
+                row.appendChild(typeCell);
+                row.appendChild(sizeCell);
+                row.appendChild(statusCell); 
+                row.appendChild(compressedSizeCell)
+                row.appendChild(compressedRatioCell)
+                row.appendChild(actionsCell);
 
-                // Dodanie wszystkich komórek do wiersza
-                listItem.appendChild(previewCell);
-                listItem.appendChild(nameCell);
-                listItem.appendChild(typeCell);
-                listItem.appendChild(sizeCell);
-                listItem.appendChild(compressedSizeCell);
-                listItem.appendChild(ratioCell);
-                listItem.appendChild(actionsCell);
-
-                // Dodanie wiersza do listy
-                this.elements.imageGallery.appendChild(listItem);
-
-                resolve(listItem);
+                this.elements.imageTable.appendChild(row);
+                resolve(row);
             };
 
             reader.onerror = (error) => {
@@ -205,44 +220,67 @@ export default class UICompressorManager {
     }
 
     /**
+     * Tworzy komórkę tabeli
+     * @param {string} content - Zawartość komórki
+     * @param {Object} attributes - atrybuty 
+     * @returns {HTMLTableCellElement}
+     */
+    createTableCell(content, attributes = {}) {
+        const cell = document.createElement('td');
+        cell.innerHTML = content;
+
+        Object.keys(attributes).forEach(key => {
+            cell.setAttribute(key, attributes[key])
+        });
+
+        return cell;
+    }
+
+    /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
+    updateTableHead() { 
+        const allTableTHElements = Array.from(this.elements.tableHeadRow.children)
+
+        allTableTHElements.forEach(th => th.classList.remove('sr-only'))
+        // this.elements.tableHeadRow.lastElementChild?.remove()
+
+        // this.elements.tableHeadRow.append(createTH('Rozmiar po kompresji'))
+        // this.elements.tableHeadRow.append(createTH('Poziom kompresji'))
+        // this.elements.tableHeadRow.append(createTH('Akcje'))
+    }
+   
+
+    /**
      * Aktualizacja informacji o skompresowanym obrazie w widoku listy
      * @param {string} fileName - Nazwa pliku
      * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
      * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
+     * @param {string} downloadURL - link do pobrania
      */
-    updateCompressedImageInfo(fileName, compressedSize, ratio) {
-        // Walidacja parametrów
+    updateTableAfterCompression(fileName, compressedSize, ratio, downloadURL) {
         if (!fileName) {
-            console.warn('Brak nazwy pliku w updateCompressedImageInfo');
+            console.warn('Brak nazwy pliku w updateTableAfterCompression');
             return;
         }
 
-        // Formatowanie compressedSize jeśli to liczba
-        let formattedSize = compressedSize;
-        if (typeof compressedSize === 'number') {
-            formattedSize = formatFileSize(compressedSize);
-        }
+        const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
 
-        // Formatowanie ratio jeśli to liczba
-        let formattedRatio = ratio;
-        if (typeof ratio === 'number') {
-            formattedRatio = `${ratio}%`;
-        }
+        if (!listItem) return;  
 
-        const listItem = this.elements.imageGallery.querySelector(`[data-file-name="${fileName}"]`);
-        if (!listItem) return;
+        const actionsCell = listItem.querySelector('[data-actions]')
+        const compressedSizeCell = listItem.querySelector('[data-compressed-size]')
+        const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]') 
 
-        // Aktualizacja rozmiaru po kompresji
-        const compressedSizeCell = listItem.querySelector('.image-compressor__list-cell--compressed-size');
-        if (compressedSizeCell) {
-            compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formattedSize}</span>`;
-        }
+        compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>` 
+        compressedRatioCell.innerHTML = `<span class="image-compressor__compression-ratio">${ratio}%</span>` 
+        actionsCell.innerHTML = `
+            <a href="${downloadURL}" class="mx-auto badge image-compressor__item-download">
+                <i class="fa-solid fa-circle-down image-compressor__item-download-icon"></i>
+                <span>Pobierz</span>
+            </a>
+        ` 
 
-        // Aktualizacja współczynnika kompresji
-        const ratioCell = listItem.querySelector('.image-compressor__list-cell--ratio');
-        if (ratioCell) {
-            ratioCell.innerHTML = `<span class="image-compressor__compression-ratio">${formattedRatio}</span>`;
-        }
+        compressedSizeCell.classList.remove('sr-only')
+        compressedRatioCell.classList.remove('sr-only')
     }
 
     /**
@@ -250,17 +288,18 @@ export default class UICompressorManager {
      * @param {string} fileName - Nazwa pliku do usunięcia
      */
     removeThumbnail(fileName) {
-        const thumbnailToRemove = this.elements.imageGallery.querySelector(`[data-file-name="${fileName}"]`);
+        const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
+        
         if (thumbnailToRemove) {
-            this.elements.imageGallery.removeChild(thumbnailToRemove);
+            this.elements.imageTable.removeChild(thumbnailToRemove);
         }
     }
 
     /**
      * Czyści galerię miniatur
      */
-    clearGallery() {
-        this.elements.imageGallery.innerHTML = '';
+    clearTable() {
+        this.elements.imageTable.innerHTML = '';
     }
 
     /**
@@ -288,26 +327,31 @@ export default class UICompressorManager {
     updateProgress(percent) {
         this.elements.progressBar.style.width = `${percent}%`;
         this.elements.progressText.textContent = `${percent}%`;
+        this.elements.progressBar.setAttribute('per', percent)
     }
 
     /**
      * Pokazanie paska postępu
      */
     showProgressBar() {
-        this.elements.progressContainer.style.display = 'block';
-        this.elements.progressBar.style.width = '0%';
-        this.elements.progressText.textContent = '0%';
+        this.elements.progressContainer.style.removeProperty('display')
+
+        fadeAnimation(() => {
+            this.elements.progressBar.style.width = '0%';
+            this.elements.progressText.textContent = '0%';
+            this.elements.progressBar.setAttribute('per', '0')
+        }, [this.elements.progressContainer], 400);
     }
 
     /**
      * Ukrycie paska postępu
      * @param {number} delay - Opóźnienie w milisekundach przed ukryciem
      */
-    hideProgressBar(delay = 1000) {
+    hideProgressBar(delay = 3000) {
         setTimeout(() => {
-            this.elements.progressContainer.style.display = 'none';
+            fadeAnimation(() => {
+                this.elements.progressContainer.style.display = 'none';
+            }, [this.elements.progressContainer], 400);
         }, delay);
-    }  
-
-    
+    }
 }

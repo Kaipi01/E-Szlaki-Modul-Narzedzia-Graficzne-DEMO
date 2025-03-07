@@ -1,3 +1,5 @@
+import { formatFileSize } from "../utils/file-helpers.js";
+
 /**
  * Klasa FileManager
  * 
@@ -17,10 +19,7 @@ export default class FileManager {
      * @param {Function} options.onError - Callback wywoływany przy błędzie walidacji
      */
     constructor(options = {}) {
-        this.config = {
-            allowedTypes: options.allowedTypes || ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
-            maxFileSize: options.maxFileSize || 10 * 1024 * 1024 // 10MB
-        };
+        this.config = options;
 
         // Callbacki
         this.onFileAdded = options.onFileAdded || (() => {});
@@ -70,7 +69,7 @@ export default class FileManager {
 
         // Sprawdzenie rozmiaru pliku
         if (file.size > this.config.maxFileSize) {
-            this.onError(`Plik "${file.name}" jest zbyt duży. Maksymalny rozmiar pliku to ${this.formatFileSize(this.config.maxFileSize)}.`);
+            this.onError(`Plik "${file.name}" jest zbyt duży. Maksymalny rozmiar pliku to ${formatFileSize(this.config.maxFileSize)}.`);
             return false;
         }
 
@@ -158,22 +157,7 @@ export default class FileManager {
      */
     getTotalSize() {
         return this.files.reduce((sum, file) => sum + file.size, 0);
-    }
-
-    /**
-     * Formatuje rozmiar pliku do czytelnej postaci
-     * @param {number} bytes - Rozmiar w bajtach
-     * @returns {string} - Sformatowany rozmiar z jednostką
-     */
-    formatFileSize(bytes) {
-        if (bytes === 0) return '0 B';
-
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
+    } 
 
     /**
      * Pobiera szczegółowe informacje o pliku
@@ -184,7 +168,7 @@ export default class FileManager {
         return {
             name: file.name,
             size: file.size,
-            formattedSize: this.formatFileSize(file.size),
+            formattedSize: formatFileSize(file.size),
             type: file.type,
             lastModified: file.lastModified,
             extension: file.name.split('.').pop().toLowerCase()
