@@ -1,185 +1,75 @@
 <div id="graphics-tools-module-compressor" class="image-compressor" data-api='{ 
-    "compressImagesURL": "{{ path('app_gtm_compressor_compress_images_post') }}"
-}'>
-    <div class="image-compressor__header">
-        <h2 class="image-compressor__title">Kompresja obrazów</h2>
-    </div>
-    
-    {% include "graphics_tools_module/components/drop-zone.html.twig" %}
-    
-    <div class="image-compressor__list-container">
-        <div class="image-compressor__list-header">
-            <div class="image-compressor__list-cell image-compressor__list-cell--preview">Podgląd</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--name">Nazwa pliku</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--type">Typ</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--size">Rozmiar oryg.</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--compressed-size">Rozmiar po kompresji</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--ratio">Kompresja</div>
-            <div class="image-compressor__list-cell image-compressor__list-cell--actions">Akcje</div>
+    "compressImagesURL": "{{ path('app_gtm_compressor_compress_images_post') }}" }'> 
+
+    <div class="modern-card">
+        <div class="image-compressor__header">
+            <h2 class="image-compressor__title">Kompresja obrazów</h2>
         </div>
-        
-        <div class="image-compressor__list" id="imageList" data-image-gallery>
-            <!-- Tutaj będą wyświetlane elementy listy obrazów -->
+
+        <div class="image-compressor__alerts" data-compressor-alerts></div>
+
+        {% include "graphics_tools_module/components/drop-zone.html.twig" %}
+
+    </div>
+
+    <div data-actions-panel class="modern-card image-compressor__actions">
+
+        <div class="image-compressor__actions-buttons" id="actionButtons">
+            <button class="image-compressor__action-button link variant2" id="compressButton" data-compress-button disabled>
+                <i class="fa-solid fa-file-zipper"></i>
+                Kompresuj
+            </button>
+            <button class="image-compressor__action-button link variant-red" id="clearButton" data-clear-button disabled>
+                <i class="fa-solid fa-trash"></i>
+                Wyczyść
+            </button>
+
+            <button class="link variant2" data-download-all-btn>
+                <i class="fa-solid fa-download"></i>
+                Pobierz wszystkie grafiki
+            </button>
         </div>
-    </div>
-    
-    <div class="image-compressor__actions" id="actionButtons">
-        <button class="image-compressor__compress-button link variant2" id="compressButton" data-compress-button disabled>Kompresuj</button>
-        <button class="image-compressor__clear-button link variant-red" id="clearButton" data-clear-button disabled>Wyczyść</button>
-    </div>
-    
-    <div class="image-compressor__progress" id="progressContainer" data-progress-container>
-        <div class="image-compressor__progress-bar" id="progressBar" data-progress-bar></div>
-        <div class="image-compressor__progress-text" id="progressText" data-progress-text>0%</div>
-    </div>
-    
-    <div class="image-compressor__alerts" data-compressor-alerts></div>
-</div>
 
+        {# <div class="image-compressor__progress" id="progressContainer" data-progress-container>
+            <div class="image-compressor__progress-bar" id="progressBar" data-progress-bar></div>
+            <div class="image-compressor__progress-text" id="progressText" data-progress-text>0%</div>
+        </div> #}
 
+        <div data-progress-container class="animated-progress">
+            <div class="animated-progress-bar">
+                <div class="animated-progress-per" data-progress-bar per="0"></div>
+            </div>
 
-
- 
-
-            <div class="modern-table"> 
-
-                <div class="table-responsive-vertical">
-
-                    <table id="table" class="table table-hover table-mc-red">
-                        <thead>
-                            <tr>
-                                <th>Curabitur</th>
-                                <th>Aliquam imperdiet</th>
-                                <th>Quisque</th>
-                                <th>Donec magna</th>
-                                <th>Sed pulvinar</th>
-                                <th>Vestibulum</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td data-title="Curabitur">Faucibus</td>
-                                <td data-title="Aliquam imperdiet">Varius massa eleifend</td>
-                                <td data-title="Quisque">Sagittis ligula tristique</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Tristique <span>Lorem
-                                            ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Dictum congue</td>
-                                <td data-title="Vestibulum">Cras sed laoreet</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Mollis lorem</td>
-                                <td data-title="Aliquam imperdiet">Cras tincidunt venenatis</td>
-                                <td data-title="Quisque">Placerat, molestie urna</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Dui tempor<span>Lorem
-                                            ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Malesuada</td>
-                                <td data-title="Vestibulum">Phasellus non</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Materio</td>
-                                <td data-title="Aliquam imperdiet">Aenean vel mollis turpis</td>
-                                <td data-title="Quisque">Genean faucibus justo ex</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Blandit
-                                        mauris<span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Morbi vitae</td>
-                                <td data-title="Vestibulum">Vehicula tellus</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Libero sed</td>
-                                <td data-title="Aliquam imperdiet">Curabitur tincidunt</td>
-                                <td data-title="Quisque">Proin libero tortor</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Ut odio augue<span>Lorem
-                                            ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Justo ante</td>
-                                <td data-title="Vestibulum">Commodo vel</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Blandit</td>
-                                <td data-title="Aliquam imperdiet">Proin ut fermentum</td>
-                                <td data-title="Quisque">Ut odio egestas porttitor</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Sodales ipsum
-                                        ac<span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Proin vitae</td>
-                                <td data-title="Vestibulum">Adipiscing elit</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Morbi sit amet</td>
-                                <td data-title="Aliquam imperdiet">Nulla ullamcorper lacinia</td>
-                                <td data-title="Quisque">Arcu porttitor, vitae tempus justo</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">habitasse platea
-                                        <span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Lectus</td>
-                                <td data-title="Vestibulum">Aenean</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Phasellus</td>
-                                <td data-title="Aliquam imperdiet">Posuere arcu sed</td>
-                                <td data-title="Quisque">Quisque sit amet dictu</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Habitasse platea
-                                        <span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Aliquet erat viverra</td>
-                                <td data-title="Vestibulum">Praesent volutpat</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Ullamcorper</td>
-                                <td data-title="Aliquam imperdiet">Aenean non ipsum</td>
-                                <td data-title="Quisque">Tincidunt lectus nec</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Class aptent<span>Lorem
-                                            ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Libero ut felis</td>
-                                <td data-title="Vestibulum">In habitasse</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Duis auctor</td>
-                                <td data-title="Aliquam imperdiet">Elit id ipsum fringilla</td>
-                                <td data-title="Quisque">Condimentum mi</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Vivamus
-                                        rutrum<span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Praesent volutpat</td>
-                                <td data-title="Vestibulum">Risus laoreet</td>
-                            </tr>
-                            <tr>
-                                <td data-title="Curabitur">Ultricies odio</td>
-                                <td data-title="Aliquam imperdiet">Sapien eget pellentesqu</td>
-                                <td data-title="Quisque">Felis eros nec metus</td>
-                                <td data-title="Donec magna">
-                                    <a href="#" class="basic-link tooltip-link" target="_blank">Arcu dapibus felis
-                                        <span>Lorem ipsum</span></a>
-                                </td>
-                                <td data-title="Sed pulvinar">Congue</td>
-                                <td data-title="Vestibulum">Pellentesque</td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>Curabitur</th>
-                                <th>Aliquam imperdiet</th>
-                                <th>Quisque</th>
-                                <th>Donec magna</th>
-                                <th>Sed pulvinar</th>
-                                <th>Vestibulum</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-
+            <div class="animated-progress-info">
+                <div class="animated-progress-name">Proszę Czekać ...</div>
+                <div class="animated-progress-stats">
+                    <span data-progress-text>0%</span>
                 </div>
+            </div>
+        </div>
 
-            </div> 
+    </div>
+
+    <div class="image-compressor__list-container">
+        <div class="table-responsive-vertical">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr data-table-head-row>
+                        <th>Podgląd</th>
+                        <th>Nazwa pliku</th>
+                        <th>Typ</th>
+                        <th>Rozmiar</th>
+                        <th>Status</th> 
+                        <th class="sr-only">Rozmiar po kompresji</th>
+                        <th class="sr-only">Poziom kompresji</th> 
+                        <th>Akcje</th>
+                    </tr>
+                </thead>
+                <tbody data-image-table></tbody>
+            </table>
+            <div class="table-footer">
+                <button class="link variant2" data-download-all-btn>Pobierz wszystkie grafiki</button>
+            </div>
+        </div>
+    </div>
+</div>
