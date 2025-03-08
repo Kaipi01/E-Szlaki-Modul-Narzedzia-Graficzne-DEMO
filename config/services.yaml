@@ -31,33 +31,13 @@ services:
 
 
 
-    #-------------------- SKPIUJ WSZYSTKO PONIŻEJ W CELU POPRAWNEGO DZIAŁANIA MODUŁU ---------------------------------
-
-    # NIE ZAPOMNIJ O PLIKACH KONFIGURACYJNYCH BIBLIOTEKI:
-    # config/packages/liip_imagine.yaml
-    # config/routes/liip_imagine.yaml
-
+    #-------------------- SKPIUJ WSZYSTKO PONIŻEJ W CELU POPRAWNEGO DZIAŁANIA MODUŁU --------------------------------- 
+    
     App\Service\GraphicsToolsModule\ImagesCompressorService:
         arguments:
             $projectDir: '%kernel.project_dir%'
 
-    # Post-procesory dla LiipImagineBundle
-    app.image_optimizer.jpeg:
-        class: App\Service\GraphicsToolsModule\ImageOptimizer\JpegOptimizer
-        tags:
-            - { name: liip_imagine.filter.post_processor, post_processor: jpegoptim }
-
-    app.image_optimizer.png:
-        class: App\Service\GraphicsToolsModule\ImageOptimizer\PngOptimizer
-        tags:
-            - { name: liip_imagine.filter.post_processor, post_processor: pngquant }
-
-    app.image_optimizer.webp:
-        class: App\Service\GraphicsToolsModule\ImageOptimizer\WebpOptimizer
-        tags:
-            - { name: liip_imagine.filter.post_processor, post_processor: webp }
-
-    App\Command\CleanTempImagesCommand:
+    App\Command\GTMCleanGraphicsCommand:
         arguments:
             $projectDir: '%kernel.project_dir%'
         tags:

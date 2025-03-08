@@ -1,0 +1,128 @@
+@use "../../functions/toRem" as *;
+@use "../../functions/flex-center" as *;
+
+#graphics-tools-module-compressor {  
+  $success-color: #2ecc71;
+  $light-gray: #f8f9fa;
+  $medium-gray: #e9ecef;
+  $dark-gray: #6c757d;
+  $border-radius: 4px;
+  $box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  $transition-speed: 0.3s;
+
+  // Główny kontener
+  .image-compressor {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--font-color);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+    &__header {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    &__title {
+      margin: 0;
+      font-size: 2.75rem;
+    }
+
+    &__list-container {
+      margin-bottom: 2rem;
+
+      [data-preview-image] {
+        @media (min-width: 65rem) {
+          width: toRem(60);
+          max-height: toRem(60);
+        }
+      }
+    }
+
+    &__item-name {
+      margin: 0;
+      word-break: break-word;
+    }
+
+    &__item-type {
+      color: $dark-gray;
+      font-size: 0.9em;
+    }
+
+    &__item-size {
+      font-weight: 600;
+    }
+
+    &__item-compressed-size {
+      color: $success-color;
+      font-weight: 600;
+    }
+
+    &__compression-ratio { 
+      background-color: rgba($success-color, 0.1);
+      color: $success-color;
+      font-weight: bold;
+    }
+
+    &__item-remove {
+      transition: $transition-speed;
+      border: none;
+      background-color: rgba(var(--red), 0.7);
+      color: var(--red);
+      cursor: pointer;
+      @include flex-center;
+      gap: 0.65rem;
+
+      &-icon {
+        transition: $transition-speed;
+        color: inherit;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        background-color: var(--red);
+        color: white;
+
+        .image-compressor__item-remove-icon {
+          color: white;
+        }
+      } 
+    }
+
+    &__item-download {
+      transition: $transition-speed;
+      border: none;
+      background-color: rgba(var(--blue), 0.7);
+      color: var(--blue);
+      cursor: pointer;
+      @include flex-center;
+      gap: 0.65rem;
+
+      &-icon {
+        transition: $transition-speed;
+        color: inherit;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        background-color: var(--blue);
+        color: white;
+
+        .image-compressor__item-remove-icon {
+          color: white;
+        }
+      } 
+    }
+
+    &__actions {
+      margin-block: var(--panels-gap);
+
+      &-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+    }
+  }
+}

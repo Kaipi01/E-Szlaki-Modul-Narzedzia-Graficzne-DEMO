@@ -1,61 +1,31 @@
 <?php
 
-namespace App\Service\graphics-tools-module;
+namespace App\Service\GraphicsToolsModule;
 
-use App\Service\graphics-tools-module\Contracts\ImagesCompressorInterface;
+use App\Service\GraphicsToolsModule\Contracts\ImagesCompressorInterface; 
 use Symfony\Component\HttpFoundation\Request;
-use Liip\ImagineBundle\Imagine\Cache\CacheManager; 
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-
+use Psr\Log\LoggerInterface;
 
 class ImagesCompressorService implements ImagesCompressorInterface
 {
     private string $uploadDir;
 
-    public function __construct(private CacheManager $cacheManager, private UploadImageService $uploadService, private string $projectDir)
-    {
-        $this->uploadDir = $this->projectDir . '/public/graphics-tools-module/uploads/temp/';
-    }
-
-    public function compressImage(UploadedFile $image): array
-    {  
-        // Wybierz odpowiedni filtr w zależności od typu pliku
-        $mimeType = $image->getMimeType();
-        $originalName = $image->getClientOriginalName();
-        $filterName = $this->getFilterNameForMimeType($mimeType);
-
-        $newImageName = $this->uploadService->upload($image, $this->uploadDir);
-        // Ścieżka do pliku względem katalogu publicznego
-        $relativePath = 'graphics-tools-module/uploads/temp/' . $newImageName;
-
-        // Zastosuj filtr kompresji
-        $compressedPath = $this->cacheManager->getBrowserPath($relativePath, $filterName);
-
-        // Pobierz rozmiar oryginalnego pliku
-        $originalSize = filesize($this->uploadDir . $newImageName);
-
-        // Pobierz rozmiar skompresowanego pliku
-        $compressedFilePath = $this->projectDir . '/public/graphics-tools-module/media/cache/' . $filterName . '/' . $relativePath;
-        $compressedSize = file_exists($compressedFilePath) ? filesize($compressedFilePath) : 0;
-
-        return [
-            'originalName' => $originalName,
-            'originalSize' => $originalSize,
-            'compressedSize' => $compressedSize,
-            'compressionRatio' => $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0,
-            'imageDownloadURL' => $compressedPath,
-            'mimeType' => $mimeType
-        ];
+    public function __construct(
+        private LoggerInterface $logger,
+        private UploadImageService $uploadService, 
+        private ImageOptimizerService $optimizer, 
+        private string $projectDir
+    ) {
+        $this->uploadDir = "{$this->projectDir}/public/graphics-tools-module/uploads/temp/";
     }
 
     public function handle(Request $request, string $projectDir): array
     {
-        // Tablica na wyniki kompresji
         $compressedImages = [];
 
         foreach ($request->files->all() as $key => $file) {
             if ($file instanceof UploadedFile) {
-                // Dodaj informacje o skompresowanym obrazie do wyników
                 $compressedImages[] = $this->compressImage($file);
             }
         }
@@ -63,21 +33,45 @@ class ImagesCompressorService implements ImagesCompressorInterface
         return $compressedImages;
     }
 
-    /**
-     * Wybiera odpowiedni filtr na podstawie typu MIME
-     */
-    private function getFilterNameForMimeType(string $mimeType): string
+    public function compressImage(UploadedFile $image): array
     {
-        switch ($mimeType) {
-            case 'image/jpeg':
-            case 'image/jpg':
-                return 'jpeg_optimized';
-            case 'image/png':
-                return 'png_optimized';
-            case 'image/webp':
-                return 'webp_conversion';
-            default:
-                return 'jpeg_optimized';
+        // Wybierz odpowiedni format w zależności od typu pliku
+        $mimeType = $image->getMimeType();
+        $originalName = $image->getClientOriginalName();
+        $newImageName = $this->uploadService->upload($image, $this->uploadDir, true);
+
+        // Ścieżka do pliku względem katalogu publicznego 
+        $originalPath = "{$this->uploadDir}/$newImageName";
+        $compressedPath = "graphics-tools-module/uploads/compressed/$newImageName";
+        $absoluteCompressedPath = "{$this->projectDir}/public/$compressedPath";
+ 
+        $this->uploadService->ensureDirectoryExists($this->projectDir . '/public/graphics-tools-module/uploads/compressed');
+ 
+        try {
+            // Kopiowanie pliku do nowej lokalizacji
+            copy($originalPath, $absoluteCompressedPath);
+ 
+            $this->optimizer->optimize($mimeType, $absoluteCompressedPath);
+ 
+            $originalSize = filesize($originalPath); 
+            $compressedSize = file_exists($absoluteCompressedPath) ? filesize($absoluteCompressedPath) : 0;
+
+        } catch (\Exception $e) { 
+            $this->logger->error($e->getMessage());
+
+            return [
+                'originalName' => $originalName,
+                'error' => $e->getMessage()
+            ];
         }
-    }
+
+        return [
+            'originalName' => $originalName,
+            'originalSize' => $originalSize,
+            'compressedSize' => $compressedSize,
+            'compressionRatio' => $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0,
+            'imageDownloadURL' => '/' . $compressedPath,
+            'mimeType' => $mimeType
+        ];
+    } 
 }

@@ -1,4 +1,3 @@
-
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -19,10 +18,12 @@
 /node_modules/
 /public/*/node_modules/
 /public/*/npm-cache/
+/public/graphics-tools-module/uploads
 /npm-cache
 /design
 /development
 /public/build/
+/public/upload/
 npm-debug.log
 yarn-error.log
 notes.txt
@@ -30,7 +31,3 @@ notes.txt
 *.odt
 *.excalidraw
 ###< symfony/webpack-encore-bundle ###
-
-###> liip/imagine-bundle ###
-/public/media/cache/
-###< liip/imagine-bundle ###

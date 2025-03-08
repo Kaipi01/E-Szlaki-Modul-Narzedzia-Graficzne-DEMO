@@ -9,5 +9,5 @@ interface ImagesCompressorInterface
 {
     public function handle(Request $reques, string $projectDir): array;
 
-    public function compressImage(UploadedFile $image): array;
+    public function compressImage(UploadedFile $image): array; 
 }
