@@ -3,12 +3,14 @@ import CompressorPanel from './CompressorPanel.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const compressorElement = document.querySelector("#" + GRAPHICS_TOOLS_MODULE.COMPRESSOR_ID)
-    const {
-        compressImagesURL
-    } = JSON.parse(compressorElement.dataset.api)
+    // const {
+    //     compressImagesURL
+    // } = JSON.parse(compressorElement.dataset.api)
+
+    // console.log()
 
     new CompressorPanel(compressorElement, {
-        uploadUrl: compressImagesURL, 
+        uploadUrl: COMPRESS_IMAGES_URL, 
         maxBatchSize: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE,
         maxBatchSizeBytes: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE_BYTES, 
         maxConcurrentUploads: GRAPHICS_TOOLS_MODULE.MAX_CONCURRENT_UPLOADS,

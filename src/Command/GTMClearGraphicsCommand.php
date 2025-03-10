@@ -9,9 +9,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 
-class GTMCleanGraphicsCommand extends Command
+class GTMClearGraphicsCommand extends Command
 {
-    protected static $defaultName = 'gtm:clean-graphics';
+    protected static $defaultName = 'gtm:clear-graphics';
     private string $projectDir;
 
     public function __construct(string $projectDir)

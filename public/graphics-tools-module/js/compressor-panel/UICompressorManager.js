@@ -53,7 +53,7 @@ export default class UICompressorManager {
         if (this.elements.maxFileSizeInfo) {
             this.elements.maxFileSizeInfo.textContent = this.options.maxFileSize / (1024 * 1024) + " MB"
         }
-        this.elements.progressContainer.style.display = "none"
+        // this.elements.progressContainer.style.display = "none"
     }
 
     /**
@@ -104,29 +104,7 @@ export default class UICompressorManager {
     handleDragLeave(event) {
         this.preventBrowserDefaults(event);
         this.elements.dropZone.classList.remove('drag-over');
-    }
-
-    /**
-     * Obsługa zdarzenia upuszczenia plików w obszarze drop zone
-     */
-    handleDrop(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-
-        const droppedFiles = event.dataTransfer.files;
-        this.onFileSelect(droppedFiles);
-    }
-
-    /**
-     * Obsługa zdarzenia wyboru plików przez input
-     */
-    handleFileSelect(event) {
-        const selectedFiles = event.target.files;
-        this.onFileSelect(selectedFiles);
-
-        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
-        this.elements.fileInput.value = '';
-    }
+    }  
 
     /**
      * Renderowanie miniatury obrazu w widoku tabeli
@@ -160,11 +138,32 @@ export default class UICompressorManager {
                         'data-title': 'Typ',
                         'data-type': ''
                     }
-                );
+                ); 
 
-                const statusCell = this.createTableCell('<span class="mx-auto badge badge--green">Gotowy</span>', {
+                const progressBarHTML = `
+                    <div data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress">
+                        <div class="animated-progress-bar">
+                            <div class="animated-progress-per" data-progress-bar-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} per="0"></div>
+                        </div>
+                        <div class="animated-progress-info">
+                            <div class="animated-progress-name">Oczekiwanie...</div>
+                            <div class="animated-progress-stats">
+                                <span data-progress-text-${file.name.replace(/[^a-zA-Z0-9]/g, '_')}>0%</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // const statusCell = this.createTableCell('<span class="mx-auto badge badge--green">Gotowy</span>', {
+                //     'data-title': 'Status',
+                //     'data-status': '',
+                //     'data-file-progress': file.name
+                // });
+
+                const statusCell = this.createTableCell(progressBarHTML, {
                     'data-title': 'Status',
-                    'data-status': ''
+                    'data-status': '',
+                    'data-file-progress': file.name
                 });
 
                 // Komórka z rozmiarem pliku
@@ -202,7 +201,7 @@ export default class UICompressorManager {
                 row.appendChild(nameCell);
                 row.appendChild(typeCell);
                 row.appendChild(sizeCell);
-                row.appendChild(statusCell); 
+                row.appendChild(statusCell);
                 row.appendChild(compressedSizeCell)
                 row.appendChild(compressedRatioCell)
                 row.appendChild(actionsCell);
@@ -237,7 +236,7 @@ export default class UICompressorManager {
     }
 
     /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
-    updateTableHead() { 
+    updateTableHead() {
         const allTableTHElements = Array.from(this.elements.tableHeadRow.children)
 
         allTableTHElements.forEach(th => th.classList.remove('sr-only'))
@@ -247,7 +246,7 @@ export default class UICompressorManager {
         // this.elements.tableHeadRow.append(createTH('Poziom kompresji'))
         // this.elements.tableHeadRow.append(createTH('Akcje'))
     }
-   
+
 
     /**
      * Aktualizacja informacji o skompresowanym obrazie w widoku listy
@@ -264,24 +263,27 @@ export default class UICompressorManager {
 
         const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
 
-        if (!listItem) return;  
+        if (!listItem) return;
 
-        const actionsCell = listItem.querySelector('[data-actions]')
-        const compressedSizeCell = listItem.querySelector('[data-compressed-size]')
-        const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]') 
+        const actionsCell = listItem.querySelector('[data-actions]');
+        const compressedSizeCell = listItem.querySelector('[data-compressed-size]');
+        const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]');
 
-        compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>` 
-        compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>` 
+        compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>`;
+        compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>`;
         actionsCell.innerHTML = `
             <a href="${downloadURL}" class="mx-auto badge image-compressor__item-download">
                 <i class="fa-solid fa-circle-down image-compressor__item-download-icon"></i>
                 <span>Pobierz</span>
             </a>
-        ` 
+        `;
 
-        compressedSizeCell.classList.remove('sr-only')
-        compressedRatioCell.classList.remove('sr-only')
-    }
+        compressedSizeCell.classList.remove('sr-only');
+        compressedRatioCell.classList.remove('sr-only');
+
+        // Oznacz pasek postępu jako zakończony sukcesem
+        this.setFileProgressSuccess(fileName); 
+    } 
 
     /**
      * Usuwa miniaturę pliku z galerii
@@ -289,7 +291,7 @@ export default class UICompressorManager {
      */
     removeThumbnail(fileName) {
         const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-        
+
         if (thumbnailToRemove) {
             this.elements.imageTable.removeChild(thumbnailToRemove);
         }
@@ -320,38 +322,134 @@ export default class UICompressorManager {
         }
     }
 
+    handleFileSelect(event) {
+        const selectedFiles = event.target.files;
+        if (selectedFiles && selectedFiles.length > 0) {
+            this.onFileSelect(selectedFiles);
+        }
+
+        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
+        this.elements.fileInput.value = '';
+    }
+
+    // Podobnie dla metody handleDrop
+    handleDrop(event) {
+        this.preventBrowserDefaults(event);
+        this.elements.dropZone.classList.remove('drag-over');
+
+        const droppedFiles = event.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            this.onFileSelect(droppedFiles);
+        }
+    }  
+
     /**
-     * Aktualizacja paska postępu
+     * Aktualizacja paska postępu dla konkretnego pliku
+     * @param {string} fileName - Nazwa pliku
      * @param {number} percent - Procent postępu (0-100)
      */
-    updateProgress(percent) {
-        this.elements.progressBar.style.width = `${percent}%`;
-        this.elements.progressText.textContent = `${percent}%`;
-        this.elements.progressBar.setAttribute('per', percent)
+    updateFileProgress(fileName, percent) {
+        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+        const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+        const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+        const progressName = document.querySelector(`[data-progress-container-${safeFileName}] .animated-progress-name`);
+        
+        if (progressBar && progressText) {
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `${percent}%`;
+            progressBar.setAttribute('per', percent);
+            
+            // Aktualizacja tekstu informującego o aktualnym etapie
+            if (progressName) {
+                if (percent < 20) {
+                    progressName.textContent = 'Wysyłanie...';
+                } else if (percent < 100) {
+                    progressName.textContent = 'Kompresja...';
+                } else {
+                    progressName.textContent = 'Zakończono';
+                }
+            }
+        }
     }
-
+    
     /**
-     * Pokazanie paska postępu
+     * Pokazanie paska postępu dla konkretnego pliku
+     * @param {string} fileName - Nazwa pliku
      */
-    showProgressBar() {
-        this.elements.progressContainer.style.removeProperty('display')
+    showFileProgressBar(fileName) {
+        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+        const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+        const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
 
-        fadeAnimation(() => {
-            this.elements.progressBar.style.width = '0%';
-            this.elements.progressText.textContent = '0%';
-            this.elements.progressBar.setAttribute('per', '0')
-        }, [this.elements.progressContainer], 400);
-    }
+        if (progressContainer && progressBar && progressText) {
+            progressContainer.style.removeProperty('display');
 
-    /**
-     * Ukrycie paska postępu
-     * @param {number} delay - Opóźnienie w milisekundach przed ukryciem
-     */
-    hideProgressBar(delay = 3000) {
-        setTimeout(() => {
             fadeAnimation(() => {
-                this.elements.progressContainer.style.display = 'none';
-            }, [this.elements.progressContainer], 400);
-        }, delay);
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+                progressBar.setAttribute('per', '0');
+            }, [progressContainer], 400);
+        }
+    } 
+
+    /**
+     * Ustawienie statusu sukcesu dla paska postępu pliku
+     * @param {string} fileName - Nazwa pliku
+     */
+    setFileProgressSuccess(fileName) {
+        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+
+        if (progressContainer) {
+            const progressNameElement = progressContainer.querySelector('.animated-progress-name');
+            if (progressNameElement) {
+                progressNameElement.textContent = 'Zakończono';
+                progressNameElement.classList.add('text-success');
+            }
+
+            const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
+            if (progressBar) {
+                progressBar.classList.add('progress-success');
+            }
+        }
     }
+
+    /**
+     * Ustawienie statusu błędu dla paska postępu pliku
+     * @param {string} fileName - Nazwa pliku
+     * @param {string} errorMessage - Komunikat błędu
+     */
+    setFileProgressError(fileName, errorMessage = 'Błąd') {
+        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+
+        if (progressContainer) {
+            const progressNameElement = progressContainer.querySelector('.animated-progress-name');
+            if (progressNameElement) {
+                progressNameElement.textContent = errorMessage;
+                progressNameElement.classList.add('text-danger');
+            }
+
+            const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
+            if (progressBar) {
+                progressBar.classList.add('progress-danger');
+            }
+        }
+    } 
 }
+
+
+
+
+// updateFileProgress(fileName, percent) {
+    //     const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    //     const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+    //     const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+
+    //     if (progressBar && progressText) {
+    //         progressBar.style.width = `${percent}%`;
+    //         progressText.textContent = `${percent}%`;
+    //         progressBar.setAttribute('per', percent);
+    //     }
+    // }

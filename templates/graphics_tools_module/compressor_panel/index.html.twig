@@ -14,6 +14,13 @@
 
 {% block panel_javascripts %}
  
+<script> 
+
+    const COMPRESS_IMAGES_URL = "{{ path('gtm_compressor_api_compress_images') }}" 
+    const TRACK_COMPRESSION_PROGRESS_URL = "{{ TRACK_COMPRESSION_PROGRESS_URL }}"
+    const GET_COMPRESSION_STATUS_URL = "{{ GET_COMPRESSION_STATUS_URL }}"
+
+</script> 
 <script type="module" src="{{ asset('graphics-tools-module/js/compressor-panel/main.js') }}"></script>
 
 {% endblock %}

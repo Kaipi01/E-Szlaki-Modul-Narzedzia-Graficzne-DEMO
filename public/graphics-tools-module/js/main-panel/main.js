@@ -52,7 +52,7 @@ function initTestPixiLib() {
 
     // Załaduj obraz
     // const image = PIXI.Sprite.from('./images/place-img-2.webp');
-    const image = PIXI.Sprite.from('/GraphicsToolsModule/images/place-img-2.webp');
+    const image = PIXI.Sprite.from('/graphics-tools-module/images/place-img-2.webp');
     
     app.stage.addChild(image);
 
