@@ -1,0 +1,165 @@
+@use "./base/variables" as *;
+@use "./functions/toRem" as *;
+@use "./functions/flex-center" as *;
+
+#graphics-tools-module {
+  .login {
+    $input-shadow: 0 0 0 3px var(--green-opacity);
+    $input-shadow-error: 0 0 0 3px var(--red);
+
+    @include flex-center;
+    min-height: 80vh;
+
+    &__content {
+      width: 95%;
+      max-width: toRem(575);
+      transition: all 0.3s;
+
+      @media (prefers-reduced-transparency) {
+        background-color: var(--background);
+      }
+
+      @media (min-width: $content-breakpoint-phone-small) {
+        padding: toRem(40) toRem(30);
+      }
+
+      @media (min-width: $content-breakpoint-phone) {
+        padding: toRem(45) toRem(40);
+      }
+    }
+
+    .header {
+      margin-bottom: toRem(30);
+
+      &__title {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+    }
+
+    .login-form {
+      position: relative;
+
+      &__message {
+        margin-bottom: toRem(30);
+
+        &--error {
+          color: var(--red);
+          font-weight: bold;
+        }
+      }
+
+      &__bottom {
+        $gap: toRem(25);
+        gap: $gap;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin-top: $gap;
+
+        @media (min-width: $content-breakpoint-phone) {
+          flex-direction: row;
+          gap: toRem(30);
+        }
+      }
+
+      &__link {
+        font-weight: bold;
+      }
+    }
+
+    .form {
+      position: relative;
+
+      &__error-message {
+        position: relative;
+        top: -12px;
+        color: var(--red);
+        font-weight: bold;
+      }
+
+      &__message {
+        margin-bottom: toRem(10);
+
+        &--error {
+          color: var(--red);
+          font-weight: bold;
+        }
+      }
+
+      &__label {
+        display: block;
+        margin-bottom: toRem(8);
+        font-weight: bold;
+      }
+
+      &__input {
+        min-height: toRem(48);
+        margin-bottom: toRem(17);
+      }
+
+      .input {
+        width: 100%;
+        height: toRem(40);
+        padding: toRem(7) toRem(15);
+        transition: all 0.3s;
+        border: toRem(2) solid var(--green);
+        border-radius: toRem(5);
+        background-color: transparent;
+        color: var(--font-color);
+        font-size: 1rem;
+        letter-spacing: toRem(1);
+
+        &::placeholder {
+          color: var(--font-color-gray);
+          font-size: 1rem;
+        }
+
+        &:focus {
+          outline: 0;
+          box-shadow: $input-shadow;
+
+          @media (forced-colors: active) {
+            outline: auto;
+          }
+        }
+
+        &--error {
+          border-color: var(--red);
+          color: var(--red);
+
+          &:focus {
+            box-shadow: $input-shadow-error;
+          }
+        }
+      }
+
+      &__submit {
+        $gap: toRem(10);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin-left: auto;
+        padding: toRem(10) toRem(20);
+        box-shadow: rgba(0, 0, 0, 0.54) 0px 3px 8px;
+        font-weight: bold;
+        letter-spacing: toRem(2);
+        gap: $gap;
+
+        @media (min-width: $content-breakpoint-phone-small) {
+          width: max-content;
+        }
+
+        @media (min-width: $content-breakpoint-phone) {
+          padding: toRem(10) toRem(35);
+        }
+
+        &-icon {
+          width: toRem(30);
+          fill: #fff;
+        }
+      }
+    }
+  }
+}

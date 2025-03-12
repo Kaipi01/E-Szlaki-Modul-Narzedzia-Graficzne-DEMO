@@ -1,16 +1,17 @@
 <?php
 
 namespace App\Controller;
-
+ 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/profil')]
 class GTMCompressorPanelController extends AbstractController
-{
+{ 
     #[Route('/narzedzia-graficzne/kompresor', name: 'gtm_compressor_panel')]
     public function index(): Response
-    {
+    { 
         // phpinfo();
 
         // php -c "D:\xampp\php\php.ini" -v

@@ -2,6 +2,8 @@
 
 namespace App\Command;
 
+use App\Entity\GTMImage; 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +16,7 @@ class GTMClearGraphicsCommand extends Command
     protected static $defaultName = 'gtm:clear-graphics';
     private string $projectDir;
 
-    public function __construct(string $projectDir)
+    public function __construct(private EntityManagerInterface $entityManager, string $projectDir)
     {
         $this->projectDir = $projectDir;
         parent::__construct();
@@ -40,17 +42,19 @@ class GTMClearGraphicsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $filesystem = new Filesystem();
-        $compressedDir = $this->projectDir . '/public/graphics-tools-module/uploads/compressed';
-        $tempDir = $this->projectDir . '/public/graphics-tools-module/uploads/temp';
+        $compressedDir = "{$this->projectDir}/public/graphics-tools-module/uploads/compressed";
+        $tempDir = "{$this->projectDir}/public/graphics-tools-module/uploads/temp";
 
         $cleanAll = $input->getOption('all');
         $cleanTemp = $input->getOption('temp');
 
         if ($cleanAll) {
-            $this->cleanDirectory($compressedDir, $filesystem, $output);
-            $this->cleanDirectory($tempDir, $filesystem, $output);
+            $this->clearDataBase();
+            $output->writeln("Wyczyszczono informacje o grafikach w bazie danych");
+            $this->clearDirectory($compressedDir, $filesystem, $output);
+            $this->clearDirectory($tempDir, $filesystem, $output);
         } elseif ($cleanTemp) {
-            $this->cleanDirectory($tempDir, $filesystem, $output);
+            $this->clearDirectory($tempDir, $filesystem, $output);
         } else {
             $output->writeln('Nie wybrano żadnej opcji. Użyj --all lub --temp.');
             return Command::FAILURE;
@@ -61,7 +65,7 @@ class GTMClearGraphicsCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function cleanDirectory(string $directory, Filesystem $filesystem, OutputInterface $output): void
+    private function clearDirectory(string $directory, Filesystem $filesystem, OutputInterface $output): void
     {
         if ($filesystem->exists($directory)) {
             $finder = new Finder();
@@ -71,9 +75,19 @@ class GTMClearGraphicsCommand extends Command
                 $filesystem->remove($file->getRealPath()); 
             }
 
-            $output->writeln('Wyczyszczono katalog: ' . $directory);
+            $output->writeln("Wyczyszczono katalog: $directory");
         } else {
-            $output->writeln('Katalog nie istnieje: ' . $directory);
+            $output->writeln("Katalog nie istnieje: $directory");
         }
+    }
+
+    private function clearDataBase(): void 
+    {
+        $allJobs = $this->entityManager->getRepository(GTMImage::class)->findAll();
+
+        foreach($allJobs as $job) {
+            $this->entityManager->remove($job);
+        }
+        $this->entityManager->flush();
     }
 }

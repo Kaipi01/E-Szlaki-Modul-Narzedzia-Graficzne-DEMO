@@ -5,6 +5,7 @@ namespace App\Service\GraphicsToolsModule;
 use App\Service\GraphicsToolsModule\Contracts\UploadImageServiceInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
 
 class UploadImageService implements UploadImageServiceInterface
 {
@@ -23,6 +24,30 @@ class UploadImageService implements UploadImageServiceInterface
             $this->logger->error($e->getMessage());
             throw new \Exception('Nie udalo sie wyslac pliku.');
         }
+    }
+
+    public function uploadAllFromRequest(Request $request, string $uploadDir, bool $keepOriginalName = false): array
+    {
+        $fileInfos = [];
+
+        foreach ($request->files->all() as $key => $file) {
+            if ($file instanceof UploadedFile) {
+                $originalName = $file->getClientOriginalName();
+                $mimeType = $file->getMimeType();
+                $size = $file->getSize();
+                $newImageName = $this->upload($file, $uploadDir, $keepOriginalName);
+                
+                $fileInfos[] = [
+                    'originalName' => $originalName,
+                    'savedName' => $newImageName,
+                    'mimeType' => $mimeType,
+                    'size' => $size,
+                    'tempPath' => "{$uploadDir}/$newImageName"
+                ];
+            }
+        }
+
+        return $fileInfos;
     }
 
     public function getSaveImageName(UploadedFile $image, bool $keepOriginalName = false): string

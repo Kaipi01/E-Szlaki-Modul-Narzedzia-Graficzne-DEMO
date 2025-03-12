@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/profil')]
 class GTMEditorPanelController extends AbstractController
 {
     #[Route('/narzedzia-graficzne/edytor', name: 'gtm_editor_panel')]

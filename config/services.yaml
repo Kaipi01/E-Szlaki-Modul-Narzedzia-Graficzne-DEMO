@@ -35,13 +35,19 @@ services:
     
     App\Service\GraphicsToolsModule\ImagesCompressorService:
         arguments:
-            $projectDir: '%kernel.project_dir%'
+            $projectDir: '%kernel.project_dir%' 
 
-    App\Service\GraphicsToolsModule\CompressionJobDispatcher:
-            arguments:
-                $projectDir: '%kernel.project_dir%'
+    App\Service\GraphicsToolsModule\TrackCompressionProgressService:
+        arguments:
+            $projectDir: '%kernel.project_dir%' 
 
     App\Command\GTMClearGraphicsCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+        tags:
+            - { name: 'console.command' }
+
+    App\Command\GTMCompressImageCommand:
         arguments:
             $projectDir: '%kernel.project_dir%'
         tags:

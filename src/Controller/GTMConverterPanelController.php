@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/profil')]
 class GTMConverterPanelController extends AbstractController
 {
     #[Route('/narzedzia-graficzne/konwerter', name: 'gtm_converter_panel')]

@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logowanie{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/base.css') }}">
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/login.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<div id="graphics-tools-module">
+
+    <div class="login">
+        <div class="modern-card login__content">
+            <header class="header">
+                <h1 class="header__title">Logowanie</h1>
+            </header>
+
+            <form class="login-form form" method="post">
+                {% if error %}
+                <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+                {% endif %}
+
+                {% if app.user %}
+                <p class="login-form__message login-form__message--error">
+                    Jesteś zalogowany jako {{ app.user.username }},
+                    <a class="login-form__link" href="{{ path('app_logout') }}">Wyloguj się</a>
+                </p>
+                {% endif %}
+
+                <div>
+                    <label class="form__label" for="inputEmail">Adres E-mail: </label>
+                    <input class="input form__input" type="email" placeholder="user@example.com" name="email"
+                        value="{{ last_username }}" id="inputEmail" required autofocus autocomplete="email">
+                </div>
+
+                <div>
+                    <label class="form__label" for="inputPassword">Hasło: 12345</label>
+                    <input class="input form__input" type="password" name="password" id="inputPassword" required
+                        autocomplete="current-password">
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button class="link variant2 form__submit" type="submit">
+                    Zaloguj się
+                    <svg class="form__submit-icon" xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z">
+                        </path>
+                    </svg>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

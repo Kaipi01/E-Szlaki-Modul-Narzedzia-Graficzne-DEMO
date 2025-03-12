@@ -15,6 +15,6 @@ class IndexRedirectController extends AbstractController
     #[Route('/', name: 'app_index_redirect')]
     public function index(): RedirectResponse
     { 
-        return $this->redirectToRoute('app_gtm_main_panel'); 
+        return $this->redirectToRoute('gtm_main_panel'); 
     }
 }
