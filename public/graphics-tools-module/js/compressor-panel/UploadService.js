@@ -85,13 +85,13 @@ export default class UploadService {
                     const response = JSON.parse(xhr.responseText);
 
                     // Sprawdzenie, czy odpowiedź zawiera identyfikator zadania kompresji
-                    if (!response.jobId) {
+                    if (!response.processId) {
                         throw new Error('Brak identyfikatora zadania kompresji w odpowiedzi serwera');
                     }
 
                     // Rozpoczęcie nasłuchiwania na aktualizacje postępu kompresji przez SSE
                     this.monitorCompressionProgress(
-                        response.jobId,
+                        response.processId,
                         file.name,
                         onProgress,
                         onSuccess,
@@ -129,16 +129,16 @@ export default class UploadService {
 
     /**
      * Monitorowanie postępu kompresji przez Server-Sent Events
-     * @param {string} jobId - Identyfikator zadania kompresji
+     * @param {string} processId - Identyfikator zadania kompresji
      * @param {string} fileName - Nazwa pliku
      * @param {Function} onProgress - Callback wywoływany przy aktualizacji postępu
      * @param {Function} onSuccess - Callback wywoływany przy sukcesie
      * @param {Function} onError - Callback wywoływany przy błędzie
      * @param {Function} onComplete - Callback wywoływany po zakończeniu
      */
-    monitorCompressionProgress(jobId, fileName, onProgress, onSuccess, onError, onComplete) { 
+    monitorCompressionProgress(processId, fileName, onProgress, onSuccess, onError, onComplete) { 
         // stała TRACK_COMPRESSION_PROGRESS_URL jest zadeklarowana w graphics_tools_module/compressor_panel/index.html.twig
-        const sseUrl = `${TRACK_COMPRESSION_PROGRESS_URL}/${encodeURIComponent(jobId)}`;
+        const sseUrl = `${TRACK_COMPRESSION_PROGRESS_URL}/${encodeURIComponent(processId)}`;
 
         // Zmienna do przechowywania referencji do obiektu EventSource
         let eventSource = null; 
@@ -683,13 +683,13 @@ export default class UploadService {
 //                     const response = JSON.parse(xhr.responseText);
 
 //                     // Sprawdzenie, czy odpowiedź zawiera identyfikator zadania kompresji
-//                     if (!response.jobId) {
+//                     if (!response.processId) {
 //                         throw new Error('Brak identyfikatora zadania kompresji w odpowiedzi serwera');
 //                     }
 
 //                     // Rozpoczęcie nasłuchiwania na aktualizacje postępu kompresji przez SSE
 //                     this.monitorCompressionProgress(
-//                         response.jobId,
+//                         response.processId,
 //                         file.name,
 //                         onProgress,
 //                         onSuccess,
@@ -727,16 +727,16 @@ export default class UploadService {
 
 //     /**
 //      * Monitorowanie postępu kompresji przez Server-Sent Events
-//      * @param {string} jobId - Identyfikator zadania kompresji
+//      * @param {string} processId - Identyfikator zadania kompresji
 //      * @param {string} fileName - Nazwa pliku
 //      * @param {Function} onProgress - Callback wywoływany przy aktualizacji postępu
 //      * @param {Function} onSuccess - Callback wywoływany przy sukcesie
 //      * @param {Function} onError - Callback wywoływany przy błędzie
 //      * @param {Function} onComplete - Callback wywoływany po zakończeniu
 //      */
-//     monitorCompressionProgress(jobId, fileName, onProgress, onSuccess, onError, onComplete) { 
+//     monitorCompressionProgress(processId, fileName, onProgress, onSuccess, onError, onComplete) { 
 //         // stała TRACK_COMPRESSION_PROGRESS_URL jest zadeklarowana w graphics_tools_module/compressor_panel/index.html.twig
-//         const sseUrl = `${TRACK_COMPRESSION_PROGRESS_URL}/${encodeURIComponent(jobId)}`;
+//         const sseUrl = `${TRACK_COMPRESSION_PROGRESS_URL}/${encodeURIComponent(processId)}`;
 
 //         // Zmienna do przechowywania referencji do obiektu EventSource
 //         let eventSource = null; 

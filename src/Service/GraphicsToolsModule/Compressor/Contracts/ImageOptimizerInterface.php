@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Service\GraphicsToolsModule\Contracts;
+namespace App\Service\GraphicsToolsModule\Compressor\Contracts;
 
 interface ImageOptimizerInterface
 {

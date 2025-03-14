@@ -62,58 +62,58 @@ class GTMCompressorAPIController extends AbstractController
         }
     }
 
-    // #[Route('/narzedzia-graficzne/api/status-kompresji/{id}', name: 'gtm_compressor_api_get_job_status', methods: ['GET'])]
-    // public function compress_job_status(int $id): JsonResponse
-    // {
-    //     $job = $this->jobRepository->find($id);
+    #[Route('/narzedzia-graficzne/api/status-kompresji/{id}', name: 'gtm_compressor_api_get_job_status', methods: ['GET'])]
+    public function compress_job_status(int $id): JsonResponse
+    {
+        $job = $this->jobRepository->find($id);
 
-    //     if (!$job) {
-    //         return $this->json([
-    //             'success' => false,
-    //             'errorMessage' => 'Zadanie nie istnieje'
-    //         ], 404);
-    //     }
+        if (!$job) {
+            return $this->json([
+                'success' => false,
+                'errorMessage' => 'Zadanie nie istnieje'
+            ], 404);
+        }
 
-    //     return $this->json([
-    //         'success' => true,
-    //         'status' => $job->getStatus(),
-    //         'progress' => $job->getProgress(),
-    //         'results' => $job->getResults(),
-    //         'error' => $job->getError(),
-    //         'completed' => $job->getStatus() === 'completed',
-    //     ]);
-    // }
+        return $this->json([
+            'success' => true,
+            'status' => $job->getStatus(),
+            'progress' => $job->getProgress(),
+            'results' => $job->getResults(),
+            'error' => $job->getError(),
+            'completed' => $job->getStatus() === 'completed',
+        ]);
+    }
 
 
-    // #[
-    //     Route(
-    //         '/narzedzia-graficzne/kompresuj-grafiki-json',
-    //         name: 'app_gtm_compressor_compress_images_post',
-    //         methods: ['POST']
-    //     )
-    // ]
-    // public function compress_images(Request $request): JsonResponse
-    // {
-    //     $projectDir = $this->getParameter('kernel.project_dir');
-    //     $jsonData = [];
-    //     $status = 200; 
+    #[
+        Route(
+            '/narzedzia-graficzne/kompresuj-grafiki-json',
+            name: 'app_gtm_compressor_compress_images_post',
+            methods: ['POST']
+        )
+    ]
+    public function compress_images(Request $request): JsonResponse
+    {
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $jsonData = [];
+        $status = 200; 
 
-    //     try { 
-    //         $jsonData = [
-    //             'success' => true,
-    //             'errorMessage' => '',
-    //             'compressedImages' => $this->compressor->handle($request, $projectDir)
-    //         ];
+        try { 
+            $jsonData = [
+                'success' => true,
+                'errorMessage' => '',
+                'compressedImages' => $this->compressor->handle($request, $projectDir)
+            ];
 
-    //     } catch(\Exception $e) { 
-    //         $status = 500;
-    //         $jsonData = [
-    //             'success' => false,
-    //             'errorMessage' => $e->getMessage(),
-    //             'compressedImages' => []
-    //         ]; 
-    //     } 
+        } catch(\Exception $e) { 
+            $status = 500;
+            $jsonData = [
+                'success' => false,
+                'errorMessage' => $e->getMessage(),
+                'compressedImages' => []
+            ]; 
+        } 
 
-    //     return $this->json($jsonData, $status);
-    // }
+        return $this->json($jsonData, $status);
+    }
 }

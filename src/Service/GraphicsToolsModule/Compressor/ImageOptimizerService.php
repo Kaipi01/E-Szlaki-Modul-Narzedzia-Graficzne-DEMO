@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Service\GraphicsToolsModule;
+namespace App\Service\GraphicsToolsModule\Compressor;
 
-use App\Service\GraphicsToolsModule\Contracts\ImageOptimizerInterface;
+use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
 use Spatie\ImageOptimizer\Optimizers\{Cwebp, Jpegoptim, Pngquant};
 use Symfony\Component\Process\Process;

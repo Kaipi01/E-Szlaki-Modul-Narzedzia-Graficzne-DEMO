@@ -4,7 +4,7 @@ import CompressorPanel from './CompressorPanel.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const compressorElement = document.querySelector("#" + GRAPHICS_TOOLS_MODULE.COMPRESSOR_ID)
     // const {
-    //     compressImagesURL
+    //     compressImageURL
     // } = JSON.parse(compressorElement.dataset.api)
 
     // console.log()

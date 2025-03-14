@@ -2,18 +2,14 @@
 
 namespace App\Entity;
 
-use App\Repository\GTMImageRepository;
+use App\Repository\GTMImageRepository; 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=GTMImageRepository::class)
  */
 class GTMImage
-{
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_PROCESSING = 'processing';
-    public const STATUS_COMPLETED = 'completed';
-    public const STATUS_FAILED = 'failed';
+{ 
     public const OPERATION_COMPRESSION = 'compression';
     public const OPERATION_CONVERSION = 'conversion';
     public const OPERATION_EDITION = 'edition';
@@ -23,32 +19,17 @@ class GTMImage
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private int $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private string $status = self::STATUS_PENDING; // pending, processing, completed, failed
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private int $progress = 0; // 0-100
+    private int $id;  
 
     /**
      * @ORM\Column(type="json", nullable=true)
      */
-    private ?array $results = [];
+    private ?array $operationResults = [];
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private \DateTime $uploadedAt;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    private ?string $error = null;
+    private \DateTime $uploadedAt; 
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="uploadedGTMImages")
@@ -81,6 +62,11 @@ class GTMImage
      */
     private $operationType;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $operationId;
+
     public function __construct()
     {
         $this->uploadedAt = new \DateTime();
@@ -89,57 +75,18 @@ class GTMImage
     public function getId(): ?int
     {
         return $this->id;
+    }   
+
+    public function getOperationResults(): ?array
+    {
+        return $this->operationResults;
     }
 
-    public function getStatus(): string
+    public function setOperationResults(?array $operationResults): self
     {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
+        $this->operationResults = $operationResults;
         return $this;
-    }
-
-    public function getProgress(): int
-    {
-        return $this->progress;
-    }
-
-    public function setProgress(int $progress): self
-    {
-        $this->progress = $progress;
-        return $this;
-    }
-
-    public function getResults(): ?array
-    {
-        return $this->results;
-    }
-
-    public function setResults(?array $results): self
-    {
-        $this->results = $results;
-        return $this;
-    }
-
-    public function getError(): ?string
-    {
-        return $this->error;
-    }
-
-    public function setError(?string $error): self
-    {
-        $this->error = $error;
-        return $this;
-    }
-
-    public function addResult(array $result): self
-    {
-        $this->results[] = $result;
-        return $this;
-    }
+    } 
 
     public function getUploadedAt()
     {
@@ -220,6 +167,18 @@ class GTMImage
     public function setOperationType(string $operationType): self
     {
         $this->operationType = $operationType;
+
+        return $this;
+    }
+
+    public function getOperationId(): ?string
+    {
+        return $this->operationId;
+    }
+
+    public function setOperationId(string $operationId): self
+    {
+        $this->operationId = $operationId;
 
         return $this;
     }

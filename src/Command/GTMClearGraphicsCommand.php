@@ -2,7 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\GTMImage; 
+use App\Entity\GTMImage;
+use App\Service\GraphicsToolsModule\Compressor\Contracts\TrackCompressionProgressInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,8 +17,11 @@ class GTMClearGraphicsCommand extends Command
     protected static $defaultName = 'gtm:clear-graphics';
     private string $projectDir;
 
-    public function __construct(private EntityManagerInterface $entityManager, string $projectDir)
-    {
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private TrackCompressionProgressInterface $compressionTracker,
+        string $projectDir
+    ) {
         $this->projectDir = $projectDir;
         parent::__construct();
     }
@@ -47,6 +51,11 @@ class GTMClearGraphicsCommand extends Command
 
         $cleanAll = $input->getOption('all');
         $cleanTemp = $input->getOption('temp');
+        $clearCount = 0;
+
+        if ($cleanAll || $cleanTemp) {
+            $clearCount = $this->compressionTracker->cleanupOldProgressFiles(0);
+        }
 
         if ($cleanAll) {
             $this->clearDataBase();
@@ -61,6 +70,7 @@ class GTMClearGraphicsCommand extends Command
         }
 
         $output->writeln('Zakończono czyszczenie folderów obrazów.');
+        $output->writeln("Liczba wyczyszczonych plików: $clearCount");
 
         return Command::SUCCESS;
     }
@@ -72,7 +82,7 @@ class GTMClearGraphicsCommand extends Command
             $finder->files()->in($directory);
 
             foreach ($finder as $file) {
-                $filesystem->remove($file->getRealPath()); 
+                $filesystem->remove($file->getRealPath());
             }
 
             $output->writeln("Wyczyszczono katalog: $directory");
@@ -81,11 +91,11 @@ class GTMClearGraphicsCommand extends Command
         }
     }
 
-    private function clearDataBase(): void 
+    private function clearDataBase(): void
     {
         $allJobs = $this->entityManager->getRepository(GTMImage::class)->findAll();
 
-        foreach($allJobs as $job) {
+        foreach ($allJobs as $job) {
             $this->entityManager->remove($job);
         }
         $this->entityManager->flush();
