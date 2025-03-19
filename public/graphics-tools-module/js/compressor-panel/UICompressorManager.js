@@ -52,13 +52,9 @@ export default class UICompressorManager {
     initUI() {
         if (this.elements.maxFileSizeInfo) {
             this.elements.maxFileSizeInfo.textContent = this.options.maxFileSize / (1024 * 1024) + " MB"
-        }
-        // this.elements.progressContainer.style.display = "none"
+        } 
     }
-
-    /**
-     * Podpięcie nasłuchiwania zdarzeń
-     */
+ 
     attachEventListeners() {
         // Obsługa wyboru plików przez input
         this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
@@ -80,31 +76,7 @@ export default class UICompressorManager {
         // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
         document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
         document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
-    }
-
-    /**
-     * Zapobiega domyślnym akcjom przeglądarki
-     */
-    preventBrowserDefaults(event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    /**
-     * Obsługa zdarzenia przeciągania plików nad obszarem drop zone
-     */
-    handleDragOver(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.add('drag-over');
-    }
-
-    /**
-     * Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania
-     */
-    handleDragLeave(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-    }  
+    } 
 
     /**
      * Renderowanie miniatury obrazu w widoku tabeli
@@ -152,13 +124,7 @@ export default class UICompressorManager {
                             </div>
                         </div>
                     </div>
-                `;
-
-                // const statusCell = this.createTableCell('<span class="mx-auto badge badge--green">Gotowy</span>', {
-                //     'data-title': 'Status',
-                //     'data-status': '',
-                //     'data-file-progress': file.name
-                // });
+                `; 
 
                 const statusCell = this.createTableCell(progressBarHTML, {
                     'data-title': 'Status',
@@ -176,34 +142,34 @@ export default class UICompressorManager {
                     'data-title': 'Rozmiar po kompresji',
                     'data-compressed-size': ''
                 });
-                compressedSizeCell.classList.add('sr-only')
+                // compressedSizeCell.classList.add('sr-only')
 
                 const compressedRatioCell = this.createTableCell('-', {
                     'data-title': 'Współczynik kompresji',
                     'data-compressed-ratio': ''
                 });
-                compressedRatioCell.classList.add('sr-only')
+                // compressedRatioCell.classList.add('sr-only')
 
                 // Komórka z akcjami (przycisk usuwania)
                 const actionsCell = this.createTableCell(`
-                    <button class="mx-auto badge image-compressor__item-remove">
-                        <i class="fa-solid fa-cloud-arrow-up image-compressor__item-remove-icon"></i> 
-                        <span>Usuń</span>
+                    <button class="mx-auto badge image-compressor__item-cancel">
+                        <i class="fa-solid fa-xmark image-compressor__item-cancel-icon"></i> 
+                        <span>Anuluj</span>
                     </button>
                 `, {
                     'data-title': 'Akcje',
                     'data-actions': ''
                 });
-                const removeButton = actionsCell.querySelector('button');
-                removeButton.addEventListener('click', () => this.onFileRemove(file.name));
+                const cancelButton = actionsCell.querySelector('button');
+                cancelButton.addEventListener('click', () => this.onFileRemove(file.name));
 
                 row.appendChild(previewCell);
                 row.appendChild(nameCell);
                 row.appendChild(typeCell);
                 row.appendChild(sizeCell);
-                row.appendChild(statusCell);
                 row.appendChild(compressedSizeCell)
                 row.appendChild(compressedRatioCell)
+                row.appendChild(statusCell);
                 row.appendChild(actionsCell);
 
                 this.elements.imageTable.appendChild(row);
@@ -216,24 +182,7 @@ export default class UICompressorManager {
 
             reader.readAsDataURL(file);
         });
-    }
-
-    /**
-     * Tworzy komórkę tabeli
-     * @param {string} content - Zawartość komórki
-     * @param {Object} attributes - atrybuty 
-     * @returns {HTMLTableCellElement}
-     */
-    createTableCell(content, attributes = {}) {
-        const cell = document.createElement('td');
-        cell.innerHTML = content;
-
-        Object.keys(attributes).forEach(key => {
-            cell.setAttribute(key, attributes[key])
-        });
-
-        return cell;
-    }
+    } 
 
     /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
     updateTableHead() {
@@ -272,7 +221,7 @@ export default class UICompressorManager {
         compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>`;
         compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>`;
         actionsCell.innerHTML = `
-            <a href="${downloadURL}" class="mx-auto badge image-compressor__item-download">
+            <a href="${downloadURL}" download class="mx-auto badge image-compressor__item-download">
                 <i class="fa-solid fa-circle-down image-compressor__item-download-icon"></i>
                 <span>Pobierz</span>
             </a>
@@ -283,64 +232,6 @@ export default class UICompressorManager {
 
         // Oznacz pasek postępu jako zakończony sukcesem
         this.setFileProgressSuccess(fileName); 
-    } 
-
-    /**
-     * Usuwa miniaturę pliku z galerii
-     * @param {string} fileName - Nazwa pliku do usunięcia
-     */
-    removeThumbnail(fileName) {
-        const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-
-        if (thumbnailToRemove) {
-            this.elements.imageTable.removeChild(thumbnailToRemove);
-        }
-    }
-
-    /**
-     * Czyści galerię miniatur
-     */
-    clearTable() {
-        this.elements.imageTable.innerHTML = '';
-    }
-
-    /**
-     * Aktualizacja interfejsu użytkownika
-     * @param {boolean} hasFiles - Czy są jakieś pliki
-     * @param {boolean} isUploading - Czy trwa wysyłanie
-     */
-    updateUI(hasFiles, isUploading) {
-        // Aktualizacja przycisków
-        this.elements.compressButton.disabled = !hasFiles || isUploading;
-        this.elements.clearButton.disabled = !hasFiles || isUploading;
-
-        // Aktualizacja klasy dla obszaru drop zone
-        if (hasFiles) {
-            this.elements.dropZone.classList.add('has-files');
-        } else {
-            this.elements.dropZone.classList.remove('has-files');
-        }
-    }
-
-    handleFileSelect(event) {
-        const selectedFiles = event.target.files;
-        if (selectedFiles && selectedFiles.length > 0) {
-            this.onFileSelect(selectedFiles);
-        }
-
-        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
-        this.elements.fileInput.value = '';
-    }
-
-    // Podobnie dla metody handleDrop
-    handleDrop(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-
-        const droppedFiles = event.dataTransfer.files;
-        if (droppedFiles && droppedFiles.length > 0) {
-            this.onFileSelect(droppedFiles);
-        }
     }  
 
     /**
@@ -363,6 +254,8 @@ export default class UICompressorManager {
             if (progressName) {
                 if (percent < 20) {
                     progressName.textContent = 'Wysyłanie...';
+                } else if (percent < 60) {
+                    progressName.textContent = 'Przygotowanie...';
                 } else if (percent < 100) {
                     progressName.textContent = 'Kompresja...';
                 } else {
@@ -437,19 +330,95 @@ export default class UICompressorManager {
             }
         }
     } 
-}
 
+    /**
+     * Tworzy komórkę tabeli
+     * @param {string} content - Zawartość komórki
+     * @param {Object} attributes - atrybuty 
+     * @returns {HTMLTableCellElement}
+     */
+    createTableCell(content, attributes = {}) {
+        const cell = document.createElement('td');
+        cell.innerHTML = content;
 
+        Object.keys(attributes).forEach(key => {
+            cell.setAttribute(key, attributes[key])
+        });
 
+        return cell;
+    }
 
-// updateFileProgress(fileName, percent) {
-    //     const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-    //     const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
-    //     const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+    /**
+     * Usuwa wiersz z tabeli
+     * @param {string} fileName - Nazwa pliku do usunięcia
+     */
+    removeTableRow(fileName) {
+        const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
 
-    //     if (progressBar && progressText) {
-    //         progressBar.style.width = `${percent}%`;
-    //         progressText.textContent = `${percent}%`;
-    //         progressBar.setAttribute('per', percent);
-    //     }
-    // }
+        if (thumbnailToRemove) {
+            this.elements.imageTable.removeChild(thumbnailToRemove);
+        }
+    } 
+
+    /** Czyści tabele */
+    clearTable() {
+        this.elements.imageTable.innerHTML = '';
+    }
+
+    /**
+     * Aktualizacja interfejsu użytkownika
+     * @param {boolean} hasFiles - Czy są jakieś pliki
+     * @param {boolean} isUploading - Czy trwa wysyłanie
+     */
+    updateUI(hasFiles, isUploading) {
+        // Aktualizacja przycisków
+        this.elements.compressButton.disabled = !hasFiles || isUploading;
+        this.elements.clearButton.disabled = !hasFiles || isUploading;
+
+        // Aktualizacja klasy dla obszaru drop zone
+        if (hasFiles) {
+            this.elements.dropZone.classList.add('has-files');
+        } else {
+            this.elements.dropZone.classList.remove('has-files');
+        }
+    }
+
+    handleFileSelect(event) {
+        const selectedFiles = event.target.files;
+        if (selectedFiles && selectedFiles.length > 0) {
+            this.onFileSelect(selectedFiles);
+        }
+
+        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
+        this.elements.fileInput.value = '';
+    }  
+
+    // Podobnie dla metody handleDrop
+    handleDrop(event) {
+        this.preventBrowserDefaults(event);
+        this.elements.dropZone.classList.remove('drag-over');
+
+        const droppedFiles = event.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            this.onFileSelect(droppedFiles);
+        }
+    } 
+
+    /** Zapobiega domyślnym akcjom przeglądarki */
+    preventBrowserDefaults(event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    /** Obsługa zdarzenia przeciągania plików nad obszarem drop zone */
+    handleDragOver(event) {
+        this.preventBrowserDefaults(event);
+        this.elements.dropZone.classList.add('drag-over');
+    }
+
+    /** Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania */
+    handleDragLeave(event) {
+        this.preventBrowserDefaults(event);
+        this.elements.dropZone.classList.remove('drag-over');
+    }  
+} 

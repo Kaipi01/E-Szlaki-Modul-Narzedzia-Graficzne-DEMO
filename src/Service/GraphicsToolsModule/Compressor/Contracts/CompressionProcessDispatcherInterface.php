@@ -6,5 +6,5 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 interface CompressionProcessDispatcherInterface
 {
-    public function dispatch(string $processId, int $userId, UploadedFile $image): void;
+    public function dispatch(string $processId, UploadedFile $image): void;
 }

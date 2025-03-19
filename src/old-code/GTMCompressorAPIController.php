@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class GTMCompressorAPIController extends AbstractController
 {
+    
     public function __construct( 
         private UploadImageServiceInterface $uploader,
         private GTMCompressionJobRepository $jobRepository,

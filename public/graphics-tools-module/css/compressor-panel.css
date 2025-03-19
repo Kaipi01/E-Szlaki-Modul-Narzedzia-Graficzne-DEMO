@@ -936,7 +936,7 @@
   color: #2ecc71;
   font-weight: bold;
 }
-#graphics-tools-module-compressor .image-compressor__item-remove {
+#graphics-tools-module-compressor .image-compressor__item-cancel {
   transition: 0.3s;
   border: none;
   background-color: rgba(var(--red), 0.7);
@@ -947,16 +947,16 @@
   justify-content: center;
   gap: 0.65rem;
 }
-#graphics-tools-module-compressor .image-compressor__item-remove-icon {
+#graphics-tools-module-compressor .image-compressor__item-cancel-icon {
   transition: 0.3s;
   color: inherit;
   font-size: 1rem;
 }
-#graphics-tools-module-compressor .image-compressor__item-remove:hover {
+#graphics-tools-module-compressor .image-compressor__item-cancel:hover {
   background-color: var(--red);
   color: white;
 }
-#graphics-tools-module-compressor .image-compressor__item-remove:hover .image-compressor__item-remove-icon {
+#graphics-tools-module-compressor .image-compressor__item-cancel:hover .image-compressor__item-cancel-icon {
   color: white;
 }
 #graphics-tools-module-compressor .image-compressor__item-download {
@@ -979,7 +979,7 @@
   background-color: var(--blue);
   color: white;
 }
-#graphics-tools-module-compressor .image-compressor__item-download:hover .image-compressor__item-remove-icon {
+#graphics-tools-module-compressor .image-compressor__item-download:hover .image-compressor__item-cancel-icon {
   color: white;
 }
 #graphics-tools-module-compressor .image-compressor__actions {

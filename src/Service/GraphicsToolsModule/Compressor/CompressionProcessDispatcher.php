@@ -14,7 +14,7 @@ class CompressionProcessDispatcher implements CompressionProcessDispatcherInterf
 {
     public function __construct(private LoggerInterface $logger, private string $projectDir, private GTMCompressImageCommand $compressCommand) {}
 
-    public function dispatch(string $processId, int $userId, UploadedFile $image): void
+    public function dispatch(string $processId, UploadedFile $image): void
     {
         $tempPath = $image->getRealPath();
 
@@ -25,13 +25,11 @@ class CompressionProcessDispatcher implements CompressionProcessDispatcherInterf
 
             $this->logger->debug('Uruchomiono zadanie kompresji w tle', [
                 'processId' => $processId,
-                'imageName' => $image->getClientOriginalName(),
-                'userId' => $userId
+                'imageName' => $image->getClientOriginalName() 
             ]);
 
             $input = new ArrayInput([
-                'processId' => $processId, 
-                'userId' => $userId,
+                'processId' => $processId,  
                 'tempPath' => $tempPath, 
                 'originalName' => $image->getClientOriginalName(), 
                 'mimeType' => $image->getMimeType()

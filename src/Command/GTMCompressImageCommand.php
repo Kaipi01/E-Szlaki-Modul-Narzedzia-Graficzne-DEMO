@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Command;
-
+ 
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\TrackCompressionProgressInterface;
-use App\Service\GraphicsToolsModule\Utils\DTO\ImageOperationStatus;
+use App\Service\GraphicsToolsModule\Compressor\ImageEntityManager;
+use App\Service\GraphicsToolsModule\Utils\DTO\ImageOperationStatus; 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,6 +22,7 @@ class GTMCompressImageCommand extends Command
         private CompressorInterface $compressor,
         private TrackCompressionProgressInterface $compressionTracker,
         private LoggerInterface $logger,
+        private ImageEntityManager $imageManager,
         private string $projectDir
     ) {
         parent::__construct();
@@ -35,8 +37,7 @@ class GTMCompressImageCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('processId', InputArgument::REQUIRED, 'Identyfikator zadania kompresji')
-            ->addArgument('userId', InputArgument::REQUIRED, 'ID Użytkownika')
+            ->addArgument('processId', InputArgument::REQUIRED, 'Identyfikator zadania kompresji') 
             ->addArgument('tempPath', InputArgument::REQUIRED, 'Ścieżka do obrazu do kompresji')
             ->addArgument('originalName', InputArgument::REQUIRED, 'Orginalna nazwa grafiki')
             ->addArgument('mimeType', InputArgument::REQUIRED, 'Typ MIME');
@@ -44,21 +45,18 @@ class GTMCompressImageCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {  
-        $processId = $input->getArgument('processId');
-        $userId = $input->getArgument('userId');
+        $processId = $input->getArgument('processId'); 
         $tempPath = $input->getArgument('tempPath');
         $originalName = $input->getArgument('originalName');
         $mimeType = $input->getArgument('mimeType');  
 
 
         $this->logger->debug('Komenda kompresji grafiki', [
-            'processId' => $processId,
-            'userId' => $userId,
+            'processId' => $processId, 
             'tempPath' => $tempPath,
             'originalName' => $originalName,
             'mimeType' => $mimeType,
         ]); 
-
 
 
         try {
@@ -70,9 +68,7 @@ class GTMCompressImageCommand extends Command
                 mkdir($destinationDir, 0755, true);
             } 
 
-            $destinationPath = $destinationDir . basename($originalName);  
-
-            // move_uploaded_file($tempPath, $destinationPath);
+            $destinationPath = $destinationDir . basename($originalName);   
 
             copy($tempPath, $destinationPath);
             unlink($tempPath);
@@ -80,14 +76,15 @@ class GTMCompressImageCommand extends Command
             $this->compressionTracker->updateProgress($processId,  80, ImageOperationStatus::PROCESSING);
 
             $compressionResults = $this->compressor->compress($destinationPath, $mimeType);
+ 
+            $this->compressionTracker->updateProgress($processId,  90, ImageOperationStatus::PROCESSING);
 
-            // TODO: Zaimplementuj
-            // Dodanie do bazy danych wyniku kompresji
-            // $this->imageService->save($compressionResults);
-
-            // $this->compressionTracker->updateProgress($processId,  90, ImageOperationStatus::PROCESSING);
+            // Dodanie do grafiki
+            $this->imageManager->saveAsCompressed($compressionResults, $processId);  
 
             $output->writeln("Kompresja zakończona pomyślnie");
+
+            sleep(3);
 
             $this->compressionTracker->updateProgress($processId, 100, ImageOperationStatus::COMPLETED);
 

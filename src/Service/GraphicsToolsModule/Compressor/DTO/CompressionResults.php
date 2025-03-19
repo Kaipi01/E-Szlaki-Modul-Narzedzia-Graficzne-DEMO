@@ -12,6 +12,7 @@ class CompressionResults
         public int $compressedSize,
         public int $compressionRatio,
         public string $downloadURL,
+        public string $src,
         public string $mimeType,
     ) {}
 
@@ -25,6 +26,7 @@ class CompressionResults
             compressedSize: (int)($data['compressedSize'] ?? 0),
             compressionRatio: (float)($data['compressionRatio'] ?? 0),
             downloadURL: $data['downloadURL'] ?? '',
+            src: $data['src'] ?? '',
             mimeType: $data['mimeType'] ?? ''
         );
     }
@@ -37,6 +39,7 @@ class CompressionResults
             'compressedSize' => $this->compressedSize,
             'compressionRatio' => $this->compressionRatio,
             'downloadURL' => $this->downloadURL,
+            'src' => $this->src,
             'mimeType' => $this->mimeType
         ];
     }
@@ -47,37 +50,35 @@ class CompressionResults
      * @return void
      */
     private static function validateArray(array $data): void
-    { 
-        $requiredFields = ['originalName', 'originalSize', 'compressedSize', 'compressionRatio', 'downloadURL', 'mimeType'];
+    {
+        $requiredFields = ['originalName', 'originalSize', 'compressedSize', 'compressionRatio', 'downloadURL', 'src', 'mimeType'];
 
         foreach ($requiredFields as $field) {
             if (!array_key_exists($field, $data)) {
                 throw new InvalidArgumentException("Brakujące pole: {$field}");
             }
         }
- 
-        if (!is_string($data['originalName']) || empty(trim($data['originalName']))) {
-            throw new InvalidArgumentException("Pole 'originalName' musi być niepustym ciągiem znaków");
-        }
 
-        if (!is_numeric($data['originalSize']) || $data['originalSize'] < 0) {
-            throw new InvalidArgumentException("Pole 'originalSize' musi być liczbą nieujemną");
-        }
-
-        if (!is_numeric($data['compressedSize']) || $data['compressedSize'] < 0) {
-            throw new InvalidArgumentException("Pole 'compressedSize' musi być liczbą nieujemną");
-        }
+        $isPropValueEmpty = function (string $name) use ($data) {
+            if (!is_string($data[$name]) || empty(trim($data[$name]))) {
+                throw new InvalidArgumentException("Pole '$name' musi być niepustym ciągiem znaków");
+            }
+        };
+        $isNonNegativeNumber = function (string $name) use ($data) {
+            if (!is_numeric($data[$name]) || $data[$name] < 0) {
+                throw new InvalidArgumentException("Pole '$name' musi być liczbą nieujemną");
+            }
+        };
 
         if (!is_numeric($data['compressionRatio']) || $data['compressionRatio'] < 0 || $data['compressionRatio'] > 100) {
             throw new InvalidArgumentException("Pole 'compressionRatio' musi być liczbą z zakresu 0-100");
         }
 
-        if (!is_string($data['downloadURL']) || empty(trim($data['downloadURL']))) {
-            throw new InvalidArgumentException("Pole 'downloadURL' musi być niepustym ciągiem znaków");
-        }
-
-        if (!is_string($data['mimeType']) || empty(trim($data['mimeType']))) {
-            throw new InvalidArgumentException("Pole 'mimeType' musi być niepustym ciągiem znaków");
-        } 
+        $isNonNegativeNumber('originalSize');
+        $isNonNegativeNumber('compressedSize');
+        $isPropValueEmpty('mimeType');
+        $isPropValueEmpty('downloadURL');
+        $isPropValueEmpty('src');
+        $isPropValueEmpty('originalName');
     }
 }

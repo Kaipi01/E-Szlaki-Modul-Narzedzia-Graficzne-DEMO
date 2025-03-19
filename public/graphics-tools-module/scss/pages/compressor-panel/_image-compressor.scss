@@ -64,7 +64,7 @@
       font-weight: bold;
     }
 
-    &__item-remove {
+    &__item-cancel {
       transition: $transition-speed;
       border: none;
       background-color: rgba(var(--red), 0.7);
@@ -83,7 +83,7 @@
         background-color: var(--red);
         color: white;
 
-        .image-compressor__item-remove-icon {
+        .image-compressor__item-cancel-icon {
           color: white;
         }
       } 
@@ -108,7 +108,7 @@
         background-color: var(--blue);
         color: white;
 
-        .image-compressor__item-remove-icon {
+        .image-compressor__item-cancel-icon {
           color: white;
         }
       } 

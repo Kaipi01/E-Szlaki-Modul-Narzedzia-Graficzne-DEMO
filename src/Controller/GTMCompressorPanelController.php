@@ -26,7 +26,8 @@ class GTMCompressorPanelController extends AbstractController
 
         return $this->render('graphics_tools_module/compressor_panel/index.html.twig', [ 
             'TRACK_COMPRESSION_PROGRESS_URL' => GTMCompressorSSEController::TRACK_COMPRESSION_PROGRESS_URL,
-            'GET_COMPRESSION_STATUS_URL' => GTMCompressorSSEController::GET_COMPRESSION_STATUS_URL 
+            'GET_COMPRESSION_STATUS_URL' => GTMCompressorSSEController::GET_COMPRESSION_STATUS_URL, 
+            'GET_IMAGE_DATA_URL' => GTMCompressorAPIController::GET_IMAGE_DATA_URL
         ]);
     }
 }

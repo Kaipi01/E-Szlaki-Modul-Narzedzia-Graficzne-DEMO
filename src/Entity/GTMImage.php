@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GTMImageRepository; 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -65,7 +66,7 @@ class GTMImage
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $operationId;
+    private $operationId; 
 
     public function __construct()
     {
@@ -93,7 +94,7 @@ class GTMImage
         return $this->uploadedAt;
     }
 
-    public function setUploadedAt($uploadedAt): self
+    public function setUploadedAt(DateTime $uploadedAt): self
     {
         $this->uploadedAt = $uploadedAt;
         return $this;
@@ -181,5 +182,5 @@ class GTMImage
         $this->operationId = $operationId;
 
         return $this;
-    }
+    } 
 }

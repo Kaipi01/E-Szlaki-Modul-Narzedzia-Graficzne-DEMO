@@ -8,21 +8,22 @@ use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Psr\Log\LoggerInterface; 
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class CompressorService implements CompressorInterface
 { 
-    private string $compressedDir;
-    private string $publicPath;
+    private string $compressedDir; 
 
     public function __construct(
         private LoggerInterface $logger,
         private UploadImageServiceInterface $uploadService,
         private ImageOptimizerInterface $optimizer,  
+        private UrlGeneratorInterface $urlGenerator,
         private string $projectDir
     ) { 
         $this->compressedDir = "{$this->projectDir}/public/graphics-tools-module/uploads/compressed";
-        $this->publicPath = "/graphics-tools-module/uploads/compressed";
+        // $this->publicPath = "/graphics-tools-module/uploads/compressed";
 
         $this->uploadService->ensureDirectoryExists($this->compressedDir);
     }
@@ -73,7 +74,12 @@ class CompressorService implements CompressorInterface
         $originalName = basename($imagePath);
         $originalSize = filesize($imagePath);
         $relativePath = $this->getRelativePath($imagePath);
-        $downloadUrl = $relativePath ?: "/graphics-tools-module/uploads/compressed/{$originalName}"; 
+        $src = $relativePath ?: "/graphics-tools-module/uploads/compressed/{$originalName}"; 
+        $downloadUrl = $this->urlGenerator->generate(
+            'gtm_compressor_api_download_compressed_image', 
+            ['imageName' => $originalName], 
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
 
         try { 
             $this->optimizer->optimize($mimeType, $imagePath); 
@@ -91,6 +97,7 @@ class CompressorService implements CompressorInterface
             'originalSize' => $originalSize,
             'compressedSize' => $compressedSize,
             'compressionRatio' => $compressionRatio,
+            'src' => $src,
             'downloadURL' => $downloadUrl,
             'mimeType' => $mimeType
         ]);

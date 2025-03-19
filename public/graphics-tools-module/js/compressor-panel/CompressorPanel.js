@@ -19,9 +19,11 @@ export default class CompressorPanel extends AbstractPanel {
      * Konstruktor klasy CompressorPanel
      * @param {HTMLElement | string} container 
      * @param {Object} options - Opcje konfiguracyjne
-     * @param {string} options.uploadUrl - URL endpointu do kompresji obrazów
+     * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
+     * @param {string} options.imageDataUrl - URL endpointu do danych skompresowanego obrazu
+     * @param {string} options.trackProgressUrl - URL endpointu do śledzenia postępu kompresji
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
-     * @param {Array} options.allowedTypes - Dozwolone typy plików
+     * @param {Array}  options.allowedTypes - Dozwolone typy plików
      * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
      * @param {number} options.maxBatchSize - Maksymalna liczba plików w jednej partii
      * @param {number} options.maxBatchSizeBytes - Maksymalny rozmiar partii w bajtach
@@ -37,11 +39,11 @@ export default class CompressorPanel extends AbstractPanel {
         };
 
         // Inicjalizacja elementów DOM
-        this.initElements(); 
+        this.initElements();
         // Inicjalizacja komponentów
-        this.initComponents(options); 
+        this.initComponents(options);
     }
- 
+
     initElements() {
         this.elements = {
             container: this.container,
@@ -51,9 +53,6 @@ export default class CompressorPanel extends AbstractPanel {
             imageTable: this.getByAttribute('data-image-table'),
             compressButton: this.getByAttribute('data-compress-button'),
             clearButton: this.getByAttribute('data-clear-button'),
-            // progressContainer: this.getByAttribute('data-progress-container'),
-            // progressBar: this.getByAttribute('data-progress-bar'),
-            // progressText: this.getByAttribute('data-progress-text'),
             compressorAlerts: this.getByAttribute('data-compressor-alerts'),
             maxFileSizeInfo: this.getByAttribute('max-file-size-info'),
             tableHeadRow: this.getByAttribute('data-table-head-row')
@@ -61,14 +60,14 @@ export default class CompressorPanel extends AbstractPanel {
     }
 
     /** @param {Object} options - Opcje konfiguracyjne */
-    initComponents(options) { 
+    initComponents(options) {
         this.fileManager = new FileManager({
             ...options,
             onFileAdded: this.handleFileAdded.bind(this),
             onFileRemoved: this.handleFileRemoved.bind(this),
             onError: this.showError.bind(this)
         });
- 
+
         this.uiManager = new UICompressorManager(this.elements, {
             ...options,
             onFileSelect: this.handleFileSelect.bind(this),
@@ -76,15 +75,15 @@ export default class CompressorPanel extends AbstractPanel {
             onCompress: this.handleCompression.bind(this),
             onClear: this.handleClear.bind(this)
         });
- 
+
         this.uploadService = new UploadService({
             ...options,
-            onProgress: this.handleUploadProgress.bind(this),
-            onSuccess: this.handleUploadSuccess.bind(this),
-            onError: this.handleUploadError.bind(this),
-            onComplete: this.handleUploadComplete.bind(this)
+            // onProgress: this.handleUploadProgress.bind(this),
+            // onSuccess: this.handleUploadSuccess.bind(this),
+            // onError: this.showError.bind(this),
+            // onComplete: this.handleUploadComplete.bind(this)
         });
-    } 
+    }
 
     /**
      * Obsługa wyboru plików przez użytkownika
@@ -92,55 +91,51 @@ export default class CompressorPanel extends AbstractPanel {
      */
     handleFileSelect(fileList) {
         const newFiles = this.fileManager.addFiles(fileList);
-    
-        // Dla każdego pliku: renderuj miniaturę i natychmiast wyślij na serwer
+
+        // Dla każdego pliku: renderuj wiersze tabeli i natychmiast wyślij na serwer
         newFiles.forEach(file => {
             const fileDetails = this.fileManager.getFileDetails(file);
-            
-            // Renderuj miniaturę
+
+            // Renderuj wiersze tabeli
             this.uiManager
                 .renderImagesInfoTable(file, fileDetails.formattedSize)
                 .then(() => {
-                    // Po wyrenderowaniu miniatury, wyślij plik od razu
-                    this.uploadSingleFile(file);
+                    this.uploadFile(file);
                 })
-                .catch(error => this.showError(`Błąd podczas wczytywania pliku "${file.name}".`));
+                .catch(error => {
+                    this.showError(`Błąd podczas wczytywania pliku "${file.name}".`)
+                    this.showError(error.message)
+                });
         });
-    
-        // Aktualizacja UI
+
         this.updateUI();
-    }  
+    }
 
     getProgressElementsForFile(fileName) {
-        // Tworzymy bezpieczną wersję nazwy pliku do użycia w selektorach
         const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-        
-        // Znajdujemy wiersz tabeli dla danego pliku
         const row = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-        
+
         if (!row) {
-            console.warn(`Nie znaleziono wiersza dla pliku: ${fileName}`);
+            console.error(`Nie znaleziono wiersza dla pliku: ${fileName}`);
             return null;
         }
-        
-        // Znajdujemy komórkę ze statusem/progress barem
+
         const statusCell = row.querySelector('[data-status]');
-        
+
         if (!statusCell) {
-            console.warn(`Nie znaleziono komórki statusu dla pliku: ${fileName}`);
+            console.error(`Nie znaleziono komórki statusu dla pliku: ${fileName}`);
             return null;
         }
-        
-        // Pobieramy elementy progress bara
+
         const progressContainer = statusCell.querySelector(`[data-progress-container-${safeFileName}]`);
         const progressBar = statusCell.querySelector(`[data-progress-bar-${safeFileName}]`);
         const progressText = statusCell.querySelector(`[data-progress-text-${safeFileName}]`);
-        
+
         if (!progressContainer || !progressBar || !progressText) {
-            console.warn(`Nie znaleziono elementów progress bara dla pliku: ${fileName}`);
+            console.error(`Nie znaleziono elementów progress bara dla pliku: ${fileName}`);
             return null;
         }
-        
+
         return {
             container: progressContainer,
             bar: progressBar,
@@ -149,86 +144,86 @@ export default class CompressorPanel extends AbstractPanel {
     }
 
 
-     /** @param {File} file - Dodany plik */
-     uploadSingleFile(file) {
-        // Pokazanie paska postępu dla tego pliku
+    /** @param {File} file */
+    uploadFile(file) {
         this.uiManager.showFileProgressBar(file.name);
-        
-        // Aktualizacja statusu w UI
+
         const statusCell = this.getStatusCellForFile(file.name);
-        if (statusCell) {
-            const progressNameElement = statusCell.querySelector('.animated-progress-name');
-            if (progressNameElement) {
-                progressNameElement.textContent = 'Wysyłanie...';
+        const progressNameElement = statusCell.querySelector('.animated-progress-name');
+
+        progressNameElement.textContent = 'Wysyłanie...';
+
+        const uploadCallbacks = {
+            onProgress: (percent) => {
+                this.uiManager.updateFileProgress(file.name, percent);
+
+                // Aktualizacja tekstu statusu w zależności od postępu
+                if (percent < 20) {
+                    progressNameElement.textContent = 'Wysyłanie...';
+                } else if (percent < 40) {
+                    progressNameElement.textContent = 'Przygotowywanie...';
+                } else if (percent < 80) {
+                    progressNameElement.textContent = 'Kompresja...';
+                } else if (percent < 100) {
+                    progressNameElement.textContent = 'Finalizacja...';
+                } else {
+                    progressNameElement.textContent = 'Zakończono';
+                }
+            },
+            // Funkcja wywoływana po zakończeniu kompresji
+            onSuccess: (result) => {
+                if (result && result.compressedImage) {
+                    const compressedImage = result.compressedImage;
+
+                    this.uiManager.updateTableAfterCompression(
+                        compressedImage.originalName,
+                        compressedImage.compressedSize,
+                        compressedImage.compressionRatio,
+                        compressedImage.downloadURL
+                    );
+                } else {
+                    // Jeśli nie ma danych o skompresowanym obrazie, oznacz jako sukces
+                    this.uiManager.setFileProgressSuccess(file.name);
+                }
+            },
+            // Funkcja wywoływana w przypadku błędu
+            onError: (message) => {
+                this.showError(`Błąd dla pliku "${file.name}": ${message}`);
+                this.uiManager.updateFileProgress(file.name, 0);
+                this.uiManager.setFileProgressError(file.name, 'Błąd kompresji');
+            },
+            // Funkcja wywoływana po zakończeniu procesu (sukces lub błąd)
+            onComplete: async (imageHash) => {   
+                const getImageURL = `${this.options.imageDataUrl}/${imageHash}`
+                const response = await fetch(getImageURL, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }) 
+
+                this.handleUploadSuccess(await response.json())
+                this.uiManager.updateFileProgress(file.name, 100);
+
+                progressNameElement.textContent = 'Zakończono';
             }
         }
-        
-        // Funkcja do aktualizacji postępu
-        const onSingleFileProgress = (percent) => {
-            this.uiManager.updateFileProgress(file.name, percent);
-            
-            // Aktualizacja tekstu statusu w zależności od postępu
-            if (statusCell) {
-                const progressNameElement = statusCell.querySelector('.animated-progress-name');
-                if (progressNameElement) {
-                    if (percent < 20) {
-                        progressNameElement.textContent = 'Wysyłanie...';
-                    } else if (percent < 100) {
-                        progressNameElement.textContent = 'Kompresja...';
-                    } else {
-                        progressNameElement.textContent = 'Zakończono';
-                    }
-                }
-            }
-        };
-        
-        // Funkcja wywoływana po zakończeniu kompresji
-        const onSingleFileSuccess = (result) => {
-            if (result && result.compressedImages && result.compressedImages.length > 0) {
-                const compressedImage = result.compressedImages[0];
-                this.uiManager.updateTableAfterCompression(
-                    compressedImage.originalName,
-                    compressedImage.compressedSize,
-                    compressedImage.compressionRatio,
-                    compressedImage.imageDownloadURL
-                );
-            } else {
-                // Jeśli nie ma danych o skompresowanym obrazie, oznacz jako sukces
-                this.uiManager.setFileProgressSuccess(file.name);
-            }
-        };
-        
-        // Funkcja wywoływana w przypadku błędu
-        const onSingleFileError = (message) => {
-            this.showError(`Błąd dla pliku "${file.name}": ${message}`);
-            this.uiManager.setFileProgressError(file.name, 'Błąd kompresji');
-        };
-        
-        // Funkcja wywoływana po zakończeniu procesu (sukces lub błąd)
-        const onSingleFileComplete = () => {
-            // Tutaj możesz dodać dodatkowe operacje po zakończeniu
-            console.log(`Zakończono proces dla pliku: ${file.name}`);
-        };
-        
+
         // Wywołanie metody z UploadService do wysłania pliku i monitorowania kompresji
-        this.uploadService.uploadSingleFileWithCallbacks(
-            file, 
-            onSingleFileProgress, 
-            onSingleFileSuccess, 
-            onSingleFileError, 
-            onSingleFileComplete
-        );
-    } 
+        this.uploadService.uploadFile(file, uploadCallbacks);
+    }
 
     /** @param {string} fileName - Nazwa pliku */
     getStatusCellForFile(fileName) {
         const row = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
+
         if (row) {
             return row.querySelector('[data-status]');
         }
+
         return null;
     }
-    
+
     /** @param {File} file - Dodany plik */
     handleFileAdded(file) {
         // Ten callback jest wywoływany przez FileManager
@@ -243,7 +238,7 @@ export default class CompressorPanel extends AbstractPanel {
      */
     handleFileRemove(fileName) {
         this.fileManager.removeFile(fileName);
-        this.uiManager.removeThumbnail(fileName);
+        this.uiManager.removeTableRow(fileName);
         this.updateUI();
     }
 
@@ -254,23 +249,29 @@ export default class CompressorPanel extends AbstractPanel {
         console.log(`Usunięto plik: ${file.name}`);
         // TODO: dokończ
     }
- 
+
     handleCompression() {
         if (!this.fileManager.hasFiles()) return;
-    
+
         // Pobierz wszystkie pliki
         const files = this.fileManager.getAllFiles();
-        
+
         // Dla każdego pliku, wyślij go osobno
-        files.forEach(file => {
-            this.uploadSingleFile(file);
-        });
-        
+        files.forEach(file => this.uploadFile(file));
+
+        // TODO: Obsłuż wyświetlenie wiadomości o sukcesie kiedy wszystkie grafiki są już skompresowane 
+
+        // const filesPromises = files.map(file => this.uploadFile(file));
+
+        // Promise.all(filesPromises).then(result => {
+        //     this.handleAllImagesCompressed()
+        // }).catch(err => console.error(err))
+
         // Wyczyść listę plików po rozpoczęciu wysyłania
         this.fileManager.clearFiles();
         this.updateUI();
-    } 
- 
+    }
+
     handleClear() {
         if (this.state.uploading) return;
 
@@ -281,140 +282,47 @@ export default class CompressorPanel extends AbstractPanel {
 
     /** 
      * @param {number} percent - Procent postępu (0-100)
-     * @param {Array|string} files - Pliki, których dotyczy postęp
+     * @param {string} fileName - Nazwa pliku
      */
-    handleUploadProgress(percent, files) {
-        this.uiManager.updateProgress(percent);
+    handleUploadProgress(percent, fileName) {
+        // this.uiManager.updateProgress(percent);
+        console.log(`Progress: ${percent}% dla grafiki o nazwie: ${fileName}`)
     }
 
     /**
      * Obsługa udanego wysłania
-     * @param {Object} response - Odpowiedź z serwera
-     * @param {Array|File} files - Pliki, których dotyczy odpowiedź
+     * @param {Object} response - Odpowiedź z serwera 
      */
-    handleUploadSuccess(response, files) {
-        // Jeśli serwer zwraca linki do skompresowanych obrazów, aktualizujemy informacje w widoku listy
-        const { compressedImages } = response
+    handleUploadSuccess(response) { 
+        const { compressedImage: image } = response
+ 
+        console.log("response: ", response)  
 
-        console.log("--------------- handleUploadSuccess --------------")
-        console.log("response: ", response)
-        console.log("files: ", files)
-        console.log("compressedImages: ", compressedImages)
-        console.log("--------------------------------------------------")
-        
-        if (compressedImages && Array.isArray(compressedImages)) { 
+        if (image) {
             this.uiManager.updateTableHead()
 
-            compressedImages.forEach(image => {
-                this.uiManager.updateTableAfterCompression(
-                    image.originalName,
-                    image.compressedSize,
-                    image.compressionRatio,
-                    image.imageDownloadURL
-                );
-            });
+            this.uiManager.updateTableAfterCompression(
+                image.originalName,
+                image.compressedSize,
+                image.compressionRatio,
+                image.downloadURL
+            );
         }
-    }
-
-    /**
-     * Obsługa błędu wysyłania
-     * @param {string} message - Komunikat błędu
-     * @param {Array|File} files - Pliki, których dotyczy błąd
-     */
-    handleUploadError(message, files) {
-        this.showError(message);
-
-        // TODO: dokończ
-    }
- 
-    handleUploadComplete() {
-        // Wyświetlenie komunikatu o sukcesie
-        this.showSuccess('Wszystkie obrazy zostały pomyślnie skompresowane!');
-
-        // Reset stanu
-        this.state.uploading = false;
-        this.updateUI();
-
-        // Ukrycie paska postępu po krótkim opóźnieniu
-        // this.uiManager.hideProgressBar();
     } 
+
+    // handleAllImagesCompressed() {
+    //     Toast.show(Toast.SUCCESS, 'Wszystkie obrazy zostały pomyślnie skompresowane!');
+ 
+    //     this.state.uploading = false; 
+    // }
 
     /** @param {string} message - Treść komunikatu */
     showError(message) {
-        super.showError(message, this.elements.compressorAlerts) 
-    }
+        super.showError(message, this.elements.compressorAlerts)
+    } 
 
-    /** @param {string} message - Treść komunikatu */
-    showSuccess(message) { 
-        Toast.show(Toast.SUCCESS, message);
-    }
- 
     updateUI() {
         const hasFiles = this.fileManager.hasFiles();
         this.uiManager.updateUI(hasFiles, this.state.uploading);
     }
 }
-
-
-
-
-
-    //  uploadSingleFile(file) {
-    //     // Tworzymy tablicę z jednym plikiem
-    //     const singleFileArray = [file];
-        
-    //     // Używamy naszej własnej funkcji do śledzenia postępu dla tego pliku
-    //     const onSingleFileProgress = (percent) => {
-    //         const progressElements = this.getProgressElementsForFile(file.name);
-            
-    //         if (progressElements) {
-    //             progressElements.bar.style.width = `${percent}%`;
-    //             progressElements.text.textContent = `${percent}%`;
-    //             progressElements.bar.setAttribute('per', percent);
-    //         } else {
-    //             // Jeśli nie możemy znaleźć elementów progress bara, używamy metody z UIManager
-    //             this.uiManager.updateFileProgress(file.name, percent);
-    //         }
-    //     };
-        
-    //     // Używamy naszej własnej funkcji do obsługi sukcesu dla tego pliku
-    //     const onSingleFileSuccess = (response) => {
-    //         if (response && response.compressedImages && response.compressedImages.length > 0) {
-    //             const compressedImage = response.compressedImages[0];
-    //             this.uiManager.updateTableAfterCompression(
-    //                 compressedImage.originalName,
-    //                 compressedImage.compressedSize,
-    //                 compressedImage.compressionRatio,
-    //                 compressedImage.imageDownloadURL
-    //             );
-    //         }
-    //     };
-        
-    //     // Używamy naszej własnej funkcji do obsługi błędu dla tego pliku
-    //     const onSingleFileError = (message) => {
-    //         this.showError(`Błąd dla pliku "${file.name}": ${message}`);
-            
-    //         // Aktualizacja statusu w tabeli, aby pokazać błąd
-    //         const row = this.elements.imageTable.querySelector(`[data-file-name="${file.name}"]`);
-    //         if (row) {
-    //             const statusCell = row.querySelector('[data-status]');
-    //             if (statusCell) {
-    //                 statusCell.innerHTML = '<span class="mx-auto badge badge--red">Błąd</span>';
-    //             }
-    //         }
-    //     };
-        
-    //     // Używamy naszej własnej funkcji do obsługi zakończenia dla tego pliku
-    //     const onSingleFileComplete = () => {
-    //         // Możemy tutaj dodać dodatkową logikę po zakończeniu wysyłania pliku
-    //     };
-        
-    //     // Wysyłamy plik z własnymi callbackami
-    //     this.uploadService.uploadSingleFileWithCallbacks(
-    //         file, 
-    //         onSingleFileProgress, 
-    //         onSingleFileSuccess, 
-    //         onSingleFileError, 
-    //         onSingleFileComplete
-    //     );
-    // } 

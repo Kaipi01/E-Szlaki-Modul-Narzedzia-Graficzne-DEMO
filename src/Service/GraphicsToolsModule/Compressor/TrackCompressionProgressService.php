@@ -30,7 +30,7 @@ class TrackCompressionProgressService implements TrackCompressionProgressInterfa
 
         file_put_contents(
             "{$this->progressDir}{$id}.json",
-            json_encode($progressData, JSON_PRETTY_PRINT)
+            json_encode($progressData) //, JSON_PRETTY_PRINT
         );
     }
 
