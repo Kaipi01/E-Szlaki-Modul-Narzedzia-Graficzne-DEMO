@@ -2,6 +2,7 @@
 
 import AbstractPanel from '../modules/AbstractPanel.js';
 import Toast from '../modules/Toast.js';
+import { downloadAjaxFile } from '../utils/file-helpers.js';
 import FileManager from './FileManager.js';
 import UICompressorManager from './UICompressorManager.js';
 import UploadService from './UploadService.js';
@@ -21,6 +22,7 @@ export default class CompressorPanel extends AbstractPanel {
      * @param {Object} options - Opcje konfiguracyjne
      * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
      * @param {string} options.imageDataUrl - URL endpointu do danych skompresowanego obrazu
+     * @param {string} options.downloadAllImagesUrl - URL endpointu do pobrania wszystkich skompresowanych obrazów
      * @param {string} options.trackProgressUrl - URL endpointu do śledzenia postępu kompresji
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
      * @param {Array}  options.allowedTypes - Dozwolone typy plików
@@ -35,6 +37,7 @@ export default class CompressorPanel extends AbstractPanel {
 
         // Stan panelu
         this.state = {
+            compressedImageHashes: [], // Przechowuje id skompresowanych grafik do pobrania
             uploading: false
         };
 
@@ -50,6 +53,7 @@ export default class CompressorPanel extends AbstractPanel {
             dropZone: this.getByAttribute('data-drop-zone'),
             fileInput: this.getByAttribute('data-file-input'),
             selectButton: this.getByAttribute('data-select-button'),
+            downloadButtons: this.container.querySelectorAll('[data-download-all-btn]'),
             imageTable: this.getByAttribute('data-image-table'),
             compressButton: this.getByAttribute('data-compress-button'),
             clearButton: this.getByAttribute('data-clear-button'),
@@ -57,6 +61,11 @@ export default class CompressorPanel extends AbstractPanel {
             maxFileSizeInfo: this.getByAttribute('max-file-size-info'),
             tableHeadRow: this.getByAttribute('data-table-head-row')
         };
+
+        this.elements.downloadButtons.forEach(btn => btn.addEventListener('click', this.handleDownloadAllImages.bind(this)))
+
+        // TODO: Usuń
+        this.elements.downloadButtons.forEach(btn => btn.removeAttribute('disabled'))
     }
 
     /** @param {Object} options - Opcje konfiguracyjne */
@@ -76,13 +85,17 @@ export default class CompressorPanel extends AbstractPanel {
             onClear: this.handleClear.bind(this)
         });
 
-        this.uploadService = new UploadService({
-            ...options,
-            // onProgress: this.handleUploadProgress.bind(this),
-            // onSuccess: this.handleUploadSuccess.bind(this),
-            // onError: this.showError.bind(this),
-            // onComplete: this.handleUploadComplete.bind(this)
-        });
+        this.uploadService = new UploadService(options);
+    }
+
+    handleDownloadAllImages() { 
+        try { 
+            downloadAjaxFile(this.options.downloadAllImagesUrl, {
+                imageHashes: this.state.compressedImageHashes
+            }, 'skompresowane-grafiki.zip') 
+        } catch(e) {
+            this.showError(e.message)
+        } 
     }
 
     /**
@@ -191,19 +204,29 @@ export default class CompressorPanel extends AbstractPanel {
                 this.showError(`Błąd dla pliku "${file.name}": ${message}`);
                 this.uiManager.updateFileProgress(file.name, 0);
                 this.uiManager.setFileProgressError(file.name, 'Błąd kompresji');
-            },
-            // Funkcja wywoływana po zakończeniu procesu (sukces lub błąd)
-            onComplete: async (imageHash) => {   
-                const getImageURL = `${this.options.imageDataUrl}/${imageHash}`
+            }, 
+            onComplete: async (operationHash) => {
+                const getImageURL = `${this.options.imageDataUrl}/${operationHash}`
                 const response = await fetch(getImageURL, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json"
                     }
-                }) 
+                })
 
-                this.handleUploadSuccess(await response.json())
-                this.uiManager.updateFileProgress(file.name, 100);
+                const { compressedImage: image } = await response.json()
+
+                this.uiManager.updateTableHead()
+
+                this.uiManager.updateTableAfterCompression(
+                    image.originalName,
+                    image.compressedSize,
+                    image.compressionRatio,
+                    image.downloadURL
+                );
+                // this.uiManager.updateFileProgress(file.name, 100);
+
+                this.state.compressedImageHashes.push(operationHash)
 
                 progressNameElement.textContent = 'Zakończono';
             }
@@ -275,6 +298,8 @@ export default class CompressorPanel extends AbstractPanel {
     handleClear() {
         if (this.state.uploading) return;
 
+        this.state.compressedImageHashes = []
+
         this.fileManager.clearFiles();
         this.uiManager.clearTable();
         this.updateUI();
@@ -289,37 +314,24 @@ export default class CompressorPanel extends AbstractPanel {
         console.log(`Progress: ${percent}% dla grafiki o nazwie: ${fileName}`)
     }
 
-    /**
-     * Obsługa udanego wysłania
-     * @param {Object} response - Odpowiedź z serwera 
-     */
-    handleUploadSuccess(response) { 
-        const { compressedImage: image } = response
- 
-        console.log("response: ", response)  
+    // /**
+    //  * Obsługa udanego wysłania
+    //  * @param {Object} response - Odpowiedź z serwera 
+    //  */
+    // handleUploadSuccess(response) { 
 
-        if (image) {
-            this.uiManager.updateTableHead()
-
-            this.uiManager.updateTableAfterCompression(
-                image.originalName,
-                image.compressedSize,
-                image.compressionRatio,
-                image.downloadURL
-            );
-        }
-    } 
+    // } 
 
     // handleAllImagesCompressed() {
     //     Toast.show(Toast.SUCCESS, 'Wszystkie obrazy zostały pomyślnie skompresowane!');
- 
+
     //     this.state.uploading = false; 
     // }
 
     /** @param {string} message - Treść komunikatu */
     showError(message) {
         super.showError(message, this.elements.compressorAlerts)
-    } 
+    }
 
     updateUI() {
         const hasFiles = this.fileManager.hasFiles();

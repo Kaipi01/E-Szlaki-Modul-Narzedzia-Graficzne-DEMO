@@ -4,6 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    gtm_operation_progress: '%kernel.project_dir%/var/graphics-tools-module/operation-progress'
+    gtm_uploads_tmp: '%kernel.project_dir%/public/graphics-tools-module/uploads/temp'
+    gtm_uploads_compressed: '%kernel.project_dir%/public/graphics-tools-module/uploads/compressed'
+    gtm_uploads_compressed_short: 'graphics-tools-module/uploads/compressed'
 
 services:
     # default configuration for services in *this* file
@@ -32,28 +36,36 @@ services:
 
 
     #-------------------- SKPIUJ WSZYSTKO PONIŻEJ W CELU POPRAWNEGO DZIAŁANIA MODUŁU --------------------------------- 
-    
-    App\Service\GraphicsToolsModule\Compressor\CompressorService:
-        arguments:
-            $projectDir: '%kernel.project_dir%' 
+
+    # Nie zapomnij o parametrach powyżej!
+    # Wymagany jest plik konfiguracji messanger.yaml 
 
     App\Service\GraphicsToolsModule\Compressor\TrackCompressionProgressService:
-        arguments:
-            $projectDir: '%kernel.project_dir%' 
+        arguments: 
+            $operationProgressDir: '%gtm_operation_progress%'
 
 
-    App\Service\GraphicsToolsModule\Compressor\CompressionProcessDispatcher:
+    App\Service\GraphicsToolsModule\Compressor\CompressionProcess:
         arguments:
-                $projectDir: '%kernel.project_dir%' 
+            $projectDir: '%kernel.project_dir%'  
 
     App\Command\GTMClearGraphicsCommand:
-        arguments:
+        arguments: 
+            $compressedDir: '%gtm_uploads_compressed%'
+            $uploadsTmpDir: '%gtm_uploads_tmp%'
             $projectDir: '%kernel.project_dir%'
         tags:
             - { name: 'console.command' }
 
     App\Command\GTMCompressImageCommand:
-        arguments:
-            $projectDir: '%kernel.project_dir%'
+        arguments: 
+            $compressedDir: '%gtm_uploads_compressed%' 
         tags:
             - { name: 'console.command' }
+ 
+    App\Service\GraphicsToolsModule\MessageHandler\ImageProcessingMessageHandler:
+        tags: [messenger.message_handler]
+
+    App\Service\GraphicsToolsModule\Message\:
+        resource: '../src/Service/GraphicsToolsModule/Message/'
+        tags: ['messenger.message']

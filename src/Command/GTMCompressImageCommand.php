@@ -16,87 +16,92 @@ class GTMCompressImageCommand extends Command
 {
     protected static $defaultName = 'gtm:compress-image';
     protected static $defaultDescription = 'Kompresuje obraz i śledzi postęp procesu'; 
-    private string $progressDir;
 
     public function __construct(
         private CompressorInterface $compressor,
         private TrackCompressionProgressInterface $compressionTracker,
         private LoggerInterface $logger,
-        private ImageEntityManager $imageManager,
-        private string $projectDir
+        private ImageEntityManager $imageManager, 
+        private string $compressedDir
     ) {
-        parent::__construct();
-
-        $this->progressDir = "{$this->projectDir}/var/compression-progress/";
-
-        if (!is_dir($this->progressDir)) {
-            mkdir($this->progressDir, 0755, true);
-        }
+        parent::__construct();  
     }
 
     protected function configure(): void
     {
         $this
-            ->addArgument('processId', InputArgument::REQUIRED, 'Identyfikator zadania kompresji') 
+            ->addArgument('processHash', InputArgument::REQUIRED, 'Identyfikator zadania kompresji') 
             ->addArgument('tempPath', InputArgument::REQUIRED, 'Ścieżka do obrazu do kompresji')
             ->addArgument('originalName', InputArgument::REQUIRED, 'Orginalna nazwa grafiki')
-            ->addArgument('mimeType', InputArgument::REQUIRED, 'Typ MIME');
+            ->addArgument('mimeType', InputArgument::REQUIRED, 'Typ MIME')
+            ->addArgument('userId', InputArgument::REQUIRED, 'ID Użytkownika');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {  
-        $processId = $input->getArgument('processId'); 
+        $processHash = $input->getArgument('processHash'); 
         $tempPath = $input->getArgument('tempPath');
         $originalName = $input->getArgument('originalName');
         $mimeType = $input->getArgument('mimeType');  
+        $userId = $input->getArgument('userId');  
 
+        // sleep(4);
 
+        $this->logger->debug('---------------------------------------------------------------------------------');
         $this->logger->debug('Komenda kompresji grafiki', [
-            'processId' => $processId, 
+            'processHash' => $processHash, 
             'tempPath' => $tempPath,
             'originalName' => $originalName,
             'mimeType' => $mimeType,
+            'userId' => $userId,
         ]); 
-
+        $this->logger->debug('---------------------------------------------------------------------------------');
+        
+        $this->compressionTracker->updateProgress($processHash, 25, ImageOperationStatus::PENDING);
+        $this->compressionTracker->showProgressLog($processHash);
 
         try {
-            $this->compressionTracker->updateProgress($processId, 40, ImageOperationStatus::PREPARING);
-
-            $destinationDir = "{$this->projectDir}/public/graphics-tools-module/uploads/compressed/";
+            $destinationDir = "{$this->compressedDir}/$userId";
 
             if (!is_dir($destinationDir)) {
                 mkdir($destinationDir, 0755, true);
-            } 
+            }
 
-            $destinationPath = $destinationDir . basename($originalName);   
+            $this->compressionTracker->updateProgress($processHash, 40, ImageOperationStatus::PREPARING);
+            $this->compressionTracker->showProgressLog($processHash);  
+
+            $destinationPath = $destinationDir . "/" . basename($originalName);   
 
             copy($tempPath, $destinationPath);
             unlink($tempPath);
 
-            $this->compressionTracker->updateProgress($processId,  80, ImageOperationStatus::PROCESSING);
+            $this->compressionTracker->updateProgress($processHash,  80, ImageOperationStatus::PROCESSING);
+            $this->compressionTracker->showProgressLog($processHash);
 
             $compressionResults = $this->compressor->compress($destinationPath, $mimeType);
  
-            $this->compressionTracker->updateProgress($processId,  90, ImageOperationStatus::PROCESSING);
+            $this->compressionTracker->updateProgress($processHash,  90, ImageOperationStatus::PROCESSING);
+            $this->compressionTracker->showProgressLog($processHash);
 
             // Dodanie do grafiki
-            $this->imageManager->saveAsCompressed($compressionResults, $processId);  
+            $this->imageManager->saveAsCompressed($compressionResults, $processHash, $userId);  
 
             $output->writeln("Kompresja zakończona pomyślnie");
 
-            sleep(3);
+            // sleep(3);
 
-            $this->compressionTracker->updateProgress($processId, 100, ImageOperationStatus::COMPLETED);
+            $this->compressionTracker->updateProgress($processHash, 100, ImageOperationStatus::COMPLETED);
+            $this->compressionTracker->showProgressLog($processHash);
 
             return Command::SUCCESS;
 
         } catch (\Exception $e) {
             $this->logger->error('Błąd podczas kompresji obrazu', [
-                'processId' => $processId,
+                'processHash' => $processHash,
                 'error' => $e->getMessage()
             ]);
 
-            $this->compressionTracker->updateProgress($processId, 0, ImageOperationStatus::FAILED, $e->getMessage());
+            $this->compressionTracker->updateProgress($processHash, 0, ImageOperationStatus::FAILED, $e->getMessage());
 
             $output->writeln("<error>Błąd: {$e->getMessage()}</error>");
 

@@ -66,11 +66,11 @@ class GTMImage
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $operationId; 
+    private $operationHash; 
 
     public function __construct()
     {
-        $this->uploadedAt = new \DateTime();
+        $this->uploadedAt = new DateTime();
     }
 
     public function getId(): ?int
@@ -172,14 +172,14 @@ class GTMImage
         return $this;
     }
 
-    public function getOperationId(): ?string
+    public function getOperationHash(): ?string
     {
-        return $this->operationId;
+        return $this->operationHash;
     }
 
-    public function setOperationId(string $operationId): self
+    public function setOperationHash(string $operationHash): self
     {
-        $this->operationId = $operationId;
+        $this->operationHash = $operationHash;
 
         return $this;
     } 

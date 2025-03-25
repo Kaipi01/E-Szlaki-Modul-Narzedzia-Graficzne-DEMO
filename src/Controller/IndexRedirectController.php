@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class IndexRedirectController extends AbstractController
 {
-    #[Route('/', name: 'app_index_redirect')]
+    #[Route(path: '/', name: 'app_index_redirect')]
     public function index(): RedirectResponse
     { 
         return $this->redirectToRoute('gtm_main_panel'); 

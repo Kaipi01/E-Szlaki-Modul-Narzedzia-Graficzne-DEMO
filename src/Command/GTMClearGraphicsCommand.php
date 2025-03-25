@@ -14,15 +14,15 @@ use Symfony\Component\Finder\Finder;
 
 class GTMClearGraphicsCommand extends Command
 {
-    protected static $defaultName = 'gtm:clear-graphics';
-    private string $projectDir;
+    protected static $defaultName = 'gtm:clear-graphics'; 
 
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private TrackCompressionProgressInterface $compressionTracker,
-        string $projectDir
-    ) {
-        $this->projectDir = $projectDir;
+        private TrackCompressionProgressInterface $compressionTracker, 
+        private string $compressedDir,
+        private string $uploadsTmpDir,
+        private string $projectDir
+    ) { 
         parent::__construct();
     }
 
@@ -45,9 +45,7 @@ class GTMClearGraphicsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $filesystem = new Filesystem();
-        $compressedDir = "{$this->projectDir}/public/graphics-tools-module/uploads/compressed";
-        $tempDir = "{$this->projectDir}/public/graphics-tools-module/uploads/temp";
+        $filesystem = new Filesystem();  
 
         $cleanAll = $input->getOption('all');
         $cleanTemp = $input->getOption('temp');
@@ -57,13 +55,15 @@ class GTMClearGraphicsCommand extends Command
             $clearCount = $this->compressionTracker->cleanupOldProgressFiles(0);
         }
 
+        $this->clearDevLog($output);
+
         if ($cleanAll) {
             $this->clearDataBase();
             $output->writeln("Wyczyszczono informacje o grafikach w bazie danych");
-            $this->clearDirectory($compressedDir, $filesystem, $output);
-            $this->clearDirectory($tempDir, $filesystem, $output);
+            $this->clearDirectory($this->compressedDir, $filesystem, $output);
+            $this->clearDirectory($this->uploadsTmpDir, $filesystem, $output);
         } elseif ($cleanTemp) {
-            $this->clearDirectory($tempDir, $filesystem, $output);
+            $this->clearDirectory($this->uploadsTmpDir, $filesystem, $output);
         } else {
             $output->writeln('Nie wybrano żadnej opcji. Użyj --all lub --temp.');
             return Command::FAILURE;
@@ -100,4 +100,18 @@ class GTMClearGraphicsCommand extends Command
         }
         $this->entityManager->flush();
     }
+
+    /** Czyści plik dziennika dev.log w Symfony */
+    private function clearDevLog(OutputInterface $output): void
+    {  
+        $logFile = "{$this->projectDir}/var/log/dev.log";
+        
+        if (file_exists($logFile)) { 
+            file_put_contents($logFile, '');
+            $output->writeln("<info>Wyczyszczono plik dziennika: $logFile</info>");
+        } else {
+            $output->writeln("<comment>Plik dziennika nie istnieje: $logFile</comment>");
+        }
+    }
+
 }

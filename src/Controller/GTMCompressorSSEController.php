@@ -1,26 +1,27 @@
 <?php
 
 namespace App\Controller;
- 
+
 use App\Repository\GTMImageRepository;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\TrackCompressionProgressInterface;
 use App\Service\GraphicsToolsModule\Utils\DTO\ImageOperationStatus;
-use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController; 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
+use Exception;
 
-#[Route('/profil')]
+#[Route(path: '/profil')]
 class GTMCompressorSSEController extends AbstractController
 {
     public const TRACK_COMPRESSION_PROGRESS_URL = '/profil/narzedzia-graficzne/sse/sledzenie-kompresji';
-    public const GET_COMPRESSION_STATUS_URL = '/profil/narzedzia-graficzne/sse/pobierz-status-kompresji'; 
+    public const GET_COMPRESSION_STATUS_URL = '/profil/narzedzia-graficzne/sse/pobierz-status-kompresji';
     private const MAX_CONNECTION_TIMEOUT = 900; // 15 minut
-    private const NO_PROGRESS_TIMEOUT = 360;    // 6 minut
+    private const NO_PROGRESS_TIMEOUT = 1200;   // 20 minut
     private const KEEP_ALIVE_INTERVAL = 30;     // 30 sekund
-    private const POLL_INTERVAL = 250000;       // 0.25 sekundy (w mikrosekundach)
+    private const POLL_INTERVAL = 100000;       // 0.1 sekundy (w mikrosekundach)
 
     public function __construct(
         private LoggerInterface $logger,
@@ -34,24 +35,28 @@ class GTMCompressorSSEController extends AbstractController
      * Utrzymuje otwarte połączenie i wysyła aktualizacje, gdy stan zadania się zmienia.
      * Kończy działanie dopiero po zakończeniu zadania lub przerwaniu połączenia
      */
-    #[Route("/narzedzia-graficzne/sse/sledzenie-kompresji/{processId}", name: 'gtm_compressor_sse_compression_tracking', methods: ['GET'])]
-    public function trackCompressionProgress(string $processId): Response
+    #[Route(path: "/narzedzia-graficzne/sse/sledzenie-kompresji/{processHash}", name: 'gtm_compressor_sse_compression_tracking', methods: ['GET'])]
+    public function trackCompressionProgress(string $processHash): Response
     {
         // Zamknij sesję przed rozpoczęciem strumienia
         $this->closeSession();
 
-        $this->logger->debug('Rozpoczęcie połączenia SSE', ['processId' => $processId]);
+        $this->compressionTracker->initTracking($processHash);
+
+        $this->logger->debug('Rozpoczęcie połączenia SSE', ['processHash' => $processHash]);
 
         try {
-            return $this->createSSEResponse($processId);
-
-        } catch (\Exception $e) {
+            return new StreamedResponse(function () use ($processHash) {
+                $this->configureSSEHeaders();
+                $this->streamProgressUpdates($processHash);
+            });
+        } catch (Exception $e) {
             $this->logger->error('Błąd podczas obsługi SSE', [
-                'processId' => $processId,
+                'processHash' => $processHash,
                 'error' => $e->getMessage()
             ]);
 
-            return $this->createErrorResponse('Wewnętrzny błąd serwera');
+            return $this->createErrorResponse($e->getMessage());
         }
     }
 
@@ -61,15 +66,6 @@ class GTMCompressorSSEController extends AbstractController
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
         }
-    }
-
-    /** Tworzy odpowiedź SSE */
-    private function createSSEResponse(string $processId): StreamedResponse
-    {
-        return new StreamedResponse(function () use ($processId) {
-            $this->configureSSEHeaders();
-            $this->streamProgressUpdates($processId);
-        });
     }
 
     /** Konfiguruje nagłówki HTTP dla SSE */
@@ -86,83 +82,72 @@ class GTMCompressorSSEController extends AbstractController
     }
 
     /** Główna pętla wysyłająca aktualizacje postępu */
-    private function streamProgressUpdates(string $processId): void
+    private function streamProgressUpdates(string $processHash): void
     {
         $lastProgress = null;
         $startTime = time();
         $lastChangeTime = time();
-        $lastKeepAliveTime = time();
+        $lastKeepAliveTime = time(); 
 
         // Pętla z ograniczeniem czasowym
         while (time() - $startTime < self::MAX_CONNECTION_TIMEOUT) {
             // Pobierz aktualny postęp
-            $progressData = $this->compressionTracker->getProgress($processId);
+            $progressData = $this->compressionTracker->getProgress($processHash);
+            $this->compressionTracker->showProgressLog($processHash);
 
             // Obsługa braku danych o postępie
-            if ($progressData === null) {
+            if ($progressData === null) {   
 
-                $this->sendSSEEvent('error', [
-                    'progress' => 0,
-                    'status' => ImageOperationStatus::PENDING,
-                    'message' => 'No progress data found'
-                ]);
-                break;
+                $this->sendSSEMessage('pending', 0);
+
+                sleep(1); // Czekamy chwilę, zanim ponowimy próbę
+                continue;
             }
 
             $progressValue = $progressData['progress'];
             $progressStatus = $progressData['status'];
 
             // Obsługa zakończenia kompresji
-            if ($progressValue === 100) {
+            if ($progressValue === 100) { 
 
-                $this->sendSSEEvent('completed', [
-                    'progress' => $progressValue,
-                    'status' => $progressStatus,
-                    'message' => ''
-                ]);
+                $this->sendSSEMessage('completed', $progressValue);
 
                 $this->logger->info('Kompresja zakończona', [
-                    'processId' => $processId,
+                    'processHash' => $processHash,
                     'status' => $progressStatus
                 ]);
 
-                break;
-            }
+                break; 
 
-            // Obsługa zmiany postępu
-            if ($progressValue !== $lastProgress) {
-                $this->sendSSEEvent('progress', [
-                    'progress' => $progressValue,
-                    'status' => $progressStatus,
-                    'message' => ''
-                ]);
+                // Obsługa zmiany postępu
+            } else if ($progressValue !== $lastProgress) { 
+
+                $this->sendSSEMessage('progress', $progressValue);
 
                 $lastProgress = $progressValue;
                 $lastChangeTime = time();
-            }
-            // Obsługa timeout bez zmian postępu
-            else if (time() - $lastChangeTime > self::NO_PROGRESS_TIMEOUT) {
+            
+                // Obsługa timeout bez zmian postępu
+            } else if (time() - $lastChangeTime > self::NO_PROGRESS_TIMEOUT) { 
 
-                $this->sendSSEEvent('timeout', [
-                    'progress' => $progressValue,
-                    'status' => $progressStatus,
-                    'message' => "No progress updates for " . self::NO_PROGRESS_TIMEOUT . " seconds"
-                ]);
+                $this->sendSSEMessage('timeout', $progressValue);
 
                 $this->logger->warning('Timeout bez zmian postępu', [
-                    'processId' => $processId,
+                    'processHash' => $processHash,
                     'lastProgress' => $lastProgress
                 ]);
 
                 break;
+            } else {
+                $this->sendSSEMessage('pending', 0);
             }
 
             // Wysyłanie komunikatu keep-alive
-            if (time() - $lastKeepAliveTime >= self::KEEP_ALIVE_INTERVAL) {
-                echo ": keep-alive\n\n";
-                $lastKeepAliveTime = time();
-                $this->flushOutput();
-            }
+            // if (time() - $lastKeepAliveTime >= self::KEEP_ALIVE_INTERVAL) {
+            //     echo ": keep-alive\n\n";
+            //     $lastKeepAliveTime = time();
+            //     $this->flushOutput();
+            // }
 
             // Opróżnienie bufora wyjścia
             $this->flushOutput();
@@ -172,7 +157,7 @@ class GTMCompressorSSEController extends AbstractController
 
             // Sprawdzenie czy klient jest nadal połączony
             if (connection_aborted()) {
-                $this->logger->info('Klient rozłączony', ['processId' => $processId]);
+                $this->logger->info('Klient rozłączony', ['processHash' => $processHash]);
                 break;
             }
         }
@@ -183,8 +168,10 @@ class GTMCompressorSSEController extends AbstractController
     {
         $jsonData = json_encode($data);
 
-        echo "event: {$eventName}\n";
-        echo "data: {$jsonData}\n\n";
+        echo "event: $eventName\n";
+        echo "data: $jsonData\n\n";
+        
+        echo str_pad('', 1024, ' '); // Zapobieganie problemom z buforowaniem 
 
         $this->flushOutput();
     }
@@ -203,156 +190,238 @@ class GTMCompressorSSEController extends AbstractController
         $response->headers->set('Content-Type', 'text/event-stream');
         $response->headers->set('Cache-Control', 'no-cache');
 
-        $data = json_encode([
+        $this->logger->error('#####################################################');
+        $this->logger->error("Błąd !!!", [
             'progress' => 0,
             'status' => ImageOperationStatus::FAILED,
             'message' => $errorMessage
         ]);
+        $this->logger->error('#####################################################');
 
-        $response->setContent("event: error\ndata: {$data}\n\n");
+        $response->setContent("event: error\ndata: $errorMessage\n\n");
+
+        return $response;
+    } 
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #[Route(path: "/sse/test", name: "sse_test")]
+    public function sseTest(LoggerInterface $logger): Response
+    {
+        $response = new StreamedResponse();
+ 
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Cache-Control', 'no-cache');
+        $response->headers->set('Connection', 'keep-alive');
+        $response->headers->set('X-Accel-Buffering', 'no'); // Wyłączenie buforowania w nginx
+
+        $response->setCallback(function () use ($logger) {
+            try {
+                $progress = 0;
+
+                while ($progress <= 100) {  
+                    $eventType = ($progress === 100) ? 'completed' : 'progress'; 
+
+                    // Logowanie postępu
+                    $logger->debug('---------------------------------------------------------------------------------');
+                    $logger->debug('Aktualny postęp: ' . $progress); 
+                    $logger->debug('---------------------------------------------------------------------------------');
+
+                    // Wysyłanie wiadomości SSE
+                    $this->sendSSEMessage($eventType, $progress);
+
+                    // Opóźnienie dla symulacji procesu
+                    if ($progress < 100) {
+                        usleep(250000); // 0.25 sekundy
+                    }
+
+                    // Sprawdzenie, czy klient się rozłączył
+                    if (connection_aborted()) {
+                        $logger->info("Klient rozłączył się. Przerywam SSE.");
+                        break;
+                    }
+
+                    $progress++;
+                }
+            } catch (Exception $e) { 
+                // Logowanie błędu
+                $logger->error("#############################################################################");
+                $logger->error($e->getMessage());
+                $logger->error("#############################################################################"); 
+            }
+        });
 
         return $response;
     }
-}
+
+    /** Funkcja pomocnicza do wysyłania komunikatów SSE. */
+    private function sendSSEMessage(string $event, string $data): void
+    {
+        echo "event: $event\n";
+        echo "data: $data\n\n";
+        echo str_pad('', 1024, ' '); // Zapobieganie problemom z buforowaniem
+
+        ob_flush();
+        flush();  // Wymusza wysłanie danych do klienta
+    }
 
 
 
 
-// namespace App\Controller;
+
+    // #[Route(path: "/sse/test", name: "sse_test")]
+    // public function sseTest(): Response
+    // {
+    //     $response = new StreamedResponse();
+    //     $response->headers->set('Content-Type', 'text/event-stream');
+    //     $response->headers->set('Cache-Control', 'no-cache');
+    //     $response->headers->set('Connection', 'keep-alive');
+    //     $response->headers->set('X-Accel-Buffering', 'no'); // Wyłączenie buforowania w nginx 
+
+    //     ob_implicit_flush(true);  // Włącz natychmiastowe wysyłanie danych
+
+    //     try {
+    //         // Wyłącz buforowanie Symfony
+    //         ob_implicit_flush(true);
+    //         ob_end_flush();  
+
+    //         $response->setCallback(function () {
+    //             $progress = 0;
+
+    //             while ($progress <= 100) {  
+    //                 $eventType = ($progress === 100) ? 'completed' : 'progress'; 
+
+    //                 $this->logger->debug('---------------------------------------------------------------------------------');
+    //                 $this->logger->debug('Aktualny postęp: ' . $progress); 
+    //                 $this->logger->debug('---------------------------------------------------------------------------------');
+
+    //                 echo "event: $eventType\n";
+    //                 echo "data: $progress\n\n";
  
-// use App\Repository\GTMImageRepository;
-// use App\Service\GraphicsToolsModule\Compressor\Contracts\TrackCompressionProgressInterface;
-// use App\Service\GraphicsToolsModule\Utils\DTO\ImageOperationStatus;
-// use Doctrine\ORM\EntityManagerInterface;
-// use Psr\Log\LoggerInterface;
-// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-// use Symfony\Component\HttpFoundation\Response;
-// use Symfony\Component\HttpFoundation\StreamedResponse;
-// use Symfony\Component\Routing\Annotation\Route;
+    //                 echo str_pad('', 1024, ' '); 
 
-// #[Route('/profil')]
-// class GTMCompressorSSEController extends AbstractController
-// {
-//     public const TRACK_COMPRESSION_PROGRESS_URL = '/profil/narzedzia-graficzne/sse/sledzenie-kompresji';
-//     public const GET_COMPRESSION_STATUS_URL = '/profil/narzedzia-graficzne/sse/pobierz-status-kompresji';
+    //                 if (ob_get_contents()) {
+    //                     ob_end_clean();  // Wyczyść poprzedni bufor, jeśli istnieje
+    //                     ob_end_flush();
+    //                 }   
+                    
+    //                 flush();  // Wymusza natychmiastowe wysłanie danych do klienta
 
-//     public function __construct(
-//         private LoggerInterface $logger,
-//         private TrackCompressionProgressInterface $compressionTracker,
-//         private GTMImageRepository $jobRepository,
-//         private EntityManagerInterface $entityManager
-//     ) {}
+    //                 if ($progress < 100) {
+    //                     usleep(750000); // 0.75 sekundy
+    //                 }
+
+    //                 if (connection_aborted()) {
+    //                     break;
+    //                 }
+
+    //                 $progress++;
+    //             }
+    //         });
+    //     } catch (Exception $e) { 
+    //         $this->logger->error("#############################################################################");
+    //         $this->logger->error($e->getMessage());
+    //         $this->logger->error("#############################################################################"); 
+    //     }
+
+    //     return $response;
+    // }
 
 
-//     /**
-//      * Nawiązuje długotrwałe połączenie SSE, które monitoruje postęp w czasie rzeczywistym
-//      * Utrzymuje otwarte połączenie i wysyła aktualizacje, gdy stan zadania się zmienia.
-//      * Kończy działanie dopiero po zakończeniu zadania lub przerwaniu połączenia
-//      */
-//     #[Route("/narzedzia-graficzne/sse/sledzenie-kompresji/{processId}", name: 'gtm_compressor_sse_compression_tracking', methods: ['GET'])]
-//     public function track_compression_progress(string $processId): Response
-//     {
-//         // Zamknij sesję przed rozpoczęciem strumienia
-//         if (session_status() === PHP_SESSION_ACTIVE) {
-//             session_write_close();
-//         }
-//         $response = new Response();
 
-//         $this->logger->debug('Rozpoczęcie połączenia SSE');
 
-//         try {
+    #[Route(path: "/narzedzia-graficzne/sse/test", name: 'gtm_compressor_sse_test', methods: ['GET'])]
+    public function testSSE(): Response
+    {
+        // $this->closeSession();
 
-//             $response = new StreamedResponse(function () use ($processId) {
-//                 // Ustawienie nagłówków SSE
-//                 header('Content-Type: text/event-stream');
-//                 header('Cache-Control: no-cache');
-//                 header('Connection: keep-alive');
-//                 header('X-Accel-Buffering: no'); // Wyłącza buforowanie Nginx
+        $this->logger->debug('Rozpoczęcie testowego połączenia SSE');
 
-//                 // Ignorowanie rozłączenia klienta
-//                 ignore_user_abort(true);
+        try {
+            return new StreamedResponse(function () {
+                $this->configureSSEHeaders();
 
-//                 // Ustawienie czasu wykonania skryptu
-//                 set_time_limit(0);
+                $progress = 0;
+                $startTime = time();
+                $lastKeepAliveTime = time();
 
-//                 $lastProgress = null;
-//                 $startTime = time();
-//                 $timeout = 900; // 10 minut maksymalnego czasu połączenia
-//                 $noChangeTimeout = 360; // 6 minuta bez zmian powoduje zakończenie
-//                 $lastChangeTime = time();
-//                 $lastKeepAliveTime = time();
+                // $this->sendSSEEvent('start', []);
 
-//                 // Pętla z ograniczeniem czasowym
-//                 while (time() - $startTime < $timeout) {
+                while (time() - $startTime < self::MAX_CONNECTION_TIMEOUT) {
 
-//                     $progressData = $this->compressionTracker->getProgress($processId);
-//                     $progressValue = $progressData ? $progressData['progress'] : 0;
-//                     $progressStatus = $progressData ? $progressData['status'] : ImageOperationStatus::PENDING;
+                    $this->sendSSEEvent('progress', [
+                        'progress' => $progress,
+                        'message' => ''
+                    ]);
 
-//                     if ($progressData === null) {
-//                         $data = json_encode(['progress' => $progressValue, 'status' => $progressStatus, 'message' => 'No progress data found']);
+                    if ($progress === 100) {
 
-//                         echo "event: error\n";
-//                         echo "data: " . $data . "\n\n";
-//                         break;
-//                     }
+                        $this->sendSSEEvent('completed', [
+                            'progress' => $progress,
+                            'message' => ''
+                        ]);
 
-//                     // Jeśli postęp wynosi 100%, kończymy strumień
-//                     if ($progressValue === 100) {
-//                         $data = json_encode(['progress' => $progressValue, 'status' => $progressStatus, 'message' => '']);
+                        $this->logger->info('Test zakończony');
 
-//                         echo "event: completed\n";
-//                         echo "data: " . $data . "\n\n";
+                        break;
+                    }
 
-//                         break;
-//                     }
+                    // if (time() - $lastKeepAliveTime >= self::KEEP_ALIVE_INTERVAL) {
+                    //     echo ": keep-alive\n\n";
+                    //     $lastKeepAliveTime = time();
+                    //     $this->flushOutput();
+                    // }
 
-//                     if ($progressValue !== $lastProgress) {
-//                         $data = json_encode(['progress' => $progressValue, 'status' => $progressStatus, 'message' => '']);
+                    // $this->flushOutput();
 
-//                         echo "event: progress\n";
-//                         echo "data: " . $data . "\n\n";
-//                         $lastProgress = $progressValue;
-//                         $lastChangeTime = time();
-//                     } else if (time() - $lastChangeTime > $noChangeTimeout) {
-//                         $data = json_encode(['progress' => $progressValue, 'status' => $progressStatus, 'message' => "No progress updates for $noChangeTimeout seconds"]);
+                    usleep(self::POLL_INTERVAL);
 
-//                         // Jeśli przez minutę nie było zmiany, kończymy połączenie
-//                         echo "event: timeout\n";
-//                         echo "data: " . $data . "\n\n";
+                    if (connection_aborted()) {
+                        $this->logger->info('Klient rozłączony');
+                        break;
+                    }
 
-//                         $this->logger->warning('Timeout bez zmian postępu', ['processId' => $processId, 'lastProgress' => $lastProgress]);
-                        
-//                         break;
-//                     } 
-                     
-//                     if (time() - $lastKeepAliveTime >= 30) {
-//                         echo ": keep-alive\n\n";
-//                         $lastKeepAliveTime = time();
-//                     }
+                    $progress++;
+                }
+            });
+        } catch (\Exception $e) {
+            $this->logger->error('Błąd podczas obsługi SSE', [
+                'error' => $e->getMessage()
+            ]);
 
-//                     // Opróżnienie bufora wyjścia
-//                     ob_flush();
-//                     flush();
-
-//                     // Krótsze oczekiwanie dla lepszej responsywności
-//                     usleep(250000); // 0.25 sekundy
-
-//                     // Sprawdzenie czy klient jest nadal połączony
-//                     if (connection_aborted()) {
-//                         break;
-//                     }
-//                 }
-//             });
-//         } catch (\Exception $e) { 
-//             $this->logger->error($e->getMessage());
-
-//             $data = json_encode(['progress' => 0, 'status' => ImageOperationStatus::FAILED, 'message' => 'Internal server error']);
-
-//             echo "event: error\n";
-//             echo "data: " . $data . "\n\n";
-//         }
-
-//         return $response;
-//     }
-// }
+            return $this->createErrorResponse('Wewnętrzny błąd serwera');
+        }
+    }
+}

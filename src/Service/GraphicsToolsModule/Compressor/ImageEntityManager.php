@@ -2,27 +2,26 @@
 
 namespace App\Service\GraphicsToolsModule\Compressor;
 
-use App\Entity\GTMImage;
-use App\Entity\User; 
-use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface;
-use DateTime;
+use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface; 
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface; 
+use App\Entity\GTMImage;
+use App\Entity\User;
 use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use DateTime;
 
 class ImageEntityManager implements ImageEntityManagerInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager, private TokenStorageInterface $tokenStorage, private LoggerInterface $logger) {}
-    public function save(array $imageData): void 
+    public function __construct(private EntityManagerInterface $entityManager, private LoggerInterface $logger) {}
+    public function save(array $imageData, int $userId): void 
     {
-        $owner = $this->getUserFromToken(); 
+        $owner = $this->findUser($userId); 
         $gtmImage = new GTMImage();
 
         $gtmImage
             ->setMimeType($imageData['mimeType'])
             ->setName($imageData['name'])
-            ->setOperationId($imageData['operationId'])
+            ->setOperationHash($imageData['operationHash'])
             ->setOperationResults($imageData['operationResults'])
             ->setOperationType($imageData['operationType'] ?? GTMImage::OPERATION_CONVERSION)
             ->setOwner($owner)
@@ -34,16 +33,16 @@ class ImageEntityManager implements ImageEntityManagerInterface
         $this->saveInDataBase($gtmImage);
     }
 
-    public function saveAsCompressed(DTO\CompressionResults $compressionResults, string $operationId): void
+    public function saveAsCompressed(DTO\CompressionResults $compressionResults, string $operationHash, int $userId): void
     {
-        $owner = $this->getUserFromToken();
+        $owner = $this->findUser($userId);
 
         $gtmImage = new GTMImage();
 
         $gtmImage
             ->setMimeType($compressionResults->mimeType)
             ->setName($compressionResults->originalName)
-            ->setOperationId($operationId)
+            ->setOperationHash($operationHash)
             ->setOperationResults($compressionResults->toArray())
             ->setOperationType(GTMImage::OPERATION_COMPRESSION)
             ->setOwner($owner)
@@ -53,22 +52,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
         ;
 
         $this->saveInDataBase($gtmImage);
-    }
-
-    /** 
-     * @throws \Exception
-     * @return string|\Stringable|\Symfony\Component\Security\Core\User\UserInterface
-     */
-    private function getUserFromToken(): User
-    {
-        $securityToken = $this->tokenStorage->getToken();
-
-        if (!$securityToken) {
-            throw new Exception("Brak dostępu!");
-        }
-
-        return $securityToken->getUser();
-    }
+    } 
 
     /** 
      * @param \App\Entity\GTMImage $gtmImage
@@ -84,5 +68,10 @@ class ImageEntityManager implements ImageEntityManagerInterface
             $this->logger->error($e->getMessage());
             throw new Exception("Wystąpił błąd podczas dodawania grafiki do bazy danych!");
         }
+    }
+
+    private function findUser(int $userId): User
+    {
+        return $this->entityManager->getRepository(User::class)->find($userId);
     }
 }

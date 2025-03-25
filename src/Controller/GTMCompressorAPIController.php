@@ -4,29 +4,26 @@ namespace App\Controller;
 
 use App\Entity\GTMImage;
 use App\Repository\GTMImageRepository;
-use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressionProcessDispatcherInterface;
-use App\Service\GraphicsToolsModule\Utils\Uuid;
-use Exception;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageProcessDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Exception;
 
-#[Route('/profil')]
+#[Route(path: '/profil')]
 class GTMCompressorAPIController extends AbstractController
 {
     public const GET_IMAGE_DATA_URL = '/profil/narzedzia-graficzne/api/pobierz-dane-o-grafice-json';
 
-    public function __construct(private CompressionProcessDispatcherInterface $compressionProcess) {}
+    public function __construct(private ImageProcessDispatcherInterface $imageProcess) {}
 
     /**
      * Endpoint API uruchamijący asynchroniczny process kompresji grafiki w tle
      * Zwraca identyfikator kompresowanej grafiki w celu pobrania jej kiedy będzie gotowa
      */
     #[Route(
-        '/narzedzia-graficzne/api/kompresuj-grafike-json',
+        path: '/narzedzia-graficzne/api/kompresuj-grafike-json',
         name: 'gtm_compressor_api_compress_image',
         methods: ['POST']
     )]
@@ -37,104 +34,37 @@ class GTMCompressorAPIController extends AbstractController
 
         try {
             $image = $request->files->get('image');
-            $processId = Uuid::generate();
+            $processHash = $request->request->get('processHash');
             $user = $this->getUser();
 
             if (! $user) {
                 $status = 403;
                 throw new Exception('Odmowa dostępu!');
             }
-            if (! $image) {
-                $status = 400;
-                throw new Exception('Nie przesłano żadnej grafiki!');
-            }
-            // Uruchom process kompresji grafiki w tle
-            $this->compressionProcess->dispatch($processId, $image);
 
-            $jsonData = [
-                'success' => true,
-                'errorMessage' => '',
-                'processId' => $processId
-            ];
+            if (! $processHash || ! $image) {
+                $status = 400;
+                throw new Exception('Nie poprawne dane! Brakuje danych w polach "processHash" lub "image"');
+            }
+
+            // Uruchom process kompresji grafiki 
+            $this->imageProcess->dispatch($processHash, $user->getId(), $image, GTMImage::OPERATION_COMPRESSION);
+
+            $jsonData = ['success' => true, 'errorMessage' => ''];
         } catch (Exception $e) {
             $status = $status === 200 ? 500 : $status;
-            $jsonData = [
-                'success' => false,
-                'errorMessage' => $e->getMessage(),
-                'processId' => null
-            ];
+            $jsonData = ['success' => false, 'errorMessage' => $e->getMessage()];
         }
 
         return $this->json($jsonData, $status);
     }
 
-
     #[Route(
-        '/narzedzia-graficzne/api/pobierz-skompresowana-grafike/{imageName}',
-        name: 'gtm_compressor_api_download_compressed_image',
-        methods: ['GET']
-    )]
-    public function downloadCompressedImage(string $imageName): Response
-    {
-        $plainTextHeader = ["Content-Type" => "text/plain"];
-
-        // Zabezpieczenie przed wprowadzeniem ../ w nazwie pliku
-        if (str_contains($imageName, '..')) {
-            return new Response('Nieprawidłowa nazwa pliku.', 400, $plainTextHeader);
-        }
-
-        $imagePath = $this->getParameter('kernel.project_dir') . "/public/graphics-tools-module/uploads/compressed/$imageName";
-
-        if (!$this->getUser()) {
-            return new Response('Odmowa dostępu. Użytkownik nie jest zalogowany w systemie', 401, $plainTextHeader);
-        }
-
-        if (!file_exists($imagePath)) {
-            return new Response('Grafika nie istnieje.', 404, $plainTextHeader);
-        }
-
-        return $this->file($imagePath);
-    }
-
-
-    // #[Route(
-    //     '/narzedzia-graficzne/api/pobierz-skompresowana-grafike/{imageName}',
-    //     name: 'gtm_compressor_api_download_compressed_image',
-    //     methods: ['GET']
-    // )]
-    // public function downloadCompressedImage(string $imageName): Response
-    // {
-    //     $status = 500;
-    //     $imagePath = $this->getParameter('kernel.project_dir') . "/public/graphics-tools-module/uploads/compressed/$imageName";
-
-    //     try {
-    //         if (! $this->getUser()) {
-    //             $status = 401;
-    //             throw new Exception('Odmowa dostępu. Użytkownik nie jest zalogowany w systemie');
-    //         } 
-    //         if (!file_exists($imagePath)) {
-    //             $status = 404;
-    //             throw $this->createNotFoundException('Grafika nie istnieje.');
-    //         } 
-
-    //         $binaryResponse = $this->file($imagePath);
-    //         $binaryResponse->setStatusCode(200);
-
-    //         return $binaryResponse;
-
-    //     } catch(Exception $e) {
-    //         return new Response($e->getMessage(), $status, [
-    //            "Content-Type" => "text/plain" 
-    //         ]);
-    //     } 
-    // }
-
-    #[Route(
-        '/narzedzia-graficzne/api/pobierz-dane-o-grafice-json/{processId}',
+        path: '/narzedzia-graficzne/api/pobierz-dane-o-grafice-json/{processHash}',
         name: 'gtm_compressor_api_get_compressed_image_data',
         methods: ['GET']
     )]
-    public function getCompressedImageData(string $processId, GTMImageRepository $imageRepository): JsonResponse
+    public function getCompressedImageData(string $processHash, GTMImageRepository $imageRepository): JsonResponse
     {
         $status = 200;
         $jsonData = [];
@@ -146,7 +76,7 @@ class GTMCompressorAPIController extends AbstractController
             }
             /** @var GTMImage */
             $compressedImage = $imageRepository->findOneBy([
-                'operationId' => $processId,
+                'operationHash' => $processHash,
                 'owner' => $this->getUser(),
                 'operationType' => GTMImage::OPERATION_COMPRESSION
             ]);

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     new CompressorPanel(compressorElement, {
         uploadUrl: COMPRESS_IMAGES_URL, 
         trackProgressUrl: TRACK_COMPRESSION_PROGRESS_URL, 
+        downloadAllImagesUrl: DOWNLOAD_ALL_IMAGES_URL, 
         imageDataUrl: GET_IMAGE_DATA_URL, 
         maxBatchSize: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE,
         maxBatchSizeBytes: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE_BYTES, 
