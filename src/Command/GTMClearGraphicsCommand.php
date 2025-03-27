@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\GTMImage;
-use App\Service\GraphicsToolsModule\Compressor\Contracts\TrackCompressionProgressInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +19,6 @@ class GTMClearGraphicsCommand extends Command
 
     public function __construct(
         private EntityManagerInterface $entityManager,
-        private TrackCompressionProgressInterface $compressionTracker, 
         private string $compressedDir,
         private string $uploadsTmpDir,
         private string $projectDir
@@ -50,12 +48,7 @@ class GTMClearGraphicsCommand extends Command
         $filesystem = new Filesystem();  
 
         $cleanAll = $input->getOption('all');
-        $cleanTemp = $input->getOption('temp');
-        $clearCount = 0;
-
-        if ($cleanAll || $cleanTemp) {
-            $clearCount = $this->compressionTracker->cleanupOldProgressFiles(0);
-        }
+        $cleanTemp = $input->getOption('temp'); 
 
         $this->clearDevLog($output);
 
@@ -71,8 +64,7 @@ class GTMClearGraphicsCommand extends Command
             return Command::FAILURE;
         }
 
-        $output->writeln('Zakończono czyszczenie folderów obrazów.');
-        $output->writeln("Liczba wyczyszczonych plików: $clearCount");
+        $output->writeln('Zakończono czyszczenie folderów obrazów.'); 
 
         return Command::SUCCESS;
     }

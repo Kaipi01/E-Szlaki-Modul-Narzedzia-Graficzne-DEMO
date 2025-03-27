@@ -4,12 +4,11 @@ import CompressorPanel from './CompressorPanel.js';
 document.addEventListener('DOMContentLoaded', async () => {
     const compressorElement = document.querySelector("#" + GRAPHICS_TOOLS_MODULE.COMPRESSOR_ID) 
 
-    // stałe COMPRESS_IMAGES_URL i TRACK_COMPRESSION_PROGRESS_URL 
-    // są zadeklarowane w graphics_tools_module/compressor_panel/index.html.twig
+    // stałe COMPRESS_IMAGES_URL, DOWNLOAD_ALL_IMAGES_URL i GET_IMAGE_DATA_URL
+    // są zadeklarowana w graphics_tools_module/compressor_panel/index.html.twig
     
     new CompressorPanel(compressorElement, {
-        uploadUrl: COMPRESS_IMAGES_URL, 
-        trackProgressUrl: TRACK_COMPRESSION_PROGRESS_URL, 
+        uploadUrl: COMPRESS_IMAGES_URL,
         downloadAllImagesUrl: DOWNLOAD_ALL_IMAGES_URL, 
         imageDataUrl: GET_IMAGE_DATA_URL, 
         maxBatchSize: GRAPHICS_TOOLS_MODULE.MAX_BATCH_SIZE,

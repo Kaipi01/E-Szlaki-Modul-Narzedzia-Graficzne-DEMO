@@ -22,8 +22,7 @@ export default class CompressorPanel extends AbstractPanel {
      * @param {Object} options - Opcje konfiguracyjne
      * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
      * @param {string} options.imageDataUrl - URL endpointu do danych skompresowanego obrazu
-     * @param {string} options.downloadAllImagesUrl - URL endpointu do pobrania wszystkich skompresowanych obrazów
-     * @param {string} options.trackProgressUrl - URL endpointu do śledzenia postępu kompresji
+     * @param {string} options.downloadAllImagesUrl - URL endpointu do pobrania wszystkich skompresowanych obrazów 
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
      * @param {Array}  options.allowedTypes - Dozwolone typy plików
      * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek

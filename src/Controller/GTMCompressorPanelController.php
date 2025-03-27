@@ -24,9 +24,7 @@ class GTMCompressorPanelController extends AbstractController
         //     dump("Imagick nie jest zainstalowany lub nie został załadowany.\n");
         // }
 
-        return $this->render('graphics_tools_module/compressor_panel/index.html.twig', [ 
-            'TRACK_COMPRESSION_PROGRESS_URL' => GTMCompressorSSEController::TRACK_COMPRESSION_PROGRESS_URL,
-            'GET_COMPRESSION_STATUS_URL' => GTMCompressorSSEController::GET_COMPRESSION_STATUS_URL, 
+        return $this->render('graphics_tools_module/compressor_panel/index.html.twig', [
             'GET_IMAGE_DATA_URL' => GTMCompressorAPIController::GET_IMAGE_DATA_URL
         ]);
     }

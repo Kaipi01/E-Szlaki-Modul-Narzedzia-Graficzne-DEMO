@@ -11,33 +11,24 @@ export default class UploadService {
     /**
      * Konstruktor klasy UploadService
      * @param {Object} options - Opcje konfiguracyjne
-     * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
-     * @param {string} options.trackProgressUrl - URL endpointu do śledzenia postępu kompresji
+     * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu 
      * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
-     * @param {Function} options.onProgress - Callback wywoływany przy aktualizacji postępu
-     * @param {Function} options.onSuccess - Callback wywoływany przy sukcesie
-     * @param {Function} options.onError - Callback wywoływany przy błędzie
-     * @param {Function} options.onComplete - Callback wywoływany po zakończeniu wszystkich wysyłek
      */
     constructor(options = {}) {
         this.config = options;
 
         if (!this.config.uploadUrl) {
             console.error('UploadServiceError: upload url is undefined!')
-        }
-        if (!this.config.trackProgressUrl) {
-            console.error('UploadServiceError: trackProgressUrl is undefined!')
-        }
+        } 
 
         this.uploadingImages = []
     }
 
     /**
-     * Wysyłanie pojedynczego pliku z monitorowaniem postępu kompresji przez SSE
+     * Wysyłanie pojedynczego pliku z monitorowaniem postępu kompresji
      * @param {File} file - Plik do wysłania
      * @param {Object} callbacks
      * @param {Function} callbacks.onProgress - Callback wywoływany przy aktualizacji postępu
-     * @param {Function} callbacks.onSuccess - Callback wywoływany przy sukcesie
      * @param {Function} callbacks.onError - Callback wywoływany przy błędzie
      * @param {Function} callbacks.onComplete - Callback wywoływany po zakończeniu
      */
@@ -46,7 +37,7 @@ export default class UploadService {
         onError,
         onComplete
     }) {
-        onProgress(20)  
+        onProgress(20) // FIXME: nie dokońca działa to jak trzeba ;/
 
         const errorHandler = (errorMessage) => {
             onProgress(0);
@@ -106,20 +97,7 @@ export default class UploadService {
         }
 
         return responseData
-    }
-
-    /**
-     * Przygotowanie danych formularza dla pojedynczego pliku
-     * @param {File} file - Plik do wysłania
-     * @returns {FormData} - Obiekt FormData z danymi pliku
-     */
-    prepareFileFormData(file) {
-        const formData = new FormData();
-        formData.append('image', file);
-        formData.append('filename', file.name);
-
-        return formData;
-    }
+    } 
 
     /** Anulowanie wszystkich aktywnych wysyłek */
     cancelAllUploads() {

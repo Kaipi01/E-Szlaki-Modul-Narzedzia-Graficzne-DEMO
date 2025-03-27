@@ -4,7 +4,6 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    gtm_operation_progress: '%kernel.project_dir%/var/graphics-tools-module/operation-progress'
     gtm_uploads_tmp: '%kernel.project_dir%/public/graphics-tools-module/uploads/temp'
     gtm_uploads_compressed: '%kernel.project_dir%/public/graphics-tools-module/uploads/compressed'
     gtm_uploads_compressed_short: 'graphics-tools-module/uploads/compressed'
@@ -37,11 +36,7 @@ services:
 
     #-------------------- SKPIUJ WSZYSTKO PONIŻEJ W CELU POPRAWNEGO DZIAŁANIA MODUŁU --------------------------------- 
 
-    # Nie zapomnij o parametrach powyżej! 
-
-    App\Service\GraphicsToolsModule\Compressor\TrackCompressionProgressService:
-        arguments: 
-            $operationProgressDir: '%gtm_operation_progress%' 
+    # Nie zapomnij o parametrach powyżej!  
 
     App\Command\GTMClearGraphicsCommand:
         arguments: 
