@@ -167,7 +167,9 @@ export default class CompressorPanel extends AbstractPanel {
         progressNameElement.textContent = 'Wysyłanie...';
 
         const uploadCallbacks = {
-            onProgress: (percent) => {
+            onProgress: (percentValue) => {
+                const percent = parseInt(percentValue)
+
                 this.uiManager.updateFileProgress(file.name, percent);
 
                 // Aktualizacja tekstu statusu w zależności od postępu
@@ -183,23 +185,6 @@ export default class CompressorPanel extends AbstractPanel {
                     progressNameElement.textContent = 'Zakończono';
                 }
             },
-            // Funkcja wywoływana po zakończeniu kompresji
-            onSuccess: (result) => {
-                if (result && result.compressedImage) {
-                    const compressedImage = result.compressedImage;
-
-                    this.uiManager.updateTableAfterCompression(
-                        compressedImage.originalName,
-                        compressedImage.compressedSize,
-                        compressedImage.compressionRatio,
-                        compressedImage.downloadURL
-                    );
-                } else {
-                    // Jeśli nie ma danych o skompresowanym obrazie, oznacz jako sukces
-                    this.uiManager.setFileProgressSuccess(file.name);
-                }
-            },
-            // Funkcja wywoływana w przypadku błędu
             onError: (message) => {
                 this.showError(`Błąd dla pliku "${file.name}": ${message}`);
                 this.uiManager.updateFileProgress(file.name, 0);
@@ -207,12 +192,7 @@ export default class CompressorPanel extends AbstractPanel {
             }, 
             onComplete: async (operationHash) => {
                 const getImageURL = `${this.options.imageDataUrl}/${operationHash}`
-                const response = await fetch(getImageURL, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
+                const response = await fetch(getImageURL, { method: "GET" })
 
                 const { compressedImage: image } = await response.json()
 
@@ -224,7 +204,7 @@ export default class CompressorPanel extends AbstractPanel {
                     image.compressionRatio,
                     image.downloadURL
                 );
-                // this.uiManager.updateFileProgress(file.name, 100);
+                this.uiManager.updateFileProgress(file.name, 100);
 
                 this.state.compressedImageHashes.push(operationHash)
 

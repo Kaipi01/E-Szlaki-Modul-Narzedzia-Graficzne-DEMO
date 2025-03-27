@@ -10,7 +10,7 @@ class CompressionResults
         public string $originalName,
         public int $originalSize,
         public int $compressedSize,
-        public int $compressionRatio,
+        public int|float $compressionRatio,
         public string $downloadURL,
         public string $src,
         public string $mimeType,

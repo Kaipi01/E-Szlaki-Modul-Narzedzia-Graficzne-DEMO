@@ -3,6 +3,7 @@
 namespace App\Service\GraphicsToolsModule\MessageHandler;
 
 use App\Service\GraphicsToolsModule\Compressor\CompressionProcess;
+use App\Service\GraphicsToolsModule\Compressor\CompressionProcessHandler;
 use App\Service\GraphicsToolsModule\Message\ImageProcessingMessage;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface; 
 use Psr\Log\LoggerInterface;
@@ -12,7 +13,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class ImageProcessingMessageHandler implements MessageHandlerInterface
 { 
-    public function __construct(private LoggerInterface $logger, private CompressionProcess $compressionProcess) { }
+    public function __construct(private LoggerInterface $logger) { }
 
     public function __invoke(ImageProcessingMessage $message)
     {

@@ -37,17 +37,11 @@ services:
 
     #-------------------- SKPIUJ WSZYSTKO PONIŻEJ W CELU POPRAWNEGO DZIAŁANIA MODUŁU --------------------------------- 
 
-    # Nie zapomnij o parametrach powyżej!
-    # Wymagany jest plik konfiguracji messanger.yaml 
+    # Nie zapomnij o parametrach powyżej! 
 
     App\Service\GraphicsToolsModule\Compressor\TrackCompressionProgressService:
         arguments: 
-            $operationProgressDir: '%gtm_operation_progress%'
-
-
-    App\Service\GraphicsToolsModule\Compressor\CompressionProcess:
-        arguments:
-            $projectDir: '%kernel.project_dir%'  
+            $operationProgressDir: '%gtm_operation_progress%' 
 
     App\Command\GTMClearGraphicsCommand:
         arguments: 
@@ -61,11 +55,4 @@ services:
         arguments: 
             $compressedDir: '%gtm_uploads_compressed%' 
         tags:
-            - { name: 'console.command' }
- 
-    App\Service\GraphicsToolsModule\MessageHandler\ImageProcessingMessageHandler:
-        tags: [messenger.message_handler]
-
-    App\Service\GraphicsToolsModule\Message\:
-        resource: '../src/Service/GraphicsToolsModule/Message/'
-        tags: ['messenger.message']
+            - { name: 'console.command' } 

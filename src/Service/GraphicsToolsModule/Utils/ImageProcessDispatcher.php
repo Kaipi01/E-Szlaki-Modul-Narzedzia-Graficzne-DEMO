@@ -3,22 +3,27 @@
 namespace App\Service\GraphicsToolsModule\Utils;
 
 use App\Entity\GTMImage;
-use App\Service\GraphicsToolsModule\Compressor\CompressionProcess;
+use App\Service\GraphicsToolsModule\Compressor\CompressionProcess; 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface; 
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageProcessDispatcherInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Messenger\MessageBusInterface; 
+use Symfony\Component\HttpFoundation\File\UploadedFile; 
 use Psr\Log\LoggerInterface;
 
 class ImageProcessDispatcher implements ImageProcessDispatcherInterface
 {
     public function __construct(
-        private LoggerInterface $logger,
-        private MessageBusInterface $messageBus,
+        private LoggerInterface $logger, 
         private CompressionProcess $compressionProcess,
         private ParameterBagInterface $params
     ) {}
 
+    /**
+     * Rozpoczyna asynchroniczny proces przetwarzania obrazu 
+     * @param string $processHash Unikalny identyfikator procesu
+     * @param int $userId ID użytkownika
+     * @param UploadedFile $image Przesłany plik obrazu
+     * @param string $operationType Typ operacji 
+     */
     public function dispatch(string $processHash, int $userId, UploadedFile $image, string $operationType): void
     {
         $tempPath = $image->getRealPath();

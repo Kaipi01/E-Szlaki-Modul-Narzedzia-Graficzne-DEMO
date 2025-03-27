@@ -2,22 +2,24 @@
 
 namespace App\Service\GraphicsToolsModule\Utils;
 
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Log\LoggerInterface;
 
 class UploadImageService implements UploadImageServiceInterface
 {
-    public function __construct(private LoggerInterface $logger) {}
+    public function __construct(private LoggerInterface $logger, private ImageFileValidatorInterface $imageFileValidator) {}
 
     public function upload(UploadedFile $image, string $uploadDir, bool $keepOriginalName = false): ?string
     {
         if (!$image->isValid()) {
             throw new \Exception("Przesłany plik jest nieprawidłowy. Kod błędu: {$image->getError()}");
         }
+        $this->imageFileValidator->validate($image);
 
-        $newFilename = $this->getSaveImageName($image->getClientOriginalName(), $keepOriginalName);
+        $newFilename = $this->imageFileValidator->getSaveImageName($image->getClientOriginalName(), $keepOriginalName);
 
         $this->ensureDirectoryExists($uploadDir);
 
@@ -56,18 +58,7 @@ class UploadImageService implements UploadImageServiceInterface
         }
 
         return $fileInfos;
-    }
-
-    public function getSaveImageName(string $originalName, bool $keepOriginalName = false): string
-    {
-        $originalFilename = pathinfo($originalName, PATHINFO_FILENAME);
-        $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
-        $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
-        $newFilename = $keepOriginalName ? $safeFilename : $safeFilename . '-' . uniqid();
-        $newFilename .= ".{$fileExtension}";
-
-        return $newFilename;
-    }
+    } 
 
     public function ensureDirectoryExists(string $directory): void
     {

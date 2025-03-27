@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
  
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
@@ -45,7 +47,7 @@ class GTMCompressImageCommand extends Command
         $mimeType = $input->getArgument('mimeType');  
         $userId = $input->getArgument('userId');  
 
-        // sleep(4);
+        //sleep(15);
 
         $this->logger->debug('---------------------------------------------------------------------------------');
         $this->logger->debug('Komenda kompresji grafiki', [
@@ -57,7 +59,7 @@ class GTMCompressImageCommand extends Command
         ]); 
         $this->logger->debug('---------------------------------------------------------------------------------');
         
-        $this->compressionTracker->updateProgress($processHash, 25, ImageOperationStatus::PENDING);
+        $this->compressionTracker->updateProgress($processHash, 20, ImageOperationStatus::PENDING);
         $this->compressionTracker->showProgressLog($processHash);
 
         try {

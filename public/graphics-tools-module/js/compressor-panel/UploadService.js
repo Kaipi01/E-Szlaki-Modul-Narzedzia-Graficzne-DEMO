@@ -1,13 +1,11 @@
-import {
-    generateUUIDv4
-} from "../utils/generateId.js";
+'use strict';
 
 /**
  * Klasa UploadService jest odpowiedzialna za:
  * - Wysyłanie plików na serwer
  * - Śledzenie postępu wysyłania
  * - Obsługę odpowiedzi z serwera
- * - Monitorowanie postępu kompresji przez SSE
+ * - Monitorowanie postępu kompresji 
  */
 export default class UploadService {
     /**
@@ -29,11 +27,9 @@ export default class UploadService {
         }
         if (!this.config.trackProgressUrl) {
             console.error('UploadServiceError: trackProgressUrl is undefined!')
-        } 
+        }
 
         this.uploadingImages = []
-        this.activeXHRsMap = new Map();
-        this.activeEventSourcesMap = new Map();
     }
 
     /**
@@ -46,230 +42,70 @@ export default class UploadService {
      * @param {Function} callbacks.onComplete - Callback wywoływany po zakończeniu
      */
     async uploadFile(file, {
-        onProgress,
-        onSuccess,
+        onProgress, 
         onError,
         onComplete
     }) {
-        const formData = this.prepareFileFormData(file);
-        const xhr = new XMLHttpRequest();
-        const processHash = generateUUIDv4();
-    
+        onProgress(20)  
+
         const errorHandler = (errorMessage) => {
             onProgress(0);
             onError(errorMessage);
             console.error(errorMessage);
         }
-    
-        formData.append('processHash', processHash); 
-        
+
         try {
-            // Najpierw nawiąż połączenie SSE
-            // await this.monitorCompressionProgress(
-            //     processHash,
-            //     file.name, {
-            //         onProgress,
-            //         onSuccess,
-            //         onError,
-            //         onComplete
-            //     }
-            // );
-            
-            // Po pomyślnym nawiązaniu połączenia SSE, wysyłamy plik
-            this.activeXHRsMap.set(file.name, xhr);
-            this.uploadingImages.push(file.name);
-    
-            xhr.addEventListener('load', () => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    console.log('Plik wysłany pomyślnie, serwer rozpoczyna kompresję');
-                    // Nie robimy nic więcej - postęp będzie śledzony przez SSE
-                } else {
-                    errorHandler(`Błąd serwera: ${xhr.status} ${xhr.statusText}`);
-                }
-            });
-    
-            xhr.addEventListener('error', () => errorHandler('Błąd połączenia z serwerem podczas wysyłania pliku.'));
-            xhr.addEventListener('abort', () => errorHandler('Wysyłanie pliku zostało przerwane.'));
-    
-            xhr.open('POST', this.config.uploadUrl);
-            xhr.send(formData);
+            this.uploadingImages.push(file.name); 
+
+            const dataStep1 = await this.sendStepRequest({ image: file, stepNumber: 1 }) 
+
+            const {processHash, progress} = dataStep1.processData 
+
+            if (!processHash) {
+                throw new Error('Otrzymano nie poprawne dane. Kod błędu: 500')
+            }
+
+            onProgress(progress)  
+
+            const dataStep2 = await this.sendStepRequest({ processHash, stepNumber: 2 }) 
+
+            onProgress(dataStep2.processData.progress)
+
+            const dataStep3 = await this.sendStepRequest({ processHash, stepNumber: 3 }) 
+
+            onProgress(dataStep3.processData.progress)
+
+            onComplete(processHash)
+
         } catch (error) {
-            errorHandler(`Nie można nawiązać połączenia SSE: ${error.message}`);
+            errorHandler(`Wystąpił błąd podczas procesu kompresji: ${error.message}`);
+            console.error(error)
         }
     }
-    // async uploadFile(file, {
-    //     onProgress,
-    //     onSuccess,
-    //     onError,
-    //     onComplete
-    // }) {
-    //     const formData = this.prepareFileFormData(file);
-    //     const xhr = new XMLHttpRequest();
-    //     const processHash = generateUUIDv4()
 
-    //     const errorHandler = (errorMessage) => {
-    //         onProgress(0);
-    //         onError(errorMessage);
-    //         console.error(errorMessage);
-    //     }
+    /** @param {Object} data */
+    async sendStepRequest(data) {
+        const formData = new FormData();
 
-    //     formData.append('processHash', processHash)
-
-    //     // await this.monitorCompressionProgress(
-    //     //     processHash,
-    //     //     file.name, {
-    //     //         onProgress,
-    //     //         onSuccess,
-    //     //         onError,
-    //     //         onComplete
-    //     //     }
-    //     // );
-
-    //     this.activeXHRsMap.set(file.name, xhr)
-    //     this.uploadingImages.push(file.name)
-
-    //     // Obsługa wysyłania pliku
-    //     xhr.addEventListener('load', () => {
-    //         if (xhr.status >= 200 && xhr.status < 300) { 
-    //             // kiedy poprawnie wysłano ustaw od razu na 20%
-    //             // onProgress(20); 
-
-    //             // this.monitorCompressionProgress(
-    //             //     processHash,
-    //             //     file.name, {
-    //             //         onProgress,
-    //             //         onSuccess,
-    //             //         onError,
-    //             //         onComplete
-    //             //     }
-    //             // );
-
-    //         } else {
-    //             errorHandler(`Błąd serwera: ${xhr.status} ${xhr.statusText}`);
-    //         }
-    //     });
-
-    //     xhr.addEventListener('error', () => errorHandler('Błąd połączenia z serwerem podczas wysyłania pliku.'));
-    //     xhr.addEventListener('abort', () => errorHandler('Wysyłanie pliku zostało przerwane.'));
-
-    //     xhr.open('POST', this.config.uploadUrl);
-    //     xhr.send(formData);
-    // }
-
-    /**
-     * Monitorowanie postępu kompresji przez Server-Sent Events
-     * @param {string} processHash - Identyfikator zadania kompresji
-     * @param {string} fileName - Nazwa pliku
-     * @param {Object} callbacks
-     * @param {Function} callbacks.onProgress - Callback wywoływany przy aktualizacji postępu
-     * @param {Function} callbacks.onSuccess - Callback wywoływany przy sukcesie
-     * @param {Function} callbacks.onError - Callback wywoływany przy błędzie
-     * @param {Function} callbacks.onComplete - Callback wywoływany po zakończeniu
-     */
-    async monitorCompressionProgress(processHash, fileName, {
-        onProgress,
-        onSuccess,
-        onError,
-        onComplete
-    }) { 
-
-        return new Promise((resolve, reject) => {
-            const sseUrl = `${this.config.trackProgressUrl}/${processHash}`;
-
-            const errorHandler = (errorMessage) => {
-                onProgress(0);
-                onError(errorMessage);
-                console.error(errorMessage);
-                reject(errorMessage)
+        for (const key in data) {
+            if (Object.prototype.hasOwnProperty.call(data, key)) {
+                formData.append(key, data[key]);
             }
-
-            let eventSource = null;
-
-            try {
-                eventSource = new EventSource(sseUrl);
-
-                this.activeEventSourcesMap.set(fileName, eventSource)
-
-                console.log('Utworzono EventSource dla URL:', sseUrl);
-
-                eventSource.onopen = (event) => {
-                    console.log('Połączenie SSE otwarte:', event); 
-                    resolve()
-                };
-
-                eventSource.addEventListener('progress', (event) => {
-                    onProgress(parseInt(event.data));
-                });
-
-                eventSource.addEventListener('completed', (event) => {
-                    try { 
-                        this.closeEventSource(eventSource, fileName);
-                        onSuccess(event.data);
-                        onComplete(processHash);
-                    } catch (error) {
-                        errorHandler(`Błąd podczas przetwarzania zdarzenia completed: ${error.message}`);
-                    }
-                });
-
-                eventSource.addEventListener('timeout', (event) => {
-                    this.closeEventSource(eventSource, fileName);
-                    errorHandler(event.data || 'Timeout podczas kompresji pliku');
-                });
-
-                eventSource.addEventListener('error', (event) => {
-                    try {
-                        this.closeEventSource(eventSource, fileName);
-                        console.error(event)
-                        errorHandler(event.data || 'Błąd podczas kompresji pliku');
-                    } catch(error) {
-                        errorHandler(error.message)
-                    }
-                });
-
-                eventSource.onmessage = (event) => {
-                    console.log('Otrzymano wiadomość SSE:', event);
-
-                    onProgress(parseInt(event.data));
-                };
-
-                eventSource.onerror = (event) => {
-                    this.closeEventSource(eventSource, fileName);
-                    errorHandler('Utracono połączenie z serwerem podczas monitorowania kompresji'); 
-                };  
- 
-                
-
-            } catch (error) {
-                if (eventSource) {
-                    this.closeEventSource(eventSource, fileName);
-                }
-                errorHandler(`Nie można monitorować postępu kompresji: ${error.message}`); 
-            }
+        }
+        
+        const response = await fetch(this.config.uploadUrl, {
+            method: "POST",
+            body: formData
         }) 
-    }
+        const responseData = await response.json()
 
-    /**
-     * Bezpieczne zamknięcie połączenia EventSource
-     * @param {EventSource} eventSource - Obiekt EventSource do zamknięcia
-     * @param {string} fileName - nazwa pliku, którego dotyczy połączenie
-     */
-    closeEventSource(eventSource, fileName) {
-        if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
-            // Usunięcie wszystkich nasłuchiwaczy zdarzeń
-            eventSource.onmessage = null;
-            eventSource.onerror = null;
+        // console.log(`Krok numer: ${data.stepNumber}`, responseData);
 
-            // Zamknięcie połączenia
-            eventSource.close();
-
-            this.activeEventSourcesMap.delete(fileName)
-
-            // Usunięcie z listy uploadingImages
-            const index = this.uploadingImages.indexOf(fileName);
-            if (index !== -1) {
-                this.uploadingImages.splice(index, 1);
-            }
+        if (! responseData.success) {
+            throw new Error(responseData.errorMessage)
         }
+
+        return responseData
     }
 
     /**
@@ -288,49 +124,16 @@ export default class UploadService {
     /** Anulowanie wszystkich aktywnych wysyłek */
     cancelAllUploads() {
         this.uploadingImages.forEach(imageName => this.cancelUpload(imageName))
-
-        this.uploadingImages = []
     }
 
     /** @param {string} fileName */
     cancelUpload(fileName) {
-        const xhr = this.activeXHRsMap.get(fileName)
-        const eventSource = this.activeEventSourcesMap.get(fileName)
+        // TODO: Dokończ implementacje
 
-        if (xhr) {
-            xhr.abort();
-            this.activeXHRsMap.delete(fileName);
-        }
-
-        if (eventSource) {
-            this.closeEventSource(eventSource, fileName);
+        // Usunięcie z listy uploadingImages
+        const index = this.uploadingImages.indexOf(fileName);
+        if (index !== -1) {
+            this.uploadingImages.splice(index, 1);
         }
     }
 }
-
-
-// try {
-                //     const response = JSON.parse(xhr.responseText);
-
-                //     if (!response.processHash) {
-                //         throw new Error('Brak identyfikatora zadania kompresji w odpowiedzi serwera');
-                //     } 
-
-                //     this.monitorCompressionProgress(
-                //         response.processHash,
-                //         file.name, {
-                //             onProgress,
-                //             onSuccess,
-                //             onError,
-                //             onComplete
-                //         }
-                //     );
-                // } catch (error) {
-                //     errorHandler(`Błąd podczas przetwarzania odpowiedzi: ${error.message}`);
-                // }
-
-                // Callbacki
-        // this.onProgress = options.onProgress || (() => {});
-        // this.onSuccess = options.onSuccess || (() => {});
-        // this.onError = options.onError || (() => {});
-        // this.onComplete = options.onComplete || (() => {});
