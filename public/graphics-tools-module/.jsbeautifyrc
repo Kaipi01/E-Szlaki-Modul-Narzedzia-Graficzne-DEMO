@@ -1,0 +1,9 @@
+{
+  "indent_size": 2,
+  "indent_char": " ",
+  "brace_style": "collapse,preserve-inline",
+  "max_preserve_newlines": 2,
+  "preserve_newlines": true,
+  "space_in_paren": false,
+  "space_after_anon_function": true
+}

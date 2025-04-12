@@ -1,9 +1,5 @@
-import {
-    formatFileSize
-} from "../utils/file-helpers.js";
-import {
-    fadeAnimation
-} from "../utils/animations.js";
+import { formatFileSize } from "../utils/file-helpers.js";
+import { fadeAnimation } from "../utils/animations.js";
 
 /**
  * Klasa UICompressorManager
@@ -15,105 +11,104 @@ import {
  * - Obsługę interakcji użytkownika z interfejsem
  */
 export default class UICompressorManager {
-    /**
-     * Konstruktor klasy UICompressorManager
-     * @param {Object} elements - Referencje do elementów DOM
-     * @param {HTMLElement} elements.dropZone - Element strefy upuszczania plików
-     * @param {HTMLInputElement} elements.fileInput - Input typu file
-     * @param {HTMLElement} elements.selectButton - Przycisk wyboru plików
-     * @param {HTMLElement} elements.imageTable - Kontener galerii obrazów
-     * @param {HTMLButtonElement} elements.compressButton - Przycisk kompresji
-     * @param {HTMLButtonElement} elements.clearButton - Przycisk czyszczenia
-     * @param {HTMLElement} elements.progressContainer - Kontener paska postępu
-     * @param {HTMLElement} elements.progressBar - Pasek postępu
-     * @param {HTMLElement} elements.progressText - Tekst postępu
-     * @param {HTMLElement} elements.compressorAlerts - Kontener alertów
-     * @param {HTMLElement} elements.tableHeadRow 
-     * @param {Object} options - Opcje konfiguracyjne
-     * @param {Function} options.onFileSelect - Callback wywoływany po wyborze plików
-     * @param {Function} options.onFileRemove - Callback wywoływany po usunięciu pliku
-     * @param {Function} options.onCompress - Callback wywoływany po kliknięciu przycisku kompresji
-     * @param {Function} options.onClear - Callback wywoływany po kliknięciu przycisku czyszczenia
-     */
-    constructor(elements, options = {}) {
-        this.elements = elements;
-        this.options = options
-        // Callbacki
-        this.onFileSelect = options.onFileSelect || (() => {});
-        this.onFileRemove = options.onFileRemove || (() => {});
-        this.onCompress = options.onCompress || (() => {});
-        this.onClear = options.onClear || (() => {});
+  /**
+   * Konstruktor klasy UICompressorManager
+   * @param {Object} elements - Referencje do elementów DOM
+   * @param {HTMLElement} elements.dropZone - Element strefy upuszczania plików
+   * @param {HTMLInputElement} elements.fileInput - Input typu file
+   * @param {HTMLElement} elements.selectButton - Przycisk wyboru plików
+   * @param {HTMLElement} elements.imageTable - Kontener galerii obrazów 
+   * @param {HTMLButtonElement} elements.clearButton - Przycisk czyszczenia
+   * @param {HTMLElement} elements.progressContainer - Kontener paska postępu
+   * @param {HTMLElement} elements.progressBar - Pasek postępu
+   * @param {HTMLElement} elements.progressText - Tekst postępu
+   * @param {HTMLElement} elements.compressorAlerts - Kontener alertów
+   * @param {HTMLElement} elements.tableHeadRow 
+   * @param {HTMLElement} elements.resultMessage 
+   * @param {HTMLElement} elements.resultValue 
+   * @param {Object} options - Opcje konfiguracyjne
+   * @param {Function} options.onFileSelect - Callback wywoływany po wyborze plików
+   * @param {Function} options.onFileRemove - Callback wywoływany po usunięciu pliku 
+   * @param {Function} options.onClear - Callback wywoływany po kliknięciu przycisku czyszczenia
+   */
+  constructor(elements, options = {}) {
+    this.elements = elements;
+    this.options = options
+    this.onFileSelect = options.onFileSelect || (() => {});
+    this.onFileRemove = options.onFileRemove || (() => {});
+    this.onClear = options.onClear || (() => {});
 
-        // Inicjalizacja nasłuchiwania zdarzeń
-        this.attachEventListeners();
-        this.initUI()
+    this.attachEventListeners();
+    this.initUI()
+  }
+
+  initUI() {
+    if (this.elements.maxFileSizeInfo) {
+      this.elements.maxFileSizeInfo.textContent = this.options.maxFileSize / (1024 * 1024) + " MB"
     }
+  }
 
-    initUI() {
-        if (this.elements.maxFileSizeInfo) {
-            this.elements.maxFileSizeInfo.textContent = this.options.maxFileSize / (1024 * 1024) + " MB"
-        } 
-    }
- 
-    attachEventListeners() {
-        // Obsługa wyboru plików przez input
-        this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+  attachEventListeners() {
+    this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
 
-        // Obsługa przycisku wyboru plików
-        this.elements.selectButton.addEventListener('click', () => {
-            this.elements.fileInput.click();
+    this.elements.selectButton.addEventListener('click', () => {
+      this.elements.fileInput.click();
+    });
+
+    this.elements.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
+    this.elements.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
+    this.elements.dropZone.addEventListener('drop', this.handleDrop.bind(this));
+    this.elements.clearButton.addEventListener('click', () => this.onClear());
+
+    // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
+    document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
+    document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
+  }
+
+  /** 
+   * @param {string} message 
+   * @param {string} value 
+   */
+  displayCurrentResultMessage(message, value) {
+    this.elements.resultMessage.textContent = message
+    this.elements.resultValue.textContent = value
+  }
+
+  /**
+   * Renderowanie miniatury obrazu w widoku tabeli
+   * @param {File} file - Plik obrazu do wyświetlenia
+   * @param {string} formattedSize - Sformatowany rozmiar pliku
+   */
+  renderImagesInfoTable(file, formattedSize) {
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        const row = document.createElement('tr');
+        const maxFileNameLength = 20
+        const fileNameToDisplay = file.name.length > maxFileNameLength ? (file.name.slice(0, maxFileNameLength) + "...") : file.name
+        row.dataset.fileName = file.name;
+
+        const previewCell = this.createTableCell(`<img src="${event.target.result}" alt="${file.name}" class="preview-image">`, {
+          'data-title': 'Podgląd',
+          'data-preview-image': ''
         });
 
-        // Obsługa drag & drop
-        this.elements.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
-        this.elements.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
-        this.elements.dropZone.addEventListener('drop', this.handleDrop.bind(this));
+        const nameCell = this.createTableCell(fileNameToDisplay, {
+          'data-title': 'Nazwa pliku',
+          'data-name': ''
+        });
 
-        // Obsługa przycisków akcji
-        this.elements.compressButton.addEventListener('click', () => this.onCompress());
-        this.elements.clearButton.addEventListener('click', () => this.onClear());
+        const typeCell = this.createTableCell(
+          `<span class="mx-auto badge">${file.type.replace('image/', '').toUpperCase()}</span>`, {
+            'data-title': 'Typ',
+            'data-type': ''
+          }
+        );
 
-        // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
-        document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
-        document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
-    } 
-
-    /**
-     * Renderowanie miniatury obrazu w widoku tabeli
-     * @param {File} file - Plik obrazu do wyświetlenia
-     * @param {string} formattedSize - Sformatowany rozmiar pliku
-     */
-    renderImagesInfoTable(file, formattedSize) {
-
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onload = (event) => {
-                const row = document.createElement('tr');
-                row.dataset.fileName = file.name;
-
-                // Komórka z miniaturą
-                const previewCell = this.createTableCell(`<img src="${event.target.result}" alt="${file.name}" class="preview-image">`, {
-                    'data-title': 'Podgląd',
-                    'data-preview-image': ''
-                });
-
-                // Komórka z nazwą pliku
-                const nameCell = this.createTableCell(file.name, {
-                    'data-title': 'Nazwa pliku',
-                    'data-name': ''
-                });
-
-                // Komórka z typem pliku
-                const typeCell = this.createTableCell(
-                    `<span class="mx-auto badge">${file.type.replace('image/', '').toUpperCase()}</span>`, {
-                        'data-title': 'Typ',
-                        'data-type': ''
-                    }
-                ); 
-
-                const progressBarHTML = `
-                    <div data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress">
+        const progressBarHTML = `
+                    <div data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress animated-progress--no-label">
                         <div class="animated-progress-bar">
                             <div class="animated-progress-per" data-progress-bar-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} per="0"></div>
                         </div>
@@ -124,301 +119,291 @@ export default class UICompressorManager {
                             </div>
                         </div>
                     </div>
-                `; 
+                `;
 
-                const statusCell = this.createTableCell(progressBarHTML, {
-                    'data-title': 'Status',
-                    'data-status': '',
-                    'data-file-progress': file.name
-                });
+        const statusCell = this.createTableCell(progressBarHTML, {
+          'data-title': 'Status',
+          'data-status': '',
+          'data-file-progress': file.name
+        });
 
-                // Komórka z rozmiarem pliku
-                const sizeCell = this.createTableCell(formattedSize, {
-                    'data-title': 'Rozmiar',
-                    'data-size': ''
-                });
+        const sizeCell = this.createTableCell(formattedSize, {
+          'data-title': 'Rozmiar',
+          'data-size': ''
+        });
 
-                const compressedSizeCell = this.createTableCell('-', {
-                    'data-title': 'Rozmiar po kompresji',
-                    'data-compressed-size': ''
-                });
-                // compressedSizeCell.classList.add('sr-only')
+        const compressedSizeCell = this.createTableCell('-', {
+          'data-title': 'Rozmiar po kompresji',
+          'data-compressed-size': ''
+        });
 
-                const compressedRatioCell = this.createTableCell('-', {
-                    'data-title': 'Współczynik kompresji',
-                    'data-compressed-ratio': ''
-                });
-                // compressedRatioCell.classList.add('sr-only')
+        const compressedRatioCell = this.createTableCell('-', {
+          'data-title': 'Współczynik kompresji',
+          'data-compressed-ratio': ''
+        });
 
-                // Komórka z akcjami (przycisk usuwania)
-                const actionsCell = this.createTableCell(`
+        const actionsCell = this.createTableCell(`
                     <button class="mx-auto badge image-compressor__item-cancel">
                         <i class="fa-solid fa-xmark image-compressor__item-cancel-icon"></i> 
                         <span>Anuluj</span>
                     </button>
                 `, {
-                    'data-title': 'Akcje',
-                    'data-actions': ''
-                });
-                const cancelButton = actionsCell.querySelector('button');
-                cancelButton.addEventListener('click', () => this.onFileRemove(file.name));
-
-                row.appendChild(previewCell);
-                row.appendChild(nameCell);
-                row.appendChild(typeCell);
-                row.appendChild(sizeCell);
-                row.appendChild(compressedSizeCell)
-                row.appendChild(compressedRatioCell)
-                row.appendChild(statusCell);
-                row.appendChild(actionsCell);
-
-                this.elements.imageTable.appendChild(row);
-                resolve(row);
-            };
-
-            reader.onerror = (error) => {
-                reject(error);
-            };
-
-            reader.readAsDataURL(file);
+          'data-title': 'Akcje',
+          'data-actions': ''
         });
-    } 
+        const cancelButton = actionsCell.querySelector('button');
+        cancelButton.addEventListener('click', () => this.onFileRemove(file.name));
 
-    /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
-    updateTableHead() {
-        const allTableTHElements = Array.from(this.elements.tableHeadRow.children)
+        row.appendChild(previewCell);
+        row.appendChild(nameCell);
+        row.appendChild(typeCell);
+        row.appendChild(sizeCell);
+        row.appendChild(compressedSizeCell)
+        row.appendChild(compressedRatioCell)
+        row.appendChild(statusCell);
+        row.appendChild(actionsCell);
 
-        allTableTHElements.forEach(th => th.classList.remove('sr-only'))
-        // this.elements.tableHeadRow.lastElementChild?.remove()
+        this.elements.imageTable.appendChild(row);
+        resolve(row);
+      };
 
-        // this.elements.tableHeadRow.append(createTH('Rozmiar po kompresji'))
-        // this.elements.tableHeadRow.append(createTH('Poziom kompresji'))
-        // this.elements.tableHeadRow.append(createTH('Akcje'))
+      reader.onerror = (error) => reject(error);
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  //   /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
+  //   updateTableHead() {
+  //     const allTableTHElements = Array.from(this.elements.tableHeadRow.children)
+
+  //     allTableTHElements.forEach(th => th.classList.remove('sr-only'))
+  //     // this.elements.tableHeadRow.lastElementChild?.remove()
+
+  //     // this.elements.tableHeadRow.append(createTH('Rozmiar po kompresji'))
+  //     // this.elements.tableHeadRow.append(createTH('Poziom kompresji'))
+  //     // this.elements.tableHeadRow.append(createTH('Akcje'))
+  //   }
+
+  /**
+   * Aktualizacja informacji o skompresowanym obrazie w widoku listy
+   * @param {string} fileName - Nazwa pliku
+   * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
+   * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
+   * @param {string} downloadURL - link do pobrania
+   */
+  updateTableAfterCompression(fileName, compressedSize, ratio, downloadURL) {
+    if (!fileName) {
+      console.warn('Brak nazwy pliku w updateTableAfterCompression');
+      return;
     }
 
+    const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
 
-    /**
-     * Aktualizacja informacji o skompresowanym obrazie w widoku listy
-     * @param {string} fileName - Nazwa pliku
-     * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
-     * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
-     * @param {string} downloadURL - link do pobrania
-     */
-    updateTableAfterCompression(fileName, compressedSize, ratio, downloadURL) {
-        if (!fileName) {
-            console.warn('Brak nazwy pliku w updateTableAfterCompression');
-            return;
-        }
+    if (!listItem) return;
 
-        const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
+    const actionsCell = listItem.querySelector('[data-actions]');
+    const compressedSizeCell = listItem.querySelector('[data-compressed-size]');
+    const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]');
 
-        if (!listItem) return;
-
-        const actionsCell = listItem.querySelector('[data-actions]');
-        const compressedSizeCell = listItem.querySelector('[data-compressed-size]');
-        const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]');
-
-        compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>`;
-        compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>`;
-        actionsCell.innerHTML = `
+    compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>`;
+    compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>`;
+    actionsCell.innerHTML = `
             <a href="${downloadURL}" download class="mx-auto badge image-compressor__item-download">
                 <i class="fa-solid fa-circle-down image-compressor__item-download-icon"></i>
                 <span>Pobierz</span>
             </a>
         `;
 
-        compressedSizeCell.classList.remove('sr-only');
-        compressedRatioCell.classList.remove('sr-only');
+    compressedSizeCell.classList.remove('sr-only');
+    compressedRatioCell.classList.remove('sr-only');
 
-        // Oznacz pasek postępu jako zakończony sukcesem
-        this.setFileProgressSuccess(fileName); 
-    }  
+    // Oznacz pasek postępu jako zakończony sukcesem
+    this.setFileProgressSuccess(fileName);
+  }
 
-    /**
-     * Aktualizacja paska postępu dla konkretnego pliku
-     * @param {string} fileName - Nazwa pliku
-     * @param {number} percent - Procent postępu (0-100)
-     */
-    updateFileProgress(fileName, percent) {
-        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-        const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
-        const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
-        const progressName = document.querySelector(`[data-progress-container-${safeFileName}] .animated-progress-name`);
-        
-        if (progressBar && progressText) {
-            progressBar.style.width = `${percent}%`;
-            progressText.textContent = `${percent}%`;
-            progressBar.setAttribute('per', percent);
-            
-            // Aktualizacja tekstu informującego o aktualnym etapie
-            if (progressName) {
-                if (percent < 20) {
-                    progressName.textContent = 'Wysyłanie...';
-                } else if (percent < 60) {
-                    progressName.textContent = 'Przygotowanie...';
-                } else if (percent < 100) {
-                    progressName.textContent = 'Kompresja...';
-                } else {
-                    progressName.textContent = 'Zakończono';
-                }
-            }
-        }
-    }
-    
-    /**
-     * Pokazanie paska postępu dla konkretnego pliku
-     * @param {string} fileName - Nazwa pliku
-     */
-    showFileProgressBar(fileName) {
-        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
-        const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
-        const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+  /**
+   * Aktualizacja paska postępu dla konkretnego pliku
+   * @param {string} fileName - Nazwa pliku
+   * @param {number} percent - Procent postępu (0-100)
+   */
+  updateFileProgress(fileName, percent) {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+    const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+    const progressName = document.querySelector(`[data-progress-container-${safeFileName}] .animated-progress-name`);
 
-        if (progressContainer && progressBar && progressText) {
-            progressContainer.style.removeProperty('display');
+    if (progressBar && progressText) {
+      progressBar.style.width = `${percent}%`;
+      progressText.textContent = `${percent}%`;
+      progressBar.setAttribute('per', percent);
 
-            fadeAnimation(() => {
-                progressBar.style.width = '0%';
-                progressText.textContent = '0%';
-                progressBar.setAttribute('per', '0');
-            }, [progressContainer], 400);
-        }
-    } 
-
-    /**
-     * Ustawienie statusu sukcesu dla paska postępu pliku
-     * @param {string} fileName - Nazwa pliku
-     */
-    setFileProgressSuccess(fileName) {
-        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
-
-        if (progressContainer) {
-            const progressNameElement = progressContainer.querySelector('.animated-progress-name');
-            if (progressNameElement) {
-                progressNameElement.textContent = 'Zakończono';
-                progressNameElement.classList.add('text-success');
-            }
-
-            const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
-            if (progressBar) {
-                progressBar.classList.add('progress-success');
-            }
-        }
-    }
-
-    /**
-     * Ustawienie statusu błędu dla paska postępu pliku
-     * @param {string} fileName - Nazwa pliku
-     * @param {string} errorMessage - Komunikat błędu
-     */
-    setFileProgressError(fileName, errorMessage = 'Błąd') {
-        const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-        const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
-
-        if (progressContainer) {
-            const progressNameElement = progressContainer.querySelector('.animated-progress-name');
-            if (progressNameElement) {
-                progressNameElement.textContent = errorMessage;
-                progressNameElement.classList.add('text-danger');
-            }
-
-            const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
-            if (progressBar) {
-                progressBar.classList.add('progress-danger');
-            }
-        }
-    } 
-
-    /**
-     * Tworzy komórkę tabeli
-     * @param {string} content - Zawartość komórki
-     * @param {Object} attributes - atrybuty 
-     * @returns {HTMLTableCellElement}
-     */
-    createTableCell(content, attributes = {}) {
-        const cell = document.createElement('td');
-        cell.innerHTML = content;
-
-        Object.keys(attributes).forEach(key => {
-            cell.setAttribute(key, attributes[key])
-        });
-
-        return cell;
-    }
-
-    /**
-     * Usuwa wiersz z tabeli
-     * @param {string} fileName - Nazwa pliku do usunięcia
-     */
-    removeTableRow(fileName) {
-        const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-
-        if (thumbnailToRemove) {
-            this.elements.imageTable.removeChild(thumbnailToRemove);
-        }
-    } 
-
-    /** Czyści tabele */
-    clearTable() {
-        this.elements.imageTable.innerHTML = '';
-    }
-
-    /**
-     * Aktualizacja interfejsu użytkownika
-     * @param {boolean} hasFiles - Czy są jakieś pliki
-     * @param {boolean} isUploading - Czy trwa wysyłanie
-     */
-    updateUI(hasFiles, isUploading) {
-        // Aktualizacja przycisków
-        this.elements.compressButton.disabled = !hasFiles || isUploading;
-        this.elements.clearButton.disabled = !hasFiles || isUploading;
-
-        // Aktualizacja klasy dla obszaru drop zone
-        if (hasFiles) {
-            this.elements.dropZone.classList.add('has-files');
+      // Aktualizacja tekstu informującego o aktualnym etapie
+      if (progressName) {
+        if (percent < 20) {
+          progressName.textContent = 'Wysyłanie...';
+        } else if (percent < 60) {
+          progressName.textContent = 'Przygotowanie...';
+        } else if (percent < 100) {
+          progressName.textContent = 'Kompresja...';
         } else {
-            this.elements.dropZone.classList.remove('has-files');
+          progressName.textContent = 'Zakończono';
         }
+      }
+    }
+  } 
+
+  /**
+   * Pokazanie paska postępu dla konkretnego pliku
+   * @param {string} fileName - Nazwa pliku
+   */
+  showFileProgressBar(fileName) {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+    const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+    const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+
+    if (progressContainer && progressBar && progressText) {
+      progressContainer.style.removeProperty('display');
+
+      fadeAnimation(() => {
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+        progressBar.setAttribute('per', '0');
+      }, [progressContainer], 400);
+    }
+  }
+
+  /**
+   * Ustawienie statusu sukcesu dla paska postępu pliku
+   * @param {string} fileName - Nazwa pliku
+   */
+  setFileProgressSuccess(fileName) {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+
+    if (progressContainer) {
+      const progressNameElement = progressContainer.querySelector('.animated-progress-name');
+
+      if (progressNameElement) {
+        progressNameElement.textContent = 'Zakończono';
+        progressNameElement.classList.add('text-success');
+      }
+
+      const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
+      if (progressBar) {
+        progressBar.classList.add('progress-success');
+      }
+    }
+  }
+
+  /**
+   * Ustawienie statusu błędu dla paska postępu pliku
+   * @param {string} fileName - Nazwa pliku
+   * @param {string} errorMessage - Komunikat błędu
+   */
+  setFileProgressError(fileName, errorMessage = 'Błąd') {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    const progressContainer = document.querySelector(`[data-progress-container-${safeFileName}]`);
+
+    if (progressContainer) {
+      const progressNameElement = progressContainer.querySelector('.animated-progress-name');
+      if (progressNameElement) {
+        progressNameElement.textContent = errorMessage;
+        progressNameElement.classList.add('text-danger');
+      }
+
+      const progressBar = progressContainer.querySelector(`[data-progress-bar-${safeFileName}]`);
+      if (progressBar) {
+        progressBar.classList.add('progress-danger');
+      }
+    }
+  }
+
+  /**
+   * Tworzy komórkę tabeli
+   * @param {string} content - Zawartość komórki
+   * @param {Object} attributes - atrybuty 
+   * @returns {HTMLTableCellElement}
+   */
+  createTableCell(content, attributes = {}) {
+    const cell = document.createElement('td');
+    cell.innerHTML = content;
+
+    Object.keys(attributes).forEach(key => {
+      cell.setAttribute(key, attributes[key])
+    });
+
+    return cell;
+  }
+
+  /**
+   * Usuwa wiersz z tabeli
+   * @param {string} fileName - Nazwa pliku do usunięcia
+   */
+  removeTableRow(fileName) {
+    const thumbnailToRemove = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
+
+    if (thumbnailToRemove) {
+      this.elements.imageTable.removeChild(thumbnailToRemove);
+    }
+  }
+
+  /** Czyści tabele */
+  clearTable() {
+    this.elements.imageTable.innerHTML = '';
+  }
+
+  /**
+   * Aktualizacja interfejsu użytkownika
+   * @param {boolean} hasFiles - Czy są jakieś pliki
+   * @param {boolean} isUploading - Czy trwa wysyłanie
+   */
+  updateUI(hasFiles, isUploading) {
+
+    if (hasFiles) {
+      this.elements.dropZone.classList.add('has-files');
+    } else {
+      this.elements.dropZone.classList.remove('has-files');
+    }
+  }
+
+  handleFileSelect(event) {
+    const selectedFiles = event.target.files;
+    if (selectedFiles && selectedFiles.length > 0) {
+      this.onFileSelect(selectedFiles);
     }
 
-    handleFileSelect(event) {
-        const selectedFiles = event.target.files;
-        if (selectedFiles && selectedFiles.length > 0) {
-            this.onFileSelect(selectedFiles);
-        }
+    // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
+    this.elements.fileInput.value = '';
+  }
 
-        // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
-        this.elements.fileInput.value = '';
-    }  
+  // Podobnie dla metody handleDrop
+  handleDrop(event) {
+    this.preventBrowserDefaults(event);
+    this.elements.dropZone.classList.remove('drag-over');
 
-    // Podobnie dla metody handleDrop
-    handleDrop(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-
-        const droppedFiles = event.dataTransfer.files;
-        if (droppedFiles && droppedFiles.length > 0) {
-            this.onFileSelect(droppedFiles);
-        }
-    } 
-
-    /** Zapobiega domyślnym akcjom przeglądarki */
-    preventBrowserDefaults(event) {
-        event.preventDefault();
-        event.stopPropagation();
+    const droppedFiles = event.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+      this.onFileSelect(droppedFiles);
     }
+  }
 
-    /** Obsługa zdarzenia przeciągania plików nad obszarem drop zone */
-    handleDragOver(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.add('drag-over');
-    }
+  /** Zapobiega domyślnym akcjom przeglądarki */
+  preventBrowserDefaults(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
 
-    /** Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania */
-    handleDragLeave(event) {
-        this.preventBrowserDefaults(event);
-        this.elements.dropZone.classList.remove('drag-over');
-    }  
-} 
+  /** Obsługa zdarzenia przeciągania plików nad obszarem drop zone */
+  handleDragOver(event) {
+    this.preventBrowserDefaults(event);
+    this.elements.dropZone.classList.add('drag-over');
+  }
+
+  /** Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania */
+  handleDragLeave(event) {
+    this.preventBrowserDefaults(event);
+    this.elements.dropZone.classList.remove('drag-over');
+  }
+}

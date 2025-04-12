@@ -21,12 +21,10 @@ export default class FileManager {
     constructor(options = {}) {
         this.config = options;
 
-        // Callbacki
         this.onFileAdded = options.onFileAdded || (() => {});
         this.onFileRemoved = options.onFileRemoved || (() => {});
         this.onError = options.onError || (() => {});
 
-        // Stan
         this.files = []; // Lista przechowywanych plików
     }
 
@@ -107,26 +105,24 @@ export default class FileManager {
         return removedFile;
     }
 
-    /**
-     * Pobiera wszystkie pliki
-     * @returns {Array<File>} - Lista wszystkich plików
-     */
-    getAllFiles() {
-        return [...this.files];
-    }
+    // /**
+    //  * Pobiera wszystkie pliki
+    //  * @returns {Array<File>} - Lista wszystkich plików
+    //  */
+    // getAllFiles() {
+    //     return [...this.files];
+    // }
 
-    /**
-     * Pobiera plik po nazwie
-     * @param {string} fileName - Nazwa pliku
-     * @returns {File|undefined} - Znaleziony plik lub undefined
-     */
-    getFileByName(fileName) {
-        return this.files.find(file => file.name === fileName);
-    }
+    // /**
+    //  * Pobiera plik po nazwie
+    //  * @param {string} fileName - Nazwa pliku
+    //  * @returns {File|undefined} - Znaleziony plik lub undefined
+    //  */
+    // getFileByName(fileName) {
+    //     return this.files.find(file => file.name === fileName);
+    // }
 
-    /**
-     * Czyści wszystkie pliki
-     */
+    /** Czyści wszystkie pliki */
     clearFiles() {
         const oldFiles = [...this.files];
         this.files = [];
@@ -143,19 +139,19 @@ export default class FileManager {
         return this.files.length > 0;
     }
 
-    /**
-     * Zwraca liczbę plików
-     * @returns {number} - Liczba plików
-     */
-    getFileCount() {
-        return this.files.length;
-    }
+    // /**
+    //  * Zwraca liczbę plików
+    //  * @returns {number} - Liczba plików
+    //  */
+    // getFileCount() {
+    //     return this.files.length;
+    // }
 
     /**
      * Zwraca łączny rozmiar wszystkich plików
      * @returns {number} - Łączny rozmiar w bajtach
      */
-    getTotalSize() {
+    getFilesTotalSize() {
         return this.files.reduce((sum, file) => sum + file.size, 0);
     } 
 
@@ -183,49 +179,49 @@ export default class FileManager {
         return this.files.map(file => this.getFileDetails(file));
     }
 
-    /**
-     * Sortuje pliki według wybranego kryterium
-     * @param {string} criterion - Kryterium sortowania (name, size, type)
-     * @param {boolean} ascending - Czy sortować rosnąco
-     */
-    sortFiles(criterion = 'name', ascending = true) {
-        const sortFunctions = {
-            name: (a, b) => a.name.localeCompare(b.name),
-            size: (a, b) => a.size - b.size,
-            type: (a, b) => a.type.localeCompare(b.type),
-            date: (a, b) => a.lastModified - b.lastModified
-        };
+    // /**
+    //  * Sortuje pliki według wybranego kryterium
+    //  * @param {string} criterion - Kryterium sortowania (name, size, type)
+    //  * @param {boolean} ascending - Czy sortować rosnąco
+    //  */
+    // sortFiles(criterion = 'name', ascending = true) {
+    //     const sortFunctions = {
+    //         name: (a, b) => a.name.localeCompare(b.name),
+    //         size: (a, b) => a.size - b.size,
+    //         type: (a, b) => a.type.localeCompare(b.type),
+    //         date: (a, b) => a.lastModified - b.lastModified
+    //     };
 
-        const sortFunction = sortFunctions[criterion] || sortFunctions.name;
+    //     const sortFunction = sortFunctions[criterion] || sortFunctions.name;
         
-        this.files.sort((a, b) => {
-            return ascending ? sortFunction(a, b) : sortFunction(b, a);
-        });
-    }
+    //     this.files.sort((a, b) => {
+    //         return ascending ? sortFunction(a, b) : sortFunction(b, a);
+    //     });
+    // }
 
-    /**
-     * Filtruje pliki według typu
-     * @param {string} type - Typ MIME pliku
-     * @returns {Array<File>} - Przefiltrowana lista plików
-     */
-    filterByType(type) {
-        return this.files.filter(file => file.type === type);
-    }
+    // /**
+    //  * Filtruje pliki według typu
+    //  * @param {string} type - Typ MIME pliku
+    //  * @returns {Array<File>} - Przefiltrowana lista plików
+    //  */
+    // filterByType(type) {
+    //     return this.files.filter(file => file.type === type);
+    // }
 
-    /**
-     * Sprawdza czy plik jest obrazem
-     * @param {File} file - Plik do sprawdzenia
-     * @returns {boolean} - Czy plik jest obrazem
-     */
-    isImage(file) {
-        return file.type.startsWith('image/');
-    }
+    // /**
+    //  * Sprawdza czy plik jest obrazem
+    //  * @param {File} file - Plik do sprawdzenia
+    //  * @returns {boolean} - Czy plik jest obrazem
+    //  */
+    // isImage(file) {
+    //     return file.type.startsWith('image/');
+    // }
 
-    /**
-     * Zwraca tylko pliki będące obrazami
-     * @returns {Array<File>} - Lista plików będących obrazami
-     */
-    getOnlyImages() {
-        return this.files.filter(file => this.isImage(file));
-    }
+    // /**
+    //  * Zwraca tylko pliki będące obrazami
+    //  * @returns {Array<File>} - Lista plików będących obrazami
+    //  */
+    // getOnlyImages() {
+    //     return this.files.filter(file => this.isImage(file));
+    // }
 }

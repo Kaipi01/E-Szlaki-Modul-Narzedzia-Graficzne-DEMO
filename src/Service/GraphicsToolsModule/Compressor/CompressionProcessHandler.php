@@ -116,10 +116,7 @@ class CompressionProcessHandler implements \Serializable
             throw new \RuntimeException('Nie znaleziono pliku do kompresji. Wykonaj najpierw krok przygotowania obrazu.');
         }
         
-        // Użyj zapisanego typu MIME
-        $mimeType = $this->imageMimeType ?? 'image/jpeg';
-        
-        $this->compressionResults = $this->compressor->compress($this->destinationPath, $mimeType);
+        $this->compressionResults = $this->compressor->compress($this->destinationPath);
 
         return ImageProcessData::fromArray([
             'processHash' => $this->processHash,

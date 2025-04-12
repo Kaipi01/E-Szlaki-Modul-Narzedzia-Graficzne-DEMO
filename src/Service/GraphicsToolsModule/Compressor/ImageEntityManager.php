@@ -3,6 +3,8 @@
 namespace App\Service\GraphicsToolsModule\Compressor;
 
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface; 
+use App\Service\GraphicsToolsModule\Utils\PathResolver;
+use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface; 
 use App\Entity\GTMImage;
@@ -12,21 +14,36 @@ use DateTime;
 
 class ImageEntityManager implements ImageEntityManagerInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager, private LoggerInterface $logger) {}
+    public function __construct(
+        private EntityManagerInterface $entityManager, 
+        private LoggerInterface $logger, 
+        private PathResolver $pathResolver,
+        private MimeTypeGuesserInterface $mimeTypeGuesser,
+    ) {}
+
     public function save(array $imageData, int $userId): void 
     {
         $owner = $this->findUser($userId); 
         $gtmImage = new GTMImage();
+        $imageSrc = $imageData['src'] ?? null;
+        $operationHash = $imageData['operationHash'] ?? null;
+
+        if (! $imageSrc || ! $this->pathResolver->isAbsolutePath($imageSrc)) {
+            throw new \InvalidArgumentException('Nie podano ścieżki absolutnej do obrazu !');
+        }
+        if (! $operationHash) {
+            throw new \InvalidArgumentException('Nie podano parametru: operationHash !');
+        } 
 
         $gtmImage
-            ->setMimeType($imageData['mimeType'])
-            ->setName($imageData['name'])
-            ->setOperationHash($imageData['operationHash'])
-            ->setOperationResults($imageData['operationResults'])
+            ->setMimeType($this->mimeTypeGuesser->guessMimeType($imageSrc))
+            ->setName(basename($imageSrc))
+            ->setOperationHash($operationHash)
+            ->setOperationResults($imageData['operationResults'] ?? [])
             ->setOperationType($imageData['operationType'] ?? GTMImage::OPERATION_CONVERSION)
             ->setOwner($owner)
-            ->setSize($imageData['size'])
-            ->setSrc($imageData['src'])
+            ->setSize(filesize($imageSrc))
+            ->setSrc($this->pathResolver->getRelativePath($imageSrc))
             ->setUploadedAt(new DateTime("now"))
         ;
 
@@ -47,7 +64,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
             ->setOperationType(GTMImage::OPERATION_COMPRESSION)
             ->setOwner($owner)
             ->setSize($compressionResults->compressedSize)
-            ->setSrc($compressionResults->src)
+            ->setSrc($this->pathResolver->getRelativePath($compressionResults->src))
             ->setUploadedAt(new DateTime("now"))
         ;
 

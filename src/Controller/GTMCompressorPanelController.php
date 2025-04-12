@@ -11,19 +11,7 @@ class GTMCompressorPanelController extends AbstractController
 { 
     #[Route(path: '/narzedzia-graficzne/kompresor', name: 'gtm_compressor_panel')]
     public function index(): Response
-    { 
-        // phpinfo();
-
-        // php -c "D:\xampp\php\php.ini" -v
-         
-        // if (extension_loaded('imagick')) {
-        //     dump("Imagick jest zainstalowany i załadowany.\n");
-        //     $imagick = new \Imagick();
-        //     dump($imagick);
-        // } else {
-        //     dump("Imagick nie jest zainstalowany lub nie został załadowany.\n");
-        // }
-
+    {   
         return $this->render('graphics_tools_module/compressor_panel/index.html.twig', [
             'GET_IMAGE_DATA_URL' => GTMCompressorAPIController::GET_IMAGE_DATA_URL
         ]);

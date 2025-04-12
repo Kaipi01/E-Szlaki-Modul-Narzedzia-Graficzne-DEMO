@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // stałe COMPRESS_IMAGES_URL, DOWNLOAD_ALL_IMAGES_URL i GET_IMAGE_DATA_URL
     // są zadeklarowana w graphics_tools_module/compressor_panel/index.html.twig
+    /* eslint-disable no-undef */
     
     new CompressorPanel(compressorElement, {
         uploadUrl: COMPRESS_IMAGES_URL,

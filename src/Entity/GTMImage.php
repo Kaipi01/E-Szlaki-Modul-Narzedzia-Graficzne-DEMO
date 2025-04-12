@@ -112,11 +112,13 @@ class GTMImage
         return $this;
     }
 
+    /** zwraca ścieżkę relatywną */
     public function getSrc(): ?string
     {
         return $this->src;
     }
 
+    /** wymaga ścieżki relatywnej */
     public function setSrc(string $src): self
     {
         $this->src = $src;

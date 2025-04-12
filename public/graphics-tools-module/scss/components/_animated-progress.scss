@@ -18,10 +18,8 @@
       }
     }
 
-    &-name { 
-      font-size: 0.9rem;
-      font-weight: 700; 
-      text-transform: uppercase;
+    &-name {  
+      font-weight: 700;  
     }
 
     &-info {
@@ -29,6 +27,8 @@
       align-items: center;
       justify-content: space-between;
       margin-top: 0.45rem;
+      font-size: 1rem;
+      gap: 0.5rem;
     }
 
     &-stats {
@@ -39,8 +39,7 @@
     &-bar {
       display: flex;
       align-items: center;
-      height: var(--progress-bar-height);
-      margin-top: 3rem;
+      height: var(--progress-bar-height); 
       border-radius: var(--progress-bar-border-radius);
       background: #ffffff2b;
       box-shadow: inset rgba(0, 0, 0, 0.45) 0px 5px 15px,

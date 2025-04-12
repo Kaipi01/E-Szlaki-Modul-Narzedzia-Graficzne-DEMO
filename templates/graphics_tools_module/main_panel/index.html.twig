@@ -9,17 +9,13 @@
 {% block panel_content %} 
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Moje Pliki</h1>  
+    
+    {% for image in userImages %}
+        
+        <img style="max-width: 400px; aspect-ratio: 16/8; object-fit: cover;" src="{{ image.src }}" alt="{{ image.name }}" />
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/src/Controller/IETMMainPanelController.php'|file_link(0) }}">src/Controller/IETMMainPanelController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/templates/ietm_main_panel/index.html.twig'|file_link(0) }}">templates/ietm_main_panel/index.html.twig</a></code></li>
-    </ul>
-
-    <div class="cropper-wrapper">
-        <img src="{{ asset('graphics-tools-module/images/place-img-5.webp') }}" id="image-test" alt="" />
-    </div>  
+    {% endfor %}
     
 </div> 
 

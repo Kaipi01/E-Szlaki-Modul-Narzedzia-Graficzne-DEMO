@@ -1,1 +1,14 @@
+.cropper-wrapper {
+  width: 1000px;
+  height: 500px;
+  margin: 0 auto;
+}
 
+cropper-canvas {
+  min-height: 100%;
+}
+
+#image-test {
+  display: block;
+  max-width: 100%;
+}

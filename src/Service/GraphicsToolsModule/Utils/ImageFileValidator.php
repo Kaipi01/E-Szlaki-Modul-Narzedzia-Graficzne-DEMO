@@ -3,22 +3,12 @@
 namespace App\Service\GraphicsToolsModule\Utils;
 
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
+use App\Service\GraphicsToolsModule\Utils\DTO\ImageType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use InvalidArgumentException;
 
 class ImageFileValidator implements ImageFileValidatorInterface
 { 
-    /** Lista dozwolonych typów MIME dla obrazów */
-    private const ALLOWED_MIME_TYPES = [
-        'image/jpeg',
-        'image/jpg',
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/bmp',
-        'image/tiff',
-    ];
-
     /** Wzorce niebezpiecznych elementów w nazwach plików */
     private const DANGEROUS_PATTERNS = [
         '/\.\./', // Zapobiega atakom traversal path
@@ -48,12 +38,12 @@ class ImageFileValidator implements ImageFileValidatorInterface
     public function validate(UploadedFile $image): void
     {
         // Sprawdzenie typu MIME
-        $mimeType = $image->getMimeType();
+        $mimeType = $image->getMimeType(); 
 
-        if (!in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
+        if (!in_array($mimeType, ImageType::getAllowedMimeTypes(), true)) {
             $allowedMimeTypes = "";
 
-            foreach (self::ALLOWED_MIME_TYPES as $type) {
+            foreach (ImageType::getAllowedMimeTypes() as $type) {
                 $allowedMimeTypes .= str_replace('image/', '', $type). ", ";
             }
 

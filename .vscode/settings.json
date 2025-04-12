@@ -1,3 +1,18 @@
 {
-    "php.version": "8.1"
+  "php.version": "8.1.31",
+  "php.executablePath": "D:/php-8.1.31/php.exe",
+  "intelephense.codeLens.implementations.enable": true,
+  "intelephense.codeLens.overrides.enable": true,
+  "intelephense.codeLens.parent.enable": true,
+  "intelephense.codeLens.references.enable": true,
+  "intelephense.codeLens.usages.enable": true,
+  "intelephense.completion.triggerParameterHints": true,
+  "intelephense.environment.documentRoot": "",
+  "intelephense.phpdoc.classTemplate": {
+    "summary": "$1",
+    "tags": ["@package ${1:$SYMBOL_NAMESPACE}"]
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  }
 }

@@ -6,6 +6,8 @@ use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;  
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults; 
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface; 
+use App\Service\GraphicsToolsModule\Utils\PathResolver;
+use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Psr\Log\LoggerInterface;
 
@@ -15,17 +17,13 @@ class CompressorService implements CompressorInterface
         private LoggerInterface $logger,
         private UploadImageServiceInterface $uploadService,
         private ImageOptimizerInterface $optimizer,  
-        private UrlGeneratorInterface $urlGenerator 
+        private UrlGeneratorInterface $urlGenerator,
+        private MimeTypeGuesserInterface $mimeTypeGuesser,
+        private PathResolver $pathResolver
     ) {} 
  
-    /**
-     * Kompresuje pojedynczy obraz 
-     * @param string $imagePath Ścieżka do obrazu
-     * @param string $mimeType Typ MIME obrazu
-     * @return CompressionResults Wyniki kompresji
-     * @throws \Exception W przypadku błędu kompresji
-     */
-    public function compress(string $imagePath, string $mimeType): CompressionResults
+    /** @inheritDoc */
+    public function compress(string $imagePath): CompressionResults
     {  
         if (!file_exists($imagePath)) {
             throw new \Exception("Plik nie istnieje: {$imagePath}");
@@ -40,7 +38,7 @@ class CompressorService implements CompressorInterface
         );
 
         try { 
-            $this->optimizer->optimize($mimeType, $imagePath); 
+            $this->optimizer->optimize($imagePath); 
  
             $compressedSize = file_exists($imagePath) ? filesize($imagePath) : 0;
             $compressionRatio = $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0;
@@ -55,9 +53,9 @@ class CompressorService implements CompressorInterface
             'originalSize' => $originalSize,
             'compressedSize' => $compressedSize,
             'compressionRatio' => $compressionRatio,
-            'src' => $imagePath,
+            'src' => $this->pathResolver->getRelativePath($imagePath),  
             'downloadURL' => $downloadUrl,
-            'mimeType' => $mimeType
+            'mimeType' => $this->mimeTypeGuesser->guessMimeType($imagePath)
         ]);
     }
 }

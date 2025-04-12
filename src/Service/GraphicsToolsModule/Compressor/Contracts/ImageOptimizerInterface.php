@@ -4,5 +4,9 @@ namespace App\Service\GraphicsToolsModule\Compressor\Contracts;
 
 interface ImageOptimizerInterface
 {
-    public function optimize(string $mimeType, string $imagePath): void;
+    /**
+     * Optymalizuje obraz 
+     * @param string $imagePath Ścieżka do pliku 
+     */
+    public function optimize(string $imagePath): void;
 }

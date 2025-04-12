@@ -6,5 +6,11 @@ use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 
 interface CompressorInterface 
 {  
-    public function compress(string $imagePath, string $mimeType): CompressionResults;
+    /**
+     * Kompresuje pojedynczy obraz 
+     * @param string $imagePath Ścieżka do obrazu
+     * @return CompressionResults Wyniki kompresji
+     * @throws \Exception W przypadku błędu kompresji
+     */
+    public function compress(string $imagePath): CompressionResults;
 }
