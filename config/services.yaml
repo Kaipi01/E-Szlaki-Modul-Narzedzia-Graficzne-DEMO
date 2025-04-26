@@ -51,3 +51,7 @@ services:
             $compressedDir: '%gtm_uploads_compressed%' 
         tags:
             - { name: 'console.command' } 
+
+    App\Service\GraphicsToolsModule\Utils\GTMLogger:
+        arguments:
+            $gtmLogger: '@monolog.logger.gtm'
