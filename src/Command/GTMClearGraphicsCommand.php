@@ -50,7 +50,8 @@ class GTMClearGraphicsCommand extends Command
         $cleanAll = $input->getOption('all');
         $cleanTemp = $input->getOption('temp'); 
 
-        $this->clearDevLog($output);
+        $this->clearDevLog($output, "dev.log");
+        $this->clearDevLog($output, 'gtm-module.log');
 
         if ($cleanAll) {
             $this->clearDataBase();
@@ -96,9 +97,9 @@ class GTMClearGraphicsCommand extends Command
     }
 
     /** Czyści plik dziennika dev.log w Symfony */
-    private function clearDevLog(OutputInterface $output): void
+    private function clearDevLog(OutputInterface $output, string $logName): void
     {  
-        $logFile = "{$this->projectDir}/var/log/dev.log";
+        $logFile = "{$this->projectDir}/var/log/$logName";
         
         if (file_exists($logFile)) { 
             file_put_contents($logFile, '');

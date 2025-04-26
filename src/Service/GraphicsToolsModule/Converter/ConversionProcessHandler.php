@@ -1,23 +1,24 @@
-<?php 
+<?php
 
 namespace App\Service\GraphicsToolsModule\Compressor;
- 
-use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandler;
+
+use App\Entity\GTMImage;
+use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
-use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface;
-use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionProcessState;
+use App\Service\GraphicsToolsModule\Converter\DTO\ConversionProcessState;
+use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandler;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandlerInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 
-class CompressionProcessHandler extends ImageProcessHandler implements ImageProcessHandlerInterface
+class ConversionProcessHandler extends ImageProcessHandler implements ImageProcessHandlerInterface
 {
-    protected ?CompressionProcessState $state; 
-    
-    public function __construct(private CompressorInterface $compressor, private ImageEntityManagerInterface $imageManager)
+    protected ?ConversionProcessState $state;
+
+    public function __construct(private ConverterInterface $compressor, private ImageEntityManagerInterface $imageManager)
     {
         parent::__construct($imageManager);
-    }  
+    }
 
     public function process(): ImageProcessData
     {
@@ -25,9 +26,9 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
             throw new \RuntimeException('Nie znaleziono pliku do kompresji. Wykonaj najpierw krok przygotowania obrazu.');
         }
 
-        $results = $this->compressor->compress($this->state->destinationPath);
+        $results = $this->compressor->convert($this->state->destinationPath, $this->state->toFormat);
 
-        $this->state->compressionResults = $results;
+        // $this->state->conversioResults = $results;
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,
@@ -38,16 +39,20 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
 
     public function finalize(): ImageProcessData
     {
-        $this->imageManager->saveAsCompressed(
-            $this->state->compressionResults,
-            $this->state->processHash,
+        $this->imageManager->save(
+            [
+                'src' => $this->state->imagePath,
+                'operationHash' => $this->state->processHash,
+                'operationResults' => $this->state->conversioResults,
+                'operationType' => GTMImage::OPERATION_CONVERSION
+            ],
             $this->state->ownerId
         );
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,
-            'status' => ImageOperationStatus::PROCESSING,  
-            'progress' => 90 
+            'status' => ImageOperationStatus::PROCESSING,
+            'progress' => 90
         ]);
     }
 }

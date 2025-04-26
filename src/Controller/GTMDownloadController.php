@@ -3,19 +3,19 @@
 namespace App\Controller;
 
 use App\Repository\GTMImageRepository;
-use Exception;
-use Psr\Log\LoggerInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Exception;
 use ZipArchive;
 
 #[Route(path: '/profil')]
 class GTMDownloadController extends AbstractController
 {
-    public function __construct(private GTMImageRepository $gtmImageRepository, private LoggerInterface $logger, private KernelInterface $kernel) {}
+    public function __construct(private GTMImageRepository $gtmImageRepository, private GTMLoggerInterface $logger, private KernelInterface $kernel) {}
 
     #[Route(path: '/narzedzia-graficzne/pobierz-grafike/{imageName}', name: 'gtm_download_image', methods: ['GET'])]
     public function downloadImage(string $imageName): Response
@@ -90,6 +90,7 @@ class GTMDownloadController extends AbstractController
             register_shutdown_function(fn() => unlink($zipFilePath));
 
             return $zipArchiveResponse;
+            
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
 

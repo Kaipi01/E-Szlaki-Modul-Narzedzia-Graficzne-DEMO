@@ -2,18 +2,16 @@
 
 namespace App\Service\GraphicsToolsModule\Compressor;
 
-
-
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Spatie\ImageOptimizer\Optimizers\{Cwebp, Jpegoptim, Pngquant};
 use Spatie\ImageOptimizer\OptimizerChainFactory;
-use Psr\Log\LoggerInterface;
 use Exception;
 
 class ImageOptimizerService implements ImageOptimizerInterface
 {
-    public function __construct(private LoggerInterface $logger, private MimeTypeGuesserInterface $mimeTypeGuesser)
+    public function __construct(private GTMLoggerInterface $logger, private MimeTypeGuesserInterface $mimeTypeGuesser)
     {
     }
 

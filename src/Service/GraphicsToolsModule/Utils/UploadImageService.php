@@ -2,15 +2,15 @@
 
 namespace App\Service\GraphicsToolsModule\Utils;
 
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Psr\Log\LoggerInterface;
 
 class UploadImageService implements UploadImageServiceInterface
 {
-    public function __construct(private LoggerInterface $logger, private ImageFileValidatorInterface $imageFileValidator) {}
+    public function __construct(private GTMLoggerInterface $logger, private ImageFileValidatorInterface $imageFileValidator) {}
 
     public function upload(UploadedFile $image, string $uploadDir, bool $keepOriginalName = false): ?string
     {

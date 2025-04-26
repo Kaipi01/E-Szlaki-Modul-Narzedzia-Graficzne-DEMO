@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Service\GraphicsToolsModule\Utils\DTO;
+namespace App\Service\GraphicsToolsModule\Workflow\DTO;
 
 class ImageOperationStatus
 {

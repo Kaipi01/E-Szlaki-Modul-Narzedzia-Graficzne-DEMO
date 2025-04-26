@@ -6,9 +6,9 @@ use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInter
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface; 
 use App\Entity\GTMImage;
 use App\Entity\User;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Exception;
 use DateTime;
 
@@ -16,7 +16,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
 {
     public function __construct(
         private EntityManagerInterface $entityManager, 
-        private LoggerInterface $logger, 
+        private GTMLoggerInterface $logger, 
         private PathResolver $pathResolver,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
     ) {}

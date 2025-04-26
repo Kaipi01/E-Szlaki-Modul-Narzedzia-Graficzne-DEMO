@@ -38,6 +38,7 @@ export default class CompressorPanel extends AbstractPanel {
    * @property {ImageState[]} images - Lista obiektów reprezentujących obrazy.
    * @property {boolean} uploading - Czy trwa przesyłanie.
    * @property {boolean} allOperationsCompleted - Czy wszystkie operacje są zakończone?.
+   * @property {number | null} checkResultInterval - ID interwała obługującego koniec operacji
    */
   constructor(container, options = {}) {
     super(container);
@@ -49,6 +50,7 @@ export default class CompressorPanel extends AbstractPanel {
       images: [],
       uploading: false,
       allOperationsCompleted: false,
+      checkResultInterval: null
     };
 
     this.initElements();
@@ -69,10 +71,9 @@ export default class CompressorPanel extends AbstractPanel {
       clearButton: this.getByAttribute("data-clear-button"),
       compressorAlerts: this.getByAttribute("data-compressor-alerts"),
       maxFileSizeInfo: this.getByAttribute("max-file-size-info"),
-      tableHeadRow: this.getByAttribute("data-table-head-row"),
+      tableHeadRow: this.getByAttribute("data-table-head-row")
     };
 
-    this.elements.resultTableElements.forEach(el => el.setAttribute('hidden', ''))
     this.elements.downloadButton.addEventListener("click", this.handleDownloadAllImages.bind(this));
   }
 
@@ -275,6 +276,7 @@ export default class CompressorPanel extends AbstractPanel {
     console.log(`Dodano plik: `, imageData);
 
     this.state.images.push(imageData);
+    this.state.uploading = true
   }
 
   /**
@@ -288,11 +290,12 @@ export default class CompressorPanel extends AbstractPanel {
   }
 
   /** @param {File} file - Usunięty plik */
-  handleFileRemoved(file) {
-    // Ten callback jest wywoływany przez FileManager
-    // Możemy tutaj wykonać dodatkowe operacje po usunięciu pliku
-    console.log(`Usunięto plik: ${file.name}`);
-    // TODO: dokończ
+  handleFileRemoved(file) { 
+    console.log(`Usunięto plik: ${file.name}`); 
+
+    const {images} = this.state
+
+    this.state.images = images.filter(img => img.name != file.name)
   }
 
   handleClear() {
@@ -317,7 +320,20 @@ export default class CompressorPanel extends AbstractPanel {
 
   /** Sprawdza czy wszystkie grafiki są skompresowane jeśli tak to wyświetla komunikat */
   handleAllImagesCompressed() {
-    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete);
+    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete); 
+
+    let test = 1;
+
+    this.state.checkResultInterval = setInterval(() => {
+      console.log("sprawdzam..." + (++test))
+      console.log(this.state.checkResultInterval)
+
+       if (this.state.uploading) {
+        this.handleAllImagesCompressed()
+       } else {
+        clearTimeout(this.state.checkResultInterval)
+       }
+    }, 1000) 
 
     if (allOperationsCompleted) { 
       const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.compressedSize, 0)
