@@ -1,218 +1,42 @@
 "use strict";
 
-import AbstractPanel from "../modules/AbstractPanel.js";
 import Toast from "../modules/Toast.js";
-import { downloadAjaxFile, formatFileSize } from "../utils/file-helpers.js";
-import FileManager from "./FileManager.js";
-import UICompressorManager from "./UICompressorManager.js";
-import UploadService from "./UploadService.js";
+import { formatFileSize } from "../utils/file-helpers.js";
+import InputFileManager from "../components/OperationPanel/InputFileManager.js";
+import UploadService from "../components/OperationPanel/UploadService.js";
+import OperationPanel from "../components/OperationPanel/OperationPanel.js";
+import CompressorUIManager from "./CompressorUIManager.js";
 
-/**
- * Klasa CompressorPanel służąca do kompresji obrazów
- *
- * Odpowiedzialna za:
- * - Koordynację pracy pomiędzy komponentami
- * - Inicjalizację modułów
- * - Zarządzanie przepływem danych
- */
-export default class CompressorPanel extends AbstractPanel {
-  /**
-   * @param {HTMLElement | string} container
-   * @param {Object} options - Opcje konfiguracyjne
-   * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
-   * @param {string} options.imageDataUrl - URL endpointu do danych skompresowanego obrazu
-   * @param {string} options.downloadAllImagesUrl - URL endpointu do pobrania wszystkich skompresowanych obrazów
-   * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
-   * @param {Array}  options.allowedTypes - Dozwolone typy plików
-   * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
-   * @param {number} options.maxBatchSize - Maksymalna liczba plików w jednej partii
-   * @param {number} options.maxBatchSizeBytes - Maksymalny rozmiar partii w bajtach
-   *
-   * @typedef {Object} ImageState
-   * @property {string|null} hash - Unikalny identyfikator obrazu.
-   * @property {string} name - Nazwa pliku obrazu.
-   * @property {number} compressedSize - rozmiar po kompresji 
-   * @property {boolean} isOperationComplete - Czy operacja (np. kompresja) została zakończona.
-   *
-   * @typedef {Object} State
-   * @property {ImageState[]} images - Lista obiektów reprezentujących obrazy.
-   * @property {boolean} uploading - Czy trwa przesyłanie.
-   * @property {boolean} allOperationsCompleted - Czy wszystkie operacje są zakończone?.
-   * @property {number | null} checkResultInterval - ID interwała obługującego koniec operacji
-   */
+/** Klasa CompressorPanel służąca do kompresji obrazów */
+export default class CompressorPanel extends OperationPanel {
+  
   constructor(container, options = {}) {
-    super(container);
+    super(container, options)
 
-    this.options = options;
-
-    /** @type {State} */
-    this.state = {
-      images: [],
-      uploading: false,
-      allOperationsCompleted: false,
-      checkResultInterval: null
-    };
-
-    this.initElements();
-    this.initComponents(options);
+    this.initComponents();
+    this.initCompressorEvents()
   }
 
-  initElements() {
-    this.elements = {
-      container: this.container,
-      dropZone: this.getByAttribute("data-drop-zone"),
-      fileInput: this.getByAttribute("data-file-input"),
-      selectButton: this.getByAttribute("data-select-button"),
-      downloadButton: this.getByAttribute("data-download-all-btn"),
-      imageTable: this.getByAttribute("data-image-table"),
-      resultMessage: this.getByAttribute("data-compressor-result-message"),
-      resultTableElements: this.container.querySelectorAll('[data-result-table]'),
-      resultValue: this.getByAttribute("data-compressor-result-value"),
-      clearButton: this.getByAttribute("data-clear-button"),
-      compressorAlerts: this.getByAttribute("data-compressor-alerts"),
-      maxFileSizeInfo: this.getByAttribute("max-file-size-info"),
-      tableHeadRow: this.getByAttribute("data-table-head-row")
-    };
-
-    this.elements.downloadButton.addEventListener("click", this.handleDownloadAllImages.bind(this));
+  initCompressorEvents() {
+    this.elements.downloadButton.addEventListener("click", () => this.handleDownloadAllImages('skompresowane-grafiki'));
   }
 
-  /** @param {Object} options - Opcje konfiguracyjne */
-  initComponents(options) {
-    this.fileManager = new FileManager({
-      ...options,
+  initComponents() {
+    this.InputFileManager = new InputFileManager({
+      ...this.options,
       onFileAdded: this.handleFileAdded.bind(this),
-      onFileRemoved: this.handleFileRemoved.bind(this),
+      onFileRemoved: this.handleFileRemove.bind(this),
       onError: this.showError.bind(this),
     });
 
-    this.uiManager = new UICompressorManager(this.elements, {
-      ...options,
+    this.uiManager = new CompressorUIManager(this.elements, {
+      ...this.options,
       onFileSelect: this.handleFileSelect.bind(this),
       onFileRemove: this.handleFileRemove.bind(this),
       onClear: this.handleClear.bind(this),
     });
 
-    this.uploadService = new UploadService(options);
-  }
-
-  handleDownloadAllImages() {
-    try {
-      const imageHashes = this.state.images.map((image) => image.hash).filter((hash) => hash != null);
-
-      downloadAjaxFile(this.options.downloadAllImagesUrl, { imageHashes }, "skompresowane-grafiki.zip");
-    } catch (e) {
-      this.showError(e.message);
-    }
-  }
-
-  /**
-   * Obsługa wyboru plików przez użytkownika
-   * @param {FileList} fileList - Lista wybranych plików
-   */
-  handleFileSelect(fileList) {
-    const newFiles = this.fileManager.addFiles(fileList);
-
-    if (newFiles.length > 0) {
-      this.uiManager.displayCurrentResultMessage("Trwa Kompresja, proszę czekać", "...")
-      this.elements.resultTableElements.forEach(el => el.removeAttribute('hidden'))
-    }
-
-    newFiles.forEach((file) => {
-      const fileDetails = this.fileManager.getFileDetails(file);
-
-      this.uiManager
-        .renderImagesInfoTable(file, fileDetails.formattedSize)
-        .then(() => this.uploadFile(file))
-        .catch((error) => {
-          this.showError(`Błąd podczas wczytywania pliku "${file.name}".`);
-          this.showError(error.message);
-        });
-    });
-
-    this.updateUI();
-  }
-
-  getProgressElementsForFile(fileName) {
-    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, "_");
-    const row = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-
-    if (!row) {
-      console.error(`Nie znaleziono wiersza dla pliku: ${fileName}`);
-      return null;
-    }
-
-    const statusCell = row.querySelector("[data-status]");
-
-    if (!statusCell) {
-      console.error(`Nie znaleziono komórki statusu dla pliku: ${fileName}`);
-      return null;
-    }
-
-    const progressContainer = statusCell.querySelector(`[data-progress-container-${safeFileName}]`);
-    const progressBar = statusCell.querySelector(`[data-progress-bar-${safeFileName}]`);
-    const progressText = statusCell.querySelector(`[data-progress-text-${safeFileName}]`);
-
-    if (!progressContainer || !progressBar || !progressText) {
-      console.error(`Nie znaleziono elementów progress bara dla pliku: ${fileName}`);
-      return null;
-    }
-
-    return {
-      container: progressContainer,
-      bar: progressBar,
-      text: progressText,
-    };
-  }
-
-  /** @param {File} file */
-  uploadFile(file) {
-    this.uiManager.showFileProgressBar(file.name);
-
-    const statusCell = this.getStatusCellForFile(file.name);
-    const progressNameElement = statusCell.querySelector(".animated-progress-name");
-
-    progressNameElement.textContent = "Wysyłanie...";
-
-    this.uploadService.uploadFile(file, {
-      onProgress: (percentValue) => this.onProgresOperationHandler(percentValue, progressNameElement, file.name),
-      onError: (message) => this.onErrorOperationHandler(message, file.name),
-      onComplete: async (operationHash) => await this.onCompleteOperationHandler(operationHash, progressNameElement, file.name),
-    });
-  }
-
-  /** 
-   * @param {string | number} percentValue
-   * @param {HTMLElement} progressNameElement 
-   * @param {string} fileName
-   */
-  onProgresOperationHandler(percentValue, progressNameElement, fileName) {
-    const percent = parseInt(percentValue);
-
-    this.uiManager.updateFileProgress(fileName, percent);
-
-    // Aktualizacja tekstu statusu w zależności od postępu
-    if (percent < 20) {
-      progressNameElement.textContent = "Wysyłanie...";
-    } else if (percent < 40) {
-      progressNameElement.textContent = "Przygotowywanie...";
-    } else if (percent < 80) {
-      progressNameElement.textContent = "Kompresja...";
-    } else if (percent < 100) {
-      progressNameElement.textContent = "Finalizacja...";
-    } else {
-      progressNameElement.textContent = "Zakończono";
-    }
-  }
-
-  /**
-   * @param {string} errorMessage 
-   * @param {string} fileName 
-   */
-  onErrorOperationHandler(errorMessage, fileName) {
-    this.showError(`Błąd dla pliku "${fileName}": ${errorMessage}`);
-    this.uiManager.updateFileProgress(fileName, 0);
-    this.uiManager.setFileProgressError(fileName, "Błąd kompresji");
+    this.uploadService = new UploadService(this.options, this.uiManager, this.InputFileManager);
   }
 
   /** 
@@ -223,11 +47,9 @@ export default class CompressorPanel extends AbstractPanel {
   async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {
     const getImageURL = `${this.options.imageDataUrl}/${operationHash}`;
     const response = await fetch(getImageURL, { method: "GET" });
-    const { imageData: image } = await response.json();
+    const { imageData: image } = await response.json(); 
 
-    // this.uiManager.updateTableHead();
-
-    this.uiManager.updateTableAfterCompression(
+    this.uiManager.updateTableAfterOperation(
       image.originalName,
       image.compressedSize,
       image.compressionRatio,
@@ -242,7 +64,7 @@ export default class CompressorPanel extends AbstractPanel {
 
       imageData.isOperationComplete = true;
       imageData.hash = operationHash;
-      imageData.compressedSize = image.compressedSize
+      imageData.savedSize = image.compressedSize
     }
 
     if (!this.state.allOperationsCompleted) {
@@ -252,92 +74,22 @@ export default class CompressorPanel extends AbstractPanel {
     progressNameElement.textContent = "Zakończono";
   }
 
-  /** @param {string} fileName - Nazwa pliku */
-  getStatusCellForFile(fileName) {
-    const row = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-
-    if (row) {
-      return row.querySelector("[data-status]");
-    }
-
-    return null;
-  }
-
-  /** @param {File} file - Dodany plik */
-  handleFileAdded(file) {
-    /** @type {ImageState} */
-    const imageData = {
-      hash: null,
-      name: file.name,
-      isOperationComplete: false,
-      compressedSize: 0,
-    };
-
-    console.log(`Dodano plik: `, imageData);
-
-    this.state.images.push(imageData);
-    this.state.uploading = true
-  }
-
-  /**
-   * Obsługa usunięcia pliku przez użytkownika
-   * @param {string} fileName - Nazwa pliku do usunięcia
-   */
-  handleFileRemove(fileName) {
-    this.fileManager.removeFile(fileName);
-    this.uiManager.removeTableRow(fileName);
-    this.updateUI();
-  }
-
-  /** @param {File} file - Usunięty plik */
-  handleFileRemoved(file) { 
-    console.log(`Usunięto plik: ${file.name}`); 
-
-    const {images} = this.state
-
-    this.state.images = images.filter(img => img.name != file.name)
-  }
-
-  handleClear() {
-    if (this.state.uploading) {
-      Toast.show(Toast.WARNING, "Pliki są w trakcie wysyłania – proszę poczekać na zakończenie, zanim wyczyścisz dane.");
-      return;
-    }
-
-    this.state.images = [];
-    this.state.uploading = false;
-    this.state.allOperationsCompleted = false;
-
-    this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", "0 KB")
-
-    this.elements.downloadButton.disabled = true
-    this.elements.clearButton.disabled = true
-
-    this.fileManager.clearFiles();
-    this.uiManager.clearTable();
-    this.updateUI();
-  }
-
   /** Sprawdza czy wszystkie grafiki są skompresowane jeśli tak to wyświetla komunikat */
   handleAllImagesCompressed() {
-    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete); 
-
-    let test = 1;
+    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete);
 
     this.state.checkResultInterval = setInterval(() => {
-      console.log("sprawdzam..." + (++test))
-      console.log(this.state.checkResultInterval)
 
-       if (this.state.uploading) {
+      if (this.state.uploading) {
         this.handleAllImagesCompressed()
-       } else {
+      } else {
         clearTimeout(this.state.checkResultInterval)
-       }
-    }, 1000) 
+      }
+    }, 1000)
 
-    if (allOperationsCompleted) { 
-      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.compressedSize, 0)
-      const imagesTotalSizeBefore = this.fileManager.getFilesTotalSize() 
+    if (allOperationsCompleted) {
+      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.savedSize, 0)
+      const imagesTotalSizeBefore = this.InputFileManager.getFilesTotalSize()
 
       this.state.allOperationsCompleted = allOperationsCompleted;
       this.state.uploading = false;
@@ -347,15 +99,5 @@ export default class CompressorPanel extends AbstractPanel {
 
       Toast.show(Toast.SUCCESS, "Wszystkie obrazy zostały pomyślnie skompresowane!");
     }
-  }
-
-  /** @param {string} message - Treść komunikatu */
-  showError(message) {
-    super.showError(message, this.elements.compressorAlerts);
-  }
-
-  updateUI() {
-    const hasFiles = this.fileManager.hasFiles();
-    this.uiManager.updateUI(hasFiles, this.state.uploading);
-  }
+  }  
 }

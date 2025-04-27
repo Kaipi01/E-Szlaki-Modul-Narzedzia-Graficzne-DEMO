@@ -1,16 +1,17 @@
-@use "../../functions/toRem" as *;
-@use "../../functions/flex-center" as *;
+@use "../functions/toRem" as *;
+@use "../functions/flex-center" as *;
 
-#graphics-tools-module-compressor {  
-  $success-color: #2ecc71;
-  $light-gray: #f8f9fa;
-  $medium-gray: #e9ecef;
-  $dark-gray: #6c757d;
-  $border-radius: 4px;
-  $box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  $transition-speed: 0.3s;
- 
-  .image-compressor { 
+#graphics-tools-module {  
+  
+  .image-operation { 
+    $success-color: #2ecc71;
+    $light-gray: #f8f9fa;
+    $medium-gray: #e9ecef;
+    $dark-gray: #6c757d;
+    $border-radius: 4px;
+    $box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    $transition-speed: 0.3s;
+
     margin: 0 auto;
     padding: toRem(20);
     color: var(--font-color); 
@@ -94,7 +95,7 @@
         background-color: var(--red);
         color: white;
 
-        .image-compressor__item-cancel-icon {
+        .image-operation__item-cancel-icon {
           color: white;
         }
       } 
@@ -120,7 +121,7 @@
         background-color: var(--blue);
         color: white;
 
-        .image-compressor__item-cancel-icon {
+        .image-operation__item-cancel-icon {
           color: white;
         }
       } 

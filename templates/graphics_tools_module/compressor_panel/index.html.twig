@@ -8,7 +8,9 @@
 
 {% block panel_content %}    
 
-{% include "graphics_tools_module/compressor_panel/image-compressor.html.twig" %}
+    <div id="graphics-tools-module-compressor">
+        {% include "graphics_tools_module/components/image-operation.html.twig" %}
+    </div> 
  
 {% endblock %}
 

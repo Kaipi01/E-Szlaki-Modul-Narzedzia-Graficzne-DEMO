@@ -1,16 +1,15 @@
-import { formatFileSize } from "../utils/file-helpers.js";
+import { formatFileSize } from "../../utils/file-helpers.js";
 
 /**
- * Klasa FileManager
+ * Klasa InputFileManager
  * 
  * Odpowiedzialna za:
  * - Zarządzanie plikami (dodawanie, usuwanie)
  * - Walidację plików (typ, rozmiar, duplikaty)
- * - Formatowanie informacji o plikach
+ * - Zwracanie informacji o plikach
  */
-export default class FileManager {
-    /**
-     * Konstruktor klasy FileManager
+export default class InputFileManager {
+    /** 
      * @param {Object} options - Opcje konfiguracyjne
      * @param {Array<string>} options.allowedTypes - Dozwolone typy plików
      * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
@@ -25,7 +24,8 @@ export default class FileManager {
         this.onFileRemoved = options.onFileRemoved || (() => {});
         this.onError = options.onError || (() => {});
 
-        this.files = []; // Lista przechowywanych plików
+        /** @type File[] */
+        this.files = []; 
     }
 
     /**
@@ -40,10 +40,8 @@ export default class FileManager {
         
         if (newFiles.length === 0) return [];
 
-        // Dodanie nowych plików do stanu
         this.files = [...this.files, ...newFiles];
 
-        // Powiadomienie o dodaniu plików
         newFiles.forEach(file => this.onFileAdded(file));
 
         return newFiles;
@@ -55,7 +53,6 @@ export default class FileManager {
      * @returns {boolean} - Czy plik przeszedł walidację
      */
     validateFile(file) {
-        // Sprawdzenie czy plik jest obrazem o dozwolonym typie
         if (!this.config.allowedTypes.includes(file.type)) {
             const allowedTypesList = this.config.allowedTypes.map(format => {
                 return format.replace('image/', '').toUpperCase();
@@ -65,13 +62,11 @@ export default class FileManager {
             return false;
         }
 
-        // Sprawdzenie rozmiaru pliku
         if (file.size > this.config.maxFileSize) {
             this.onError(`Plik "${file.name}" jest zbyt duży. Maksymalny rozmiar pliku to ${formatFileSize(this.config.maxFileSize)}.`);
             return false;
         }
 
-        // Sprawdzenie czy plik nie został już dodany
         const isDuplicate = this.files.some(existingFile =>
             existingFile.name === file.name &&
             existingFile.size === file.size &&
@@ -99,36 +94,17 @@ export default class FileManager {
         const removedFile = this.files[fileIndex];
         this.files.splice(fileIndex, 1);
         
-        // Powiadomienie o usunięciu pliku
-        this.onFileRemoved(removedFile);
+        this.onFileRemoved(fileName);
         
         return removedFile;
-    }
-
-    // /**
-    //  * Pobiera wszystkie pliki
-    //  * @returns {Array<File>} - Lista wszystkich plików
-    //  */
-    // getAllFiles() {
-    //     return [...this.files];
-    // }
-
-    // /**
-    //  * Pobiera plik po nazwie
-    //  * @param {string} fileName - Nazwa pliku
-    //  * @returns {File|undefined} - Znaleziony plik lub undefined
-    //  */
-    // getFileByName(fileName) {
-    //     return this.files.find(file => file.name === fileName);
-    // }
+    } 
 
     /** Czyści wszystkie pliki */
     clearFiles() {
         const oldFiles = [...this.files];
         this.files = [];
         
-        // Powiadomienie o usunięciu każdego pliku
-        oldFiles.forEach(file => this.onFileRemoved(file));
+        oldFiles.forEach(file => this.onFileRemoved(file.name));
     }
 
     /**
@@ -137,15 +113,7 @@ export default class FileManager {
      */
     hasFiles() {
         return this.files.length > 0;
-    }
-
-    // /**
-    //  * Zwraca liczbę plików
-    //  * @returns {number} - Liczba plików
-    //  */
-    // getFileCount() {
-    //     return this.files.length;
-    // }
+    } 
 
     /**
      * Zwraca łączny rozmiar wszystkich plików
@@ -178,50 +146,4 @@ export default class FileManager {
     getAllFileDetails() {
         return this.files.map(file => this.getFileDetails(file));
     }
-
-    // /**
-    //  * Sortuje pliki według wybranego kryterium
-    //  * @param {string} criterion - Kryterium sortowania (name, size, type)
-    //  * @param {boolean} ascending - Czy sortować rosnąco
-    //  */
-    // sortFiles(criterion = 'name', ascending = true) {
-    //     const sortFunctions = {
-    //         name: (a, b) => a.name.localeCompare(b.name),
-    //         size: (a, b) => a.size - b.size,
-    //         type: (a, b) => a.type.localeCompare(b.type),
-    //         date: (a, b) => a.lastModified - b.lastModified
-    //     };
-
-    //     const sortFunction = sortFunctions[criterion] || sortFunctions.name;
-        
-    //     this.files.sort((a, b) => {
-    //         return ascending ? sortFunction(a, b) : sortFunction(b, a);
-    //     });
-    // }
-
-    // /**
-    //  * Filtruje pliki według typu
-    //  * @param {string} type - Typ MIME pliku
-    //  * @returns {Array<File>} - Przefiltrowana lista plików
-    //  */
-    // filterByType(type) {
-    //     return this.files.filter(file => file.type === type);
-    // }
-
-    // /**
-    //  * Sprawdza czy plik jest obrazem
-    //  * @param {File} file - Plik do sprawdzenia
-    //  * @returns {boolean} - Czy plik jest obrazem
-    //  */
-    // isImage(file) {
-    //     return file.type.startsWith('image/');
-    // }
-
-    // /**
-    //  * Zwraca tylko pliki będące obrazami
-    //  * @returns {Array<File>} - Lista plików będących obrazami
-    //  */
-    // getOnlyImages() {
-    //     return this.files.filter(file => this.isImage(file));
-    // }
 }

@@ -1,21 +1,28 @@
 'use strict';
 
+import InputFileManager from "./InputFileManager";
+import UIManager from "./UIManager";
+
+
 /**
  * Klasa UploadService jest odpowiedzialna za:
  * - Wysyłanie plików na serwer
  * - Śledzenie postępu wysyłania
  * - Obsługę odpowiedzi z serwera
- * - Monitorowanie postępu kompresji
+ * - Monitorowanie postępu operacji
  */
 export default class UploadService {
   /**
-   * Konstruktor klasy UploadService
    * @param {Object} options - Opcje konfiguracyjne
-   * @param {string} options.uploadUrl - URL endpointu do kompresji obrazu
+   * @param {string} options.uploadUrl - URL endpointu do przetworzenia obrazu
    * @param {number} options.maxConcurrentUploads - Maksymalna liczba równoczesnych wysyłek
+   * @param {UIManager} uiManager
+   * @param {InputFileManager} fileManager
    */
-  constructor(options = {}) {
+  constructor(options = {}, uiManager, fileManager) {
     this.config = options;
+    this.uiManager = uiManager;
+    this.fileManager = fileManager
 
     if (!this.config.uploadUrl) {
       console.error('UploadServiceError: upload url is undefined!');
@@ -25,7 +32,7 @@ export default class UploadService {
   }
 
   /**
-   * Wysyłanie pojedynczego pliku z monitorowaniem postępu kompresji
+   * Wysyłanie pojedynczego pliku z monitorowaniem postępu 
    * @param {File} file - Plik do wysłania
    * @param {Object} callbacks
    * @param {Function} callbacks.onProgress - Callback wywoływany przy aktualizacji postępu
@@ -63,14 +70,14 @@ export default class UploadService {
 
       onComplete(processHash);
     } catch (error) {
-      errorHandler(`Wystąpił błąd podczas procesu kompresji: ${error.message}`);
+      errorHandler(`Wystąpił błąd podczas operacji: ${error.message}`);
       console.error(error);
     }
   }
 
   /** @param {Object} data */
   async sendStepRequest(data) {
-    const formData = new FormData();
+    const formData = new FormData();  
 
     for (const key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -90,18 +97,25 @@ export default class UploadService {
 
   /** Anulowanie wszystkich aktywnych wysyłek */
   cancelAllUploads() {
-    this.uploadingImages.forEach((imageName) => this.cancelUpload(imageName));
+    this.uploadingImages = [] 
+
+    this.fileManager.clearFiles()
+    this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", "0 KB")
   }
 
   /** @param {string} fileName */
-  cancelUpload(fileName) {
-    // TODO: Dokończ implementacje
+  cancelUpload(fileName) { 
 
-    // Usunięcie z listy uploadingImages
+    this.fileManager.removeFile(fileName)
+
     const index = this.uploadingImages.indexOf(fileName);
 
     if (index !== -1) {
       this.uploadingImages.splice(index, 1);
     }
+
+    if (this.uploadingImages.length === 0) {
+      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", "0 KB")
+    } 
   }
 }

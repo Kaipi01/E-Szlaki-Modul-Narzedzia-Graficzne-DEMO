@@ -1,12 +1,7 @@
-@use "./components/custom-pie-chart";
-@use "./components/custom-popover";
-@use "./components/custom-select-green";
-@use "./components/custom-switch";
 @use "./components/toast";
-@use "./components/search-form";
 @use "./components/alert";
 @use "./components/drop-zone";
 @use "./components/modern-table";
 @use "./components/animated-progress";
 
-@use "./pages/compressor-panel/image-compressor";
+@use "./layout/image-operation"; 

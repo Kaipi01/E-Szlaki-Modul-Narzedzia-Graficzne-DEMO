@@ -1,8 +1,8 @@
-import { formatFileSize } from "../utils/file-helpers.js";
-import { fadeAnimation } from "../utils/animations.js";
+import { formatFileSize } from "../../utils/file-helpers.js";
+import { fadeAnimation } from "../../utils/animations.js";
 
 /**
- * Klasa UICompressorManager
+ * Klasa UIManager
  * 
  * Odpowiedzialna za:
  * - Zarządzanie interfejsem użytkownika kompresora
@@ -10,9 +10,8 @@ import { fadeAnimation } from "../utils/animations.js";
  * - Aktualizację wskaźników postępu
  * - Obsługę interakcji użytkownika z interfejsem
  */
-export default class UICompressorManager {
-  /**
-   * Konstruktor klasy UICompressorManager
+export default class UIManager {
+  /** 
    * @param {Object} elements - Referencje do elementów DOM
    * @param {HTMLElement} elements.dropZone - Element strefy upuszczania plików
    * @param {HTMLInputElement} elements.fileInput - Input typu file
@@ -22,7 +21,7 @@ export default class UICompressorManager {
    * @param {HTMLElement} elements.progressContainer - Kontener paska postępu
    * @param {HTMLElement} elements.progressBar - Pasek postępu
    * @param {HTMLElement} elements.progressText - Tekst postępu
-   * @param {HTMLElement} elements.compressorAlerts - Kontener alertów
+   * @param {HTMLElement} elements.containerAlerts - Kontener alertów
    * @param {HTMLElement} elements.tableHeadRow 
    * @param {HTMLElement} elements.resultMessage 
    * @param {HTMLElement} elements.resultValue 
@@ -40,7 +39,58 @@ export default class UICompressorManager {
 
     this.attachEventListeners();
     this.initUI()
-  }
+  } 
+
+  /**
+   * Renderowanie miniatury obrazu w widoku tabeli
+   * @abstract
+   * @param {File} file - Plik obrazu do wyświetlenia
+   * @param {string} formattedSize - Sformatowany rozmiar pliku
+   */
+  renderImagesInfoTable(file, formattedSize) {}
+
+  /**
+   * Aktualizacja tabeli po operacji
+   * @abstract
+   * @param {string} fileName - Nazwa pliku
+   * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
+   * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
+   * @param {string} downloadURL - link do pobrania
+   */
+  updateTableAfterOperation(fileName, compressedSize, ratio, downloadURL) {}
+  
+
+  /**
+   * Aktualizacja paska postępu dla konkretnego pliku
+   * @param {string} fileName - Nazwa pliku
+   * @param {number} percent - Procent postępu (0-100)
+   */
+  updateFileProgress(fileName, percent) {
+    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
+    const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
+    const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
+    const progressName = document.querySelector(`[data-progress-container-${safeFileName}] .animated-progress-name`);
+
+    if (progressBar && progressText) {
+      progressBar.style.width = `${percent}%`;
+      progressText.textContent = `${percent}%`;
+      progressBar.setAttribute('per', percent);
+
+      if (progressName) {
+        if (percent < 20) {
+          progressName.textContent = 'Wysyłanie...';
+        } else if (percent < 60) {
+          progressName.textContent = 'Przygotowywanie...';
+        } else if (percent < 100) {
+          progressName.textContent = 'Przetwarzanie...';
+        } else {
+          progressName.textContent = 'Zakończono';
+        }
+      }
+    }
+  } 
+
+
 
   initUI() {
     if (this.elements.maxFileSizeInfo) {
@@ -74,184 +124,13 @@ export default class UICompressorManager {
     this.elements.resultValue.textContent = value
   }
 
-  /**
-   * Renderowanie miniatury obrazu w widoku tabeli
-   * @param {File} file - Plik obrazu do wyświetlenia
-   * @param {string} formattedSize - Sformatowany rozmiar pliku
-   */
-  renderImagesInfoTable(file, formattedSize) {
+  /** Renderuje nagłówek tabeli */
+  renderTableHead() {
+    // TODO:
+      this.elements.tableHeadRow.innerHTML = `
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = (event) => {
-        const row = document.createElement('tr');
-        const maxFileNameLength = 20
-        const fileNameToDisplay = file.name.length > maxFileNameLength ? (file.name.slice(0, maxFileNameLength) + "...") : file.name
-        row.dataset.fileName = file.name;
-
-        const previewCell = this.createTableCell(`<img src="${event.target.result}" alt="${file.name}" class="preview-image">`, {
-          'data-title': 'Podgląd',
-          'data-preview-image': ''
-        });
-
-        const nameCell = this.createTableCell(fileNameToDisplay, {
-          'data-title': 'Nazwa pliku',
-          'data-name': ''
-        });
-
-        const typeCell = this.createTableCell(
-          `<span class="mx-auto badge">${file.type.replace('image/', '').toUpperCase()}</span>`, {
-            'data-title': 'Typ',
-            'data-type': ''
-          }
-        );
-
-        const progressBarHTML = `
-                    <div data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress animated-progress--no-label">
-                        <div class="animated-progress-bar">
-                            <div class="animated-progress-per" data-progress-bar-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} per="0"></div>
-                        </div>
-                        <div class="animated-progress-info">
-                            <div class="animated-progress-name">Oczekiwanie...</div>
-                            <div class="animated-progress-stats">
-                                <span data-progress-text-${file.name.replace(/[^a-zA-Z0-9]/g, '_')}>0%</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-        const statusCell = this.createTableCell(progressBarHTML, {
-          'data-title': 'Status',
-          'data-status': '',
-          'data-file-progress': file.name
-        });
-
-        const sizeCell = this.createTableCell(formattedSize, {
-          'data-title': 'Rozmiar',
-          'data-size': ''
-        });
-
-        const compressedSizeCell = this.createTableCell('-', {
-          'data-title': 'Rozmiar po kompresji',
-          'data-compressed-size': ''
-        });
-
-        const compressedRatioCell = this.createTableCell('-', {
-          'data-title': 'Współczynik kompresji',
-          'data-compressed-ratio': ''
-        });
-
-        const actionsCell = this.createTableCell(`
-                    <button class="mx-auto badge image-compressor__item-cancel">
-                        <i class="fa-solid fa-xmark image-compressor__item-cancel-icon"></i> 
-                        <span>Anuluj</span>
-                    </button>
-                `, {
-          'data-title': 'Akcje',
-          'data-actions': ''
-        });
-        const cancelButton = actionsCell.querySelector('button');
-        cancelButton.addEventListener('click', () => this.onFileRemove(file.name));
-
-        row.appendChild(previewCell);
-        row.appendChild(nameCell);
-        row.appendChild(typeCell);
-        row.appendChild(sizeCell);
-        row.appendChild(compressedSizeCell)
-        row.appendChild(compressedRatioCell)
-        row.appendChild(statusCell);
-        row.appendChild(actionsCell);
-
-        this.elements.imageTable.appendChild(row);
-        resolve(row);
-      };
-
-      reader.onerror = (error) => reject(error);
-
-      reader.readAsDataURL(file);
-    });
+      `
   }
-
-  //   /** Aktualizacja nagłówka tabeli po kompresji zdjęć */
-  //   updateTableHead() {
-  //     const allTableTHElements = Array.from(this.elements.tableHeadRow.children)
-
-  //     allTableTHElements.forEach(th => th.classList.remove('sr-only'))
-  //     // this.elements.tableHeadRow.lastElementChild?.remove()
-
-  //     // this.elements.tableHeadRow.append(createTH('Rozmiar po kompresji'))
-  //     // this.elements.tableHeadRow.append(createTH('Poziom kompresji'))
-  //     // this.elements.tableHeadRow.append(createTH('Akcje'))
-  //   }
-
-  /**
-   * Aktualizacja informacji o skompresowanym obrazie w widoku listy
-   * @param {string} fileName - Nazwa pliku
-   * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
-   * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
-   * @param {string} downloadURL - link do pobrania
-   */
-  updateTableAfterCompression(fileName, compressedSize, ratio, downloadURL) {
-    if (!fileName) {
-      console.warn('Brak nazwy pliku w updateTableAfterCompression');
-      return;
-    }
-
-    const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
-
-    if (!listItem) return;
-
-    const actionsCell = listItem.querySelector('[data-actions]');
-    const compressedSizeCell = listItem.querySelector('[data-compressed-size]');
-    const compressedRatioCell = listItem.querySelector('[data-compressed-ratio]');
-
-    compressedSizeCell.innerHTML = `<span class="image-compressor__item-compressed-size">${formatFileSize(parseInt(compressedSize))}</span>`;
-    compressedRatioCell.innerHTML = `<span class="mx-auto badge image-compressor__compression-ratio">${ratio}%</span>`;
-    actionsCell.innerHTML = `
-            <a href="${downloadURL}" download class="mx-auto badge image-compressor__item-download">
-                <i class="fa-solid fa-circle-down image-compressor__item-download-icon"></i>
-                <span>Pobierz</span>
-            </a>
-        `;
-
-    compressedSizeCell.classList.remove('sr-only');
-    compressedRatioCell.classList.remove('sr-only');
-
-    // Oznacz pasek postępu jako zakończony sukcesem
-    this.setFileProgressSuccess(fileName);
-  }
-
-  /**
-   * Aktualizacja paska postępu dla konkretnego pliku
-   * @param {string} fileName - Nazwa pliku
-   * @param {number} percent - Procent postępu (0-100)
-   */
-  updateFileProgress(fileName, percent) {
-    const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, '_');
-    const progressBar = document.querySelector(`[data-progress-bar-${safeFileName}]`);
-    const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
-    const progressName = document.querySelector(`[data-progress-container-${safeFileName}] .animated-progress-name`);
-
-    if (progressBar && progressText) {
-      progressBar.style.width = `${percent}%`;
-      progressText.textContent = `${percent}%`;
-      progressBar.setAttribute('per', percent);
-
-      // Aktualizacja tekstu informującego o aktualnym etapie
-      if (progressName) {
-        if (percent < 20) {
-          progressName.textContent = 'Wysyłanie...';
-        } else if (percent < 60) {
-          progressName.textContent = 'Przygotowanie...';
-        } else if (percent < 100) {
-          progressName.textContent = 'Kompresja...';
-        } else {
-          progressName.textContent = 'Zakończono';
-        }
-      }
-    }
-  } 
 
   /**
    * Pokazanie paska postępu dla konkretnego pliku
