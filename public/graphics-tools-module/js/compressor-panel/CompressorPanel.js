@@ -223,7 +223,7 @@ export default class CompressorPanel extends AbstractPanel {
   async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {
     const getImageURL = `${this.options.imageDataUrl}/${operationHash}`;
     const response = await fetch(getImageURL, { method: "GET" });
-    const { compressedImage: image } = await response.json();
+    const { imageData: image } = await response.json();
 
     // this.uiManager.updateTableHead();
 

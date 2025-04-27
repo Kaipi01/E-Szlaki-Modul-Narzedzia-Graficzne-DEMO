@@ -2,19 +2,20 @@
 
 namespace App\Service\GraphicsToolsModule\Compressor;
  
-use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandler;
+use App\Service\GraphicsToolsModule\Workflow\Abstract\ImageProcessHandler;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
-use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface;
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionProcessState;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandlerInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 
 class CompressionProcessHandler extends ImageProcessHandler implements ImageProcessHandlerInterface
 {
-    protected ?CompressionProcessState $state; 
+    /** @var CompressionProcessState | null */
+    protected $state; 
     
-    public function __construct(private CompressorInterface $compressor, private ImageEntityManagerInterface $imageManager)
+    public function __construct(private CompressorInterface $compressor, protected ImageEntityManagerInterface $imageManager)
     {
         parent::__construct($imageManager);
     }  

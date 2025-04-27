@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Service\GraphicsToolsModule\Compressor\Contracts;
+namespace App\Service\GraphicsToolsModule\Utils\Contracts;
 
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 

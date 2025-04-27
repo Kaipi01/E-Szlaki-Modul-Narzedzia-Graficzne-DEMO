@@ -13,7 +13,7 @@ class GTMConverterPanelController extends AbstractController
     public function index(): Response
     {  
         return $this->render('graphics_tools_module/converter_panel/index.html.twig', [
-            'controller_name' => 'GTMConverterPanelController',
+            'GET_IMAGE_DATA_URL' => GTMImageDataAPIController::GET_IMAGE_DATA_URL
         ]);
     }
 }

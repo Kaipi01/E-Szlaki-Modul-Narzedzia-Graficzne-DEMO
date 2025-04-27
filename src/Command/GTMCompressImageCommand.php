@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
  
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface; 
-use App\Service\GraphicsToolsModule\Compressor\ImageEntityManager;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +20,7 @@ class GTMCompressImageCommand extends Command
     public function __construct(
         private CompressorInterface $compressor,
         private LoggerInterface $logger,
-        private ImageEntityManager $imageManager, 
+        private ImageEntityManagerInterface $imageManager, 
         private string $compressedDir
     ) {
         parent::__construct();  

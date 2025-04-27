@@ -6,6 +6,7 @@
 parameters:
     gtm_uploads_tmp: '%kernel.project_dir%/public/graphics-tools-module/uploads/temp'
     gtm_uploads_compressed: '%kernel.project_dir%/public/graphics-tools-module/uploads/compressed'
+    gtm_uploads_converted: '%kernel.project_dir%/public/graphics-tools-module/uploads/converted'
     gtm_uploads_compressed_short: 'graphics-tools-module/uploads/compressed'
 
 services:

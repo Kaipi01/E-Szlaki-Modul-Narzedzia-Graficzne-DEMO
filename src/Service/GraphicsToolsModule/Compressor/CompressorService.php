@@ -6,7 +6,6 @@ use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;  
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
-use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface; 
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -15,7 +14,6 @@ class CompressorService implements CompressorInterface
 {    
     public function __construct(
         private GTMLoggerInterface $logger,
-        private UploadImageServiceInterface $uploadService,
         private ImageOptimizerInterface $optimizer,  
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,

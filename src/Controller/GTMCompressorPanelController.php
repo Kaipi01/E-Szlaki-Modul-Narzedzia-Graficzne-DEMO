@@ -13,7 +13,7 @@ class GTMCompressorPanelController extends AbstractController
     public function index(): Response
     {   
         return $this->render('graphics_tools_module/compressor_panel/index.html.twig', [
-            'GET_IMAGE_DATA_URL' => GTMCompressorAPIController::GET_IMAGE_DATA_URL
+            'GET_IMAGE_DATA_URL' => GTMImageDataAPIController::GET_IMAGE_DATA_URL
         ]);
     }
 }

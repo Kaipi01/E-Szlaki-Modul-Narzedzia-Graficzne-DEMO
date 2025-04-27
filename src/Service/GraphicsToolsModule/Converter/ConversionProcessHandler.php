@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Service\GraphicsToolsModule\Compressor;
+namespace App\Service\GraphicsToolsModule\Converter;
 
 use App\Entity\GTMImage;
 use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
-use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionProcessState;
-use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandler;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
+use App\Service\GraphicsToolsModule\Workflow\Abstract\ImageProcessHandler;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessHandlerInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 
 class ConversionProcessHandler extends ImageProcessHandler implements ImageProcessHandlerInterface
 {
-    protected ?ConversionProcessState $state;
+    /** @var ConversionProcessState | null */
+    protected $state;
 
-    public function __construct(private ConverterInterface $compressor, private ImageEntityManagerInterface $imageManager)
+    public function __construct(private ConverterInterface $compressor, protected ImageEntityManagerInterface $imageManager)
     {
         parent::__construct($imageManager);
     }
@@ -26,9 +27,9 @@ class ConversionProcessHandler extends ImageProcessHandler implements ImageProce
             throw new \RuntimeException('Nie znaleziono pliku do kompresji. Wykonaj najpierw krok przygotowania obrazu.');
         }
 
-        $results = $this->compressor->convert($this->state->destinationPath, $this->state->toFormat);
+        $results = $this->compressor->convert($this->state->destinationPath, $this->state->toFormat, $this->state->quality);
 
-        // $this->state->conversioResults = $results;
+        $this->state->conversionResults = $results;
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,

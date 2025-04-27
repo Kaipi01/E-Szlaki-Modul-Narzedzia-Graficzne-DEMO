@@ -9,11 +9,12 @@ class ConversionProcessState
         public readonly int $ownerId,
         public readonly string $processDir,
         public readonly string $toFormat,
+        public int $quality,
         public ?string $imagePath = null,
         public ?string $imageMimeType = null,
         public ?string $imageOriginalName = null,
         public ?string $destinationPath = null,
-        public ?ConversionResults $conversioResults = null,
+        public ?ConversionResults $conversionResults = null,
     ) {
     }
 }

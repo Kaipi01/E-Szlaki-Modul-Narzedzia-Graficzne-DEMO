@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Service\GraphicsToolsModule\Compressor;
+namespace App\Service\GraphicsToolsModule\Utils;
 
-use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface; 
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\GTMImage;
 use App\Entity\User;
-use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
+use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use Exception;
 use DateTime;
 
@@ -50,7 +51,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
         $this->saveInDataBase($gtmImage);
     }
 
-    public function saveAsCompressed(DTO\CompressionResults $compressionResults, string $operationHash, int $userId): void
+    public function saveAsCompressed(CompressionResults $compressionResults, string $operationHash, int $userId): void
     {
         $owner = $this->findUser($userId);
 

@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Service\GraphicsToolsModule\Workflow\Contracts;
+namespace App\Service\GraphicsToolsModule\Workflow\Abstract;
 
-use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageEntityManagerInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
-use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
+use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData; 
 
 abstract class ImageProcessHandler
 {
     abstract public function process(): ImageProcessData;
-    abstract public function finalize(): ImageProcessData; 
-
+    abstract public function finalize(): ImageProcessData;  
     protected $state; 
     
     public function __construct(protected ImageEntityManagerInterface $imageManager)
