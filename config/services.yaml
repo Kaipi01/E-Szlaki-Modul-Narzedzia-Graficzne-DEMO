@@ -42,6 +42,7 @@ services:
     App\Command\GTMClearGraphicsCommand:
         arguments: 
             $compressedDir: '%gtm_uploads_compressed%'
+            $convertedDir: '%gtm_uploads_converted%'
             $uploadsTmpDir: '%gtm_uploads_tmp%'
             $projectDir: '%kernel.project_dir%'
         tags:

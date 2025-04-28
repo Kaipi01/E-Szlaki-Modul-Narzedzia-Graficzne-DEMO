@@ -20,6 +20,7 @@ class GTMClearGraphicsCommand extends Command
     public function __construct(
         private EntityManagerInterface $entityManager,
         private string $compressedDir,
+        private string $convertedDir,
         private string $uploadsTmpDir,
         private string $projectDir
     ) { 
@@ -57,6 +58,7 @@ class GTMClearGraphicsCommand extends Command
             $this->clearDataBase();
             $output->writeln("Wyczyszczono informacje o grafikach w bazie danych");
             $this->clearDirectory($this->compressedDir, $filesystem, $output);
+            $this->clearDirectory($this->convertedDir, $filesystem, $output);
             $this->clearDirectory($this->uploadsTmpDir, $filesystem, $output);
         } elseif ($cleanTemp) {
             $this->clearDirectory($this->uploadsTmpDir, $filesystem, $output);

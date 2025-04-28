@@ -12,9 +12,7 @@ abstract class ImageProcessHandler
     abstract public function finalize(): ImageProcessData;  
     protected $state; 
     
-    public function __construct(protected ImageEntityManagerInterface $imageManager)
-    {
-    }
+    public function __construct(protected ImageEntityManagerInterface $imageManager) {}
     
     public function setState(&$state) {
         $this->state = $state;
@@ -26,7 +24,7 @@ abstract class ImageProcessHandler
             'processHash' => $this->state->processHash,
             'status' => ImageOperationStatus::PREPARING,
             'progress' => 40
-        ]);
+        ]); 
 
         if ($this->state->destinationPath && file_exists($this->state->destinationPath)) {
             return $processData; 
@@ -48,11 +46,11 @@ abstract class ImageProcessHandler
 
         $originalName = $this->state->imageOriginalName;
             
-        $destinationPath = $destinationDir . "/" . $originalName;
+        $destinationPath = "$destinationDir/$originalName";
 
         if (!copy($imagePath, $destinationPath)) {
             throw new \RuntimeException('Nie udało się skopiować pliku.');
-        }
+        } 
         
         unlink($imagePath);
 

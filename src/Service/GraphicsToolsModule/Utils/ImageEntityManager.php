@@ -5,11 +5,11 @@ namespace App\Service\GraphicsToolsModule\Utils;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
+use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\GTMImage;
 use App\Entity\User;
-use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use Exception;
 use DateTime;
 
@@ -30,7 +30,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
         $operationHash = $imageData['operationHash'] ?? null;
 
         if (! $imageSrc || ! $this->pathResolver->isAbsolutePath($imageSrc)) {
-            throw new \InvalidArgumentException('Nie podano ścieżki absolutnej do obrazu !');
+            throw new \InvalidArgumentException("Nie podano ścieżki absolutnej do obrazu !");
         }
         if (! $operationHash) {
             throw new \InvalidArgumentException('Nie podano parametru: operationHash !');
@@ -83,7 +83,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
             $this->entityManager->persist($gtmImage);
             $this->entityManager->flush();
         } catch (Exception $e) {
-            $this->logger->error($e->getMessage());
+            $this->logger->error(self::class . "::saveInDataBase() " . $e->getMessage());
             throw new Exception("Wystąpił błąd podczas dodawania grafiki do bazy danych!");
         }
     }

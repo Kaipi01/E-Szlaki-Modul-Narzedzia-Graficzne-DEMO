@@ -12,7 +12,7 @@ class PathResolver
     public function __construct(KernelInterface $kernel)
     {
         $this->projectDir = $kernel->getProjectDir();
-        $this->publicDir = realpath("{$this->projectDir}/public"); 
+        $this->publicDir = realpath("{$this->projectDir}/public");
     }
 
     /** Konwertuje ścieżkę absolutną na relatywną */
@@ -33,20 +33,22 @@ class PathResolver
 
     /** Konwertuje ścieżkę relatywną na absolutną względem katalogu `public` */
     public function getAbsolutePath(string $relativePath): string
-    { 
+    {
         if ($this->isAbsolutePath($relativePath)) {
             return $relativePath;
         }
- 
+
         return $this->publicDir . DIRECTORY_SEPARATOR . ltrim($relativePath, DIRECTORY_SEPARATOR);
-    } 
+    }
 
     /** 
      * Sprawdza, czy ścieżka jest absolutna 
-     * na podstawie czy ścieżka zaczyna się od "/" (Unix) lub "C:\" (Windows)
+     * na podstawie czy ścieżka zaczyna się od "/" (Unix) lub "C:\" (Windows) lub od "http://" lub "https://"
      */
     public function isAbsolutePath(string $path): bool
     { 
-        return (bool) preg_match('/^(\/|[a-zA-Z]:[\\\\\/])/', $path);
+        return (bool) preg_match('/^(\/|[a-zA-Z]:[\\\\\/])/', $path) ||
+            str_starts_with($path, 'http://') ||
+            str_starts_with($path, 'https://');
     }
 }

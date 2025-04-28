@@ -9,12 +9,13 @@ class ConversionResults
     public function __construct(
         public string $originalName,
         public int $originalSize,
-        public int $originalFormat,
+        public string $originalFormat,
         public int $conversionSize,
-        public int $conversionFormat,
+        public string $conversionFormat,
         public float|int $conversionQuality,
         public string $downloadURL,
         public string $src,
+        public string $absoluteSrc,
         public string $mimeType
     ) {}
 
@@ -31,6 +32,7 @@ class ConversionResults
             conversionQuality: $data['conversionQuality'] + 0,
             downloadURL:     (string)$data['downloadURL'],
             src:             (string)$data['src'],
+            absoluteSrc:     (string)$data['absoluteSrc'],
             mimeType:        (string)$data['mimeType']
         );
     }
@@ -46,6 +48,7 @@ class ConversionResults
             'conversionQuality' => $this->conversionQuality,
             'downloadURL'       => $this->downloadURL,
             'src'               => $this->src,
+            'absoluteSrc'       => $this->absoluteSrc,
             'mimeType'          => $this->mimeType,
         ];
     }
@@ -65,6 +68,7 @@ class ConversionResults
             'conversionQuality',
             'downloadURL',
             'src',
+            'absoluteSrc',
             'mimeType',
         ];
 
@@ -80,7 +84,7 @@ class ConversionResults
             }
         }
 
-        foreach (['originalSize', 'originalFormat', 'conversionSize', 'conversionFormat'] as $field) {
+        foreach (['originalSize', 'conversionSize'] as $field) {
             if (!is_numeric($data[$field]) || $data[$field] < 0) {
                 throw new InvalidArgumentException("Field '{$field}' must be a non-negative number");
             }

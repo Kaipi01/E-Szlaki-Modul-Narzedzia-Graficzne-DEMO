@@ -2,6 +2,7 @@
 
 namespace App\Service\GraphicsToolsModule\Converter;
 
+use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionResults;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
@@ -22,52 +23,72 @@ class ConverterService implements ConverterInterface
         private GTMLoggerInterface $logger,
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
-        private PathResolver $pathResolver
+        private PathResolver $pathResolver,
+        private CompressorInterface $compressor
     ) {
         $driver = $this->imageExtensionTool->isImagickAvailable() ? new DriverImagick() : new DriverGD();
         $this->imageManager = new ImageManager($driver);
     }
 
     /** @inheritDoc */
-    public function convert(string $imagePath, string $convertToFormat, int $quality = 100): ConversionResults
+    public function convert(string $imagePath, string $mimeType, int $quality = 100): ConversionResults
     {
+        $formatName = $this->getFormatName($mimeType);
+
         try {
             $image = $this->imageManager->read($imagePath);
-
-            $filename = pathinfo($imagePath, PATHINFO_FILENAME);
-            $originalFormat = pathinfo($imagePath, PATHINFO_EXTENSION);
             $destDir = dirname($imagePath);
-            $outputPath = "$destDir/$filename.$convertToFormat";
-            $originalName = basename($imagePath);
-            $originalSize = filesize($imagePath);
-            $downloadUrl = $this->urlGenerator->generate(
-                'gtm_download_image', 
-                ['imageName' => $originalName], 
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
+            $filename = pathinfo($imagePath, PATHINFO_FILENAME);
+            $outputPath = "$destDir/$filename.$formatName";
+
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0777, true);
+            }
 
             $image
-                ->encodeByMediaType($convertToFormat, quality: $quality)
+                ->encodeByMediaType($mimeType, quality: $quality)
                 ->save($outputPath);
 
+            // Od razu skompresuj
+            $this->compressor->compress($outputPath);
+
+            $originalFormat = pathinfo($imagePath, PATHINFO_EXTENSION);
+            $outputName = "$filename.$formatName";
+            $originalSize = filesize($imagePath);
+            $downloadUrl = $this->urlGenerator->generate(
+                'gtm_download_image',
+                ['imageName' => $outputName],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
             $conversionSize = file_exists($outputPath) ? filesize($outputPath) : 0;
 
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
 
-            throw $e;
+        } catch (\Exception $e) {
+            $this->logger->error(self::class . "::convert() " . $e->getMessage());
+
+            throw new \Exception("Wystąpił błąd podczas konwersji formatu na $formatName !");
         }
 
         return ConversionResults::fromArray([
-            'originalName' => $originalName,
+            'originalName' => $outputName,
             'originalSize' => $originalSize,
             'originalFormat' => $originalFormat,
             'conversionSize' => $conversionSize,
-            'conversionFormat' => $convertToFormat,
+            'conversionFormat' => $formatName,
             'conversionQuality' => $quality,
-            'src' => $this->pathResolver->getRelativePath($imagePath),
+            'src' => $this->pathResolver->getRelativePath($outputPath),
+            'absoluteSrc' => $outputPath,
             'downloadURL' => $downloadUrl,
-            'mimeType' => $this->mimeTypeGuesser->guessMimeType($imagePath),
+            'mimeType' => $this->mimeTypeGuesser->guessMimeType($outputPath),
         ]);
+    }
+
+    private function getFormatName(string $mimeType): string
+    {
+        $formatName = str_replace('image/', '', $mimeType);
+
+        if ($formatName === "jpeg") return "jpg";
+
+        return $formatName;
     }
 }

@@ -41,7 +41,8 @@ class GTMConverterAPIController extends AbstractController
         $jsonData = [];
         $status = 200;
 
-        try {
+        try { 
+
             if (!$this->getUser()) {
                 $status = 403;
                 throw new Exception('Odmowa dostępu!');
@@ -97,6 +98,8 @@ class GTMConverterAPIController extends AbstractController
                     'processHash' => $processHash
                 ]
             ];
+
+            $this->logger->error(self::class . "::convertImage() " . $e->getMessage());
             
             $this->processStateManager->clear($processHash);
         }
