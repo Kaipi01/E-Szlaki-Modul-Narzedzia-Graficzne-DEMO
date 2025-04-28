@@ -1,4 +1,5 @@
-import AbstractPanel from "../../modules/AbstractPanel";
+import AbstractPanel from "../../modules/AbstractPanel.js";
+import { downloadAjaxFile } from "../../utils/file-helpers.js";
 
 export default class OperationPanel extends AbstractPanel {
   /**
@@ -21,7 +22,7 @@ export default class OperationPanel extends AbstractPanel {
    *
    * @typedef {Object} State
    * @property {ImageState[]} images - Lista obiektów reprezentujących obrazy.
-   * @property {boolean} uploading - Czy trwa przesyłanie.
+   * @property {boolean} uploading - Czy trwa przesyła2nie.
    * @property {boolean} allOperationsCompleted - Czy wszystkie operacje są zakończone?.
    * @property {number | null} checkResultInterval - ID interwała obługującego koniec operacji
    */

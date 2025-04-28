@@ -1,4 +1,3 @@
-import { formatFileSize } from "../../utils/file-helpers.js";
 import { fadeAnimation } from "../../utils/animations.js";
 
 /**
@@ -253,11 +252,9 @@ export default class UIManager {
       this.onFileSelect(selectedFiles);
     }
 
-    // Resetowanie input file, aby umożliwić ponowne wybranie tych samych plików
     this.elements.fileInput.value = '';
   }
 
-  // Podobnie dla metody handleDrop
   handleDrop(event) {
     this.preventBrowserDefaults(event);
     this.elements.dropZone.classList.remove('drag-over');

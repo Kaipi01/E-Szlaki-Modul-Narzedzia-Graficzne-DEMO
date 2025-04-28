@@ -1,7 +1,7 @@
 'use strict';
 
-import InputFileManager from "./InputFileManager";
-import UIManager from "./UIManager";
+import InputFileManager from "./InputFileManager.js";
+import UIManager from "./UIManager.js";
 
 
 /**

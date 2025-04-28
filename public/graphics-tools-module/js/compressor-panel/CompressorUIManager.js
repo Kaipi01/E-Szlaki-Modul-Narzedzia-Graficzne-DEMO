@@ -1,4 +1,5 @@
-import UIManager from "../components/OperationPanel/UIManager";
+import UIManager from "../components/OperationPanel/UIManager.js";
+import { formatFileSize } from "../utils/file-helpers.js";
 
 export default class CompressorUIManager extends UIManager {
   constructor(elements, options = {}) {
@@ -132,7 +133,6 @@ export default class CompressorUIManager extends UIManager {
     compressedSizeCell.classList.remove('sr-only');
     compressedRatioCell.classList.remove('sr-only');
 
-    // Oznacz pasek postępu jako zakończony sukcesem
     this.setFileProgressSuccess(fileName);
   }
 }
