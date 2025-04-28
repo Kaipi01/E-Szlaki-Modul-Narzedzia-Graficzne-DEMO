@@ -9,7 +9,29 @@
 {% block panel_content %}    
 
     <div id="graphics-tools-module-compressor">
-        {% include "graphics_tools_module/components/image-operation.html.twig" %}
+
+        <div class="image-operation"> 
+
+            <div class="modern-card">
+                <div class="image-operation__header">
+                    <h2 class="image-operation__title">Kompresja obrazów</h2>
+                </div>
+
+                <button class="link variant2 sr-only" id="selectButton" data-select-button>
+                    <i class="fa-solid fa-file-export"></i>
+                    Wybierz pliki
+                </button>
+        
+                <div class="image-operation__alerts" data-operation-alerts></div>
+        
+                {% include "graphics_tools_module/components/drop-zone.html.twig" %}
+        
+            </div>
+        
+            {% include "graphics_tools_module/components/image-operation-table.html.twig" %}
+            
+        </div> 
+        
     </div> 
  
 {% endblock %}

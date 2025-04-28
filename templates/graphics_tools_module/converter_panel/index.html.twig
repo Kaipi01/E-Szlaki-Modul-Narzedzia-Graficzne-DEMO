@@ -8,16 +8,52 @@
 
 {% block panel_content %} 
 
-<div class="example-wrapper">
-    
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil eius perferendis ipsum dicta nemo cupiditate praesentium placeat quod voluptas eligendi minus facere, alias unde quia quas temporibus repudiandae ullam. Tempora quidem labore officiis iure, praesentium qui deserunt magni sequi sed, a omnis distinctio velit aut vero. Nulla, nam veritatis magnam eius nostrum distinctio ratione fugiat. Voluptatibus, at quas. Eveniet tempora nam quisquam reprehenderit optio minima dolor, facere laborum fugit?</p>
+    <div id="graphics-tools-module-converter">
 
-</div>
+        <div class="image-operation"> 
+
+            <div class="modern-card">
+                <div class="image-operation__header">
+                    <h2 class="image-operation__title">Konwerter obrazów</h2>
+                </div>
+
+                <div class="change-format__wrapper">
+                    <label class="change-format__label" for="graphics-tools-module-converter-format-select">Wybierz Docelowy Format</label>
+
+                    <select class="change-format__select" data-format-select data-custom-select data-class-name="custom-select-green" id="graphics-tools-module-converter-format-select">
+                        {# Renderowanie dynamiczne #}
+                    </select>
+
+                    <button class="link variant2" id="selectButton" data-select-button>
+                        <i class="fa-solid fa-file-export"></i>
+                        Wybierz pliki
+                    </button>
+                </div>
+        
+                <div class="image-operation__alerts" data-operation-alerts></div>
+        
+                {% include "graphics_tools_module/components/drop-zone.html.twig" %}
+        
+            </div>
+        
+            {% include "graphics_tools_module/components/image-operation-table.html.twig" %}
+            
+        </div>  
+    </div> 
 
 {% endblock %}
 
 {% block panel_javascripts %}
- 
+
+
+<script> 
+
+    const CONVERT_IMAGES_URL = "{{ path('gtm_converter_api_convert_image') }}"  
+    const GET_IMAGE_DATA_URL = "{{ GET_IMAGE_DATA_URL }}"
+    const DOWNLOAD_ALL_IMAGES_URL = "{{ path('gtm_download_all_images') }}"
+
+</script> 
+
 <script type="module" src="{{ asset('graphics-tools-module/js/converter-panel/main.js') }}"></script>
 
 {% endblock %}
