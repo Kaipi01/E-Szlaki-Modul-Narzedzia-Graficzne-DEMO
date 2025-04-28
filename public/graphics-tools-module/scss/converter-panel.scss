@@ -1,7 +1,43 @@
+@use "./base/variables" as *;
 @use "./components/toast";
 @use "./components/alert";
 @use "./components/drop-zone";
 @use "./components/modern-table";
 @use "./components/animated-progress";
+@use "./components/_custom-select-green.scss";
 
-@use "./layout/image-operation"; 
+@use "./layout/image-operation";
+
+#graphics-tools-module-converter {
+  .change-format {
+    &__wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      margin: 2rem auto;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: var(--very-light-green-opacity);
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
+      gap: 1rem;
+
+      @media (min-width: $content-breakpoint-tablet) {
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        max-width: 42.5rem;
+        gap: 2rem;
+      }
+
+      .custom-select-green {
+        max-width: 10rem;
+        font-size: bold;
+      }
+    }
+    &__label {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+  }
+}

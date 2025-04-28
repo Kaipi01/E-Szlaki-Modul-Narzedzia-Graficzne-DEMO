@@ -536,6 +536,9 @@
   margin-bottom: 1.25rem;
   text-align: center;
 }
+#graphics-tools-module .image-operation__alerts {
+  margin-bottom: 1rem;
+}
 #graphics-tools-module .image-operation__title {
   margin: 0;
   font-size: 2.75rem;
