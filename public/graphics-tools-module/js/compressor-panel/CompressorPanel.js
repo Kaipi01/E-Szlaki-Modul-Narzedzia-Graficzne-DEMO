@@ -9,7 +9,7 @@ import CompressorUIManager from "./CompressorUIManager.js";
 
 /** Klasa CompressorPanel służąca do kompresji obrazów */
 export default class CompressorPanel extends OperationPanel {
-  
+
   constructor(container, options = {}) {
     super(container, options)
 
@@ -47,14 +47,14 @@ export default class CompressorPanel extends OperationPanel {
   async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {
     const getImageURL = `${this.options.imageDataUrl}/${operationHash}`;
     const response = await fetch(getImageURL, { method: "GET" });
-    const { imageData: image } = await response.json(); 
+    const { imageData: image } = await response.json();
 
-    this.uiManager.updateTableAfterOperation(
-      image.originalName,
-      image.compressedSize,
-      image.compressionRatio,
-      image.downloadURL
-    );
+    this.uiManager.updateTableAfterOperation({
+      fileName: image.originalName,
+      compressedSize: image.compressedSize,
+      downloadURL: image.downloadURL,
+      ratio: image.compressionRatio
+    });
     this.uiManager.updateFileProgress(fileName, 100);
 
     const imageDataIndex = this.state.images.findIndex((i) => i.name === fileName);
@@ -68,36 +68,9 @@ export default class CompressorPanel extends OperationPanel {
     }
 
     if (!this.state.allOperationsCompleted) {
-      this.handleAllImagesCompressed();
+      this.handleAllImagesCompleted("Wszystkie obrazy zostały pomyślnie skompresowane!");
     }
 
     progressNameElement.textContent = "Zakończono";
   }
-
-  /** Sprawdza czy wszystkie grafiki są skompresowane jeśli tak to wyświetla komunikat */
-  handleAllImagesCompressed() {
-    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete);
-
-    this.state.checkResultInterval = setInterval(() => {
-
-      if (this.state.uploading) {
-        this.handleAllImagesCompressed()
-      } else {
-        clearTimeout(this.state.checkResultInterval)
-      }
-    }, 1000)
-
-    if (allOperationsCompleted) {
-      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.savedSize, 0)
-      const imagesTotalSizeBefore = this.InputFileManager.getFilesTotalSize()
-
-      this.state.allOperationsCompleted = allOperationsCompleted;
-      this.state.uploading = false;
-      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", formatFileSize(imagesTotalSizeBefore - imagesTotalSizeAfter))
-      this.elements.downloadButton.removeAttribute("disabled");
-      this.elements.clearButton.removeAttribute("disabled");
-
-      Toast.show(Toast.SUCCESS, "Wszystkie obrazy zostały pomyślnie skompresowane!");
-    }
-  }  
 }

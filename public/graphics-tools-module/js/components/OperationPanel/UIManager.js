@@ -38,7 +38,14 @@ export default class UIManager {
 
     this.attachEventListeners();
     this.initUI()
-  } 
+    this.renderTableHead()
+  }
+
+  /**
+   * @abstract 
+   * Renderuje nagłówek tabeli 
+   */
+  renderTableHead() {}
 
   /**
    * Renderowanie miniatury obrazu w widoku tabeli
@@ -51,13 +58,9 @@ export default class UIManager {
   /**
    * Aktualizacja tabeli po operacji
    * @abstract
-   * @param {string} fileName - Nazwa pliku
-   * @param {number|string} compressedSize - Rozmiar po kompresji (liczba bajtów lub sformatowany string)
-   * @param {number|string} ratio - Współczynnik kompresji (liczba lub string z %)
-   * @param {string} downloadURL - link do pobrania
+   * @param {object} data - dane
    */
-  updateTableAfterOperation(fileName, compressedSize, ratio, downloadURL) {}
-  
+  updateTableAfterOperation(data) {}
 
   /**
    * Aktualizacja paska postępu dla konkretnego pliku
@@ -87,9 +90,7 @@ export default class UIManager {
         }
       }
     }
-  } 
-
-
+  }
 
   initUI() {
     if (this.elements.maxFileSizeInfo) {
@@ -121,14 +122,6 @@ export default class UIManager {
   displayCurrentResultMessage(message, value) {
     this.elements.resultMessage.textContent = message
     this.elements.resultValue.textContent = value
-  }
-
-  /** Renderuje nagłówek tabeli */
-  renderTableHead() {
-    // TODO:
-      this.elements.tableHeadRow.innerHTML = `
-
-      `
   }
 
   /**

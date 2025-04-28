@@ -1,5 +1,6 @@
 import AbstractPanel from "../../modules/AbstractPanel.js";
-import { downloadAjaxFile } from "../../utils/file-helpers.js";
+import Toast from "../../modules/Toast.js";
+import { downloadAjaxFile, formatFileSize } from "../../utils/file-helpers.js";
 
 export default class OperationPanel extends AbstractPanel {
   /**
@@ -41,6 +42,14 @@ export default class OperationPanel extends AbstractPanel {
 
     this.initElements();
   }
+
+  /** 
+   * @abstract
+   * @param {string} operationHash 
+   * @param {HTMLElement} progressNameElement 
+   * @param {string} fileName 
+   */
+  async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {}
 
   initElements() {
     this.elements = {
@@ -245,4 +254,34 @@ export default class OperationPanel extends AbstractPanel {
     const hasFiles = this.InputFileManager.hasFiles();
     this.uiManager.updateUI(hasFiles, this.state.uploading);
   }
+
+  /** 
+   * Sprawdza czy wszystkie grafiki są przetworzone jeśli tak to wyświetla komunikat 
+   * @param {string} message
+   */
+  handleAllImagesCompleted(message = "") {
+    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete);
+
+    this.state.checkResultInterval = setInterval(() => {
+
+      if (this.state.uploading) {
+        this.handleAllImagesCompleted(message)
+      } else {
+        clearTimeout(this.state.checkResultInterval)
+      }
+    }, 1000)
+
+    if (allOperationsCompleted) {
+      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.savedSize, 0)
+      const imagesTotalSizeBefore = this.InputFileManager.getFilesTotalSize()
+
+      this.state.allOperationsCompleted = allOperationsCompleted;
+      this.state.uploading = false;
+      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", formatFileSize(imagesTotalSizeBefore - imagesTotalSizeAfter))
+      this.elements.downloadButton.removeAttribute("disabled");
+      this.elements.clearButton.removeAttribute("disabled");
+
+      Toast.show(Toast.SUCCESS, message);
+    }
+  } 
 }

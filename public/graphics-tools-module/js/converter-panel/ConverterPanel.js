@@ -2,8 +2,9 @@
 
 import InputFileManager from "../components/OperationPanel/InputFileManager.js";
 import OperationPanel from "../components/OperationPanel/OperationPanel.js";
-import UIManager from "../components/OperationPanel/UIManager.js";
-import UploadService from "../components/OperationPanel/UploadService.js";
+import CustomSelect from "../modules/CustomSelect.js";
+import ConverterUploadService from "./ConverterUploadService.js";
+import UIConverterManager from "./UIConverterManager.js";
 
 /** Klasa ConverterPanel służąca do konwertowania obrazów */
 export default class ConverterPanel extends OperationPanel {
@@ -11,15 +12,45 @@ export default class ConverterPanel extends OperationPanel {
   constructor(container, options = {}) {
     super(container, options);
 
+    this.formatSelectElement = this.getByAttribute('data-format-select')
+    this.renderFormatSelectOptions()
+    this.formatSelect = new CustomSelect(this.formatSelectElement);
+
+    this.state.selectedFormat = this.formatSelect.getCurrentValue()
+
     this.initComponents();
-    this.initCompressorEvents()
+    this.initConverterEvents()
+  }
+
+  renderFormatSelectOptions() {
+    const mimeFormats = this.options.allowedTypes
+    /** @param {string} format */
+    const displayFriendlyFormatName = (format) => format.replace('image/', '').toUpperCase();
+    let optionsHTML = ''
+
+    if (mimeFormats.length === 0) {
+      console.warn('Brak formatów grafik do wygenerowania!')
+    }
+
+    mimeFormats.forEach(format => {
+      optionsHTML += `<option value="${format}">${displayFriendlyFormatName(format)}</option>`
+    })
+
+    this.formatSelectElement.innerHTML = optionsHTML
   }
 
   initConverterEvents() {
     this.elements.downloadButton.addEventListener("click", () => this.handleDownloadAllImages('skonwertowane-grafiki'));
+
+    this.formatSelect.onChangeSelect((e) => {
+      this.state.selectedFormat = e.detail.value
+    })
   }
 
+  getSelectedFormat = () => this.state.selectedFormat
+
   initComponents() {
+
     this.InputFileManager = new InputFileManager({
       ...this.options,
       onFileAdded: this.handleFileAdded.bind(this),
@@ -27,13 +58,63 @@ export default class ConverterPanel extends OperationPanel {
       onError: this.showError.bind(this),
     });
 
-    this.uiManager = new UIManager(this.elements, {
+    this.uiManager = new UIConverterManager(this.elements, {
       ...this.options,
       onFileSelect: this.handleFileSelect.bind(this),
       onFileRemove: this.handleFileRemove.bind(this),
       onClear: this.handleClear.bind(this),
+      getSelectedFormat: this.getSelectedFormat.bind(this)
     });
 
-    this.uploadService = new UploadService(this.options, this.uiManager, this.InputFileManager);
+    this.uploadService = new ConverterUploadService(
+      {...this.options, getSelectedFormat: this.getSelectedFormat.bind(this)}, 
+      this.uiManager, 
+      this.InputFileManager
+    );
+  }
+
+  /** 
+   * @param {string} operationHash 
+   * @param {HTMLElement} progressNameElement 
+   * @param {string} fileName 
+   */
+  async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {
+    const getImageURL = `${this.options.imageDataUrl}/${operationHash}`;
+    const response = await fetch(getImageURL, { method: "GET" });
+    const { imageData: image } = await response.json(); 
+
+    // this.uiManager.updateTableAfterOperation(
+    //   image.originalName,
+    //   image.downloadURL, 
+    //   image.originalSize,
+    //   image.originalFormat,
+    //   image.conversionSize,
+    //   image.conversionFormat,
+    //   image.conversionQuality,
+    //   image.mimeType
+    // );
+    this.uiManager.updateTableAfterOperation({
+      fileName: image.originalName,
+      afterSize: image.conversionSize,
+      downloadURL: image.downloadURL,
+      quality: image.conversionQuality
+    });
+    this.uiManager.updateFileProgress(fileName, 100);
+
+    const imageDataIndex = this.state.images.findIndex((i) => i.name === fileName);
+
+    if (imageDataIndex !== -1) {
+      const imageData = this.state.images[imageDataIndex];
+
+      imageData.isOperationComplete = true;
+      imageData.hash = operationHash;
+      imageData.savedSize = image.conversionSize
+    }
+
+    if (!this.state.allOperationsCompleted) {
+      this.handleAllImagesCompleted("Wszystkie obrazy zostały pomyślnie skonwertowane!");
+    }
+
+    progressNameElement.textContent = "Zakończono";
   }
 }

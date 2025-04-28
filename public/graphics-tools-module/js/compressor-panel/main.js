@@ -18,5 +18,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     allowedTypes: IMAGE_ALLOWED_TYPES,
     maxFileSize: IMAGE_MAX_SIZE,
   });
-
+  
 });
