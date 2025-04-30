@@ -72,4 +72,3 @@ export default class Popover extends HTMLElement {
     `
     }
 }
-customElements.define("custom-popover", Popover);

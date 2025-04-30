@@ -3,8 +3,13 @@
 import InputFileManager from "../components/OperationPanel/InputFileManager.js";
 import OperationPanel from "../components/OperationPanel/OperationPanel.js";
 import CustomSelect from "../modules/CustomSelect.js";
+import Popover from "../modules/Popover.js";
+import RangeSlider from "../modules/RangeSlider.js";
 import ConverterUploadService from "./ConverterUploadService.js";
-import UIConverterManager from "./UIConverterManager.js";
+import UIConverterManager from "./UIConverterManager.js"; 
+
+customElements.define("custom-popover", Popover);
+customElements.define('range-slider', RangeSlider);
 
 /** Klasa ConverterPanel służąca do konwertowania obrazów */
 export default class ConverterPanel extends OperationPanel {
@@ -15,6 +20,7 @@ export default class ConverterPanel extends OperationPanel {
     this.formatSelectElement = this.getByAttribute('data-format-select')
     this.renderFormatSelectOptions()
     this.formatSelect = new CustomSelect(this.formatSelectElement);
+    this.qualitySlider = new RangeSlider(this.container)
 
     this.state.selectedFormat = this.formatSelect.getCurrentValue()
 
@@ -32,6 +38,8 @@ export default class ConverterPanel extends OperationPanel {
       console.warn('Brak formatów grafik do wygenerowania!')
     }
 
+    optionsHTML += `<option hidden value="">Wybierz Docelowy Format</option>`
+
     mimeFormats.forEach(format => {
       optionsHTML += `<option value="${format}">${displayFriendlyFormatName(format)}</option>`
     })
@@ -42,8 +50,16 @@ export default class ConverterPanel extends OperationPanel {
   initConverterEvents() {
     this.elements.downloadButton.addEventListener("click", () => this.handleDownloadAllImages('skonwertowane-grafiki'));
 
-    this.formatSelect.onChangeSelect((e) => {
-      this.state.selectedFormat = e.detail.value
+    this.formatSelect.onChangeSelect((e) => this.state.selectedFormat = e.detail.value)
+
+    document.addEventListener(this.EVENT_ON_ALL_IMAGES_COMPLETED, (e) => {
+      const convertedImagesNumber = this.state.images.length
+
+      this.uiManager.displayCurrentResultMessage("Liczba Skonwertowanych Grafik: ", convertedImagesNumber)
+    })
+
+    document.addEventListener(this.EVENT_ON_CLEAR_TABLE, (e) => {
+      this.uiManager.displayCurrentResultMessage("Liczba Skonwertowanych Grafik: ", 0)
     })
   }
 
@@ -83,18 +99,9 @@ export default class ConverterPanel extends OperationPanel {
     const response = await fetch(getImageURL, { method: "GET" });
     const { imageData: image } = await response.json(); 
 
-    // this.uiManager.updateTableAfterOperation(
-    //   image.originalName,
-    //   image.downloadURL, 
-    //   image.originalSize,
-    //   image.originalFormat,
-    //   image.conversionSize,
-    //   image.conversionFormat,
-    //   image.conversionQuality,
-    //   image.mimeType
-    // );
     this.uiManager.updateTableAfterOperation({
       fileName: image.originalName,
+      newFileName: image.newName,
       afterSize: image.conversionSize,
       downloadURL: image.downloadURL,
       quality: image.conversionQuality

@@ -133,23 +133,21 @@ export default class UIConverterManager extends UIManager {
    * @param {object} data - dane
    */
   updateTableAfterOperation(data) {
-    const { fileName, afterSize, downloadURL, quality } = data
+    const { fileName, afterSize, downloadURL} = data
     const listItem = this.elements.imageTable.querySelector(`[data-file-name="${fileName}"]`);
 
     if (!listItem) return;
 
     const actionsCell = listItem.querySelector('[data-actions]');
-    //const qualityCell = listItem.querySelector('[data-quality]');
     const afterSizeCell = listItem.querySelector('[data-after-size]');
 
     afterSizeCell.innerHTML = `<span class="image-operation__item-compressed-size">${formatFileSize(parseInt(afterSize))}</span>`;
-    //qualityCell.innerHTML = `<span class="image-operation__item-compressed-size">${quality}</span>`;
     actionsCell.innerHTML = `
-                <a href="${downloadURL}" download class="mx-auto badge image-operation__item-download">
-                    <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
-                    <span>Pobierz</span>
-                </a>
-            `; 
+      <a href="${downloadURL}" download class="mx-auto badge image-operation__item-download">
+        <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
+        <span>Pobierz</span>
+      </a>
+    `; 
 
     this.setFileProgressSuccess(fileName);
   }

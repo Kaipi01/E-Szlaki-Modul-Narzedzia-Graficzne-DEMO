@@ -19,6 +19,17 @@ export default class CompressorPanel extends OperationPanel {
 
   initCompressorEvents() {
     this.elements.downloadButton.addEventListener("click", () => this.handleDownloadAllImages('skompresowane-grafiki'));
+  
+    document.addEventListener(this.EVENT_ON_ALL_IMAGES_COMPLETED, (e) => {
+      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.savedSize, 0)
+      const imagesTotalSizeBefore = this.InputFileManager.getFilesTotalSize()
+
+      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", formatFileSize(imagesTotalSizeBefore - imagesTotalSizeAfter))
+    })
+
+    document.addEventListener(this.EVENT_ON_CLEAR_TABLE, (e) => {
+      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", "0 KB")
+    })
   }
 
   initComponents() {

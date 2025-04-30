@@ -4,7 +4,7 @@ import { fadeAnimation } from "../../utils/animations.js";
  * Klasa UIManager
  * 
  * Odpowiedzialna za:
- * - Zarządzanie interfejsem użytkownika kompresora
+ * - Zarządzanie interfejsem użytkownika
  * - Renderowanie miniatur obrazów
  * - Aktualizację wskaźników postępu
  * - Obsługę interakcji użytkownika z interfejsem

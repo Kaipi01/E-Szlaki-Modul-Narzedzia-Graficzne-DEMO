@@ -17,19 +17,39 @@
                     <h2 class="image-operation__title">Konwerter obrazów</h2>
                 </div>
 
-                <div class="change-format__wrapper">
-                    <label class="change-format__label" for="graphics-tools-module-converter-format-select">Wybierz Docelowy Format</label>
+                <div class="change-format__wrapper"> 
+
+                    <label class="change-format__label sr-only" for="graphics-tools-module-converter-format-select">Wybierz Docelowy Format</label>
 
                     <select class="change-format__select" data-format-select data-custom-select data-class-name="custom-select-green" id="graphics-tools-module-converter-format-select">
                         {# Renderowanie dynamiczne #}
-                    </select>
+                    </select>  
 
-                    <button class="link variant2" id="selectButton" data-select-button>
+                    <custom-popover data-class="custom-select-green">
+                        <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
+                        <template data-class="custom-select-green-options" slot="content">
+                            
+                            <div>
+                                <span>Jakość Konwersji</span>
+                                    
+                                <range-slider min="0" max="100" step="1"></range-slider>
+                            </div>
+
+                            <label class="custom-switch change-format__compress-switch">
+                                <input type="checkbox" name="compress-at-once">
+                                <span class="toggle"><span class="toggle--handler"></span></span>
+                                <span class="label-text">Dodaj Kompresje</span>
+                            </label>
+
+                        </template>
+                    </custom-popover> 
+
+                    <button class="link variant2 select-files-btn sr-only" id="selectButton" data-select-button>
                         <i class="fa-solid fa-file-export"></i>
                         Wybierz pliki
                     </button>
-                </div>
-        
+                </div>  
+
                 <div class="image-operation__alerts" data-operation-alerts></div>
         
                 {% include "graphics_tools_module/components/drop-zone.html.twig" %}

@@ -1,14 +1,23 @@
 @use "./base/variables" as *;
 @use "./components/toast";
 @use "./components/alert";
+@use "./components/custom-range-slider";
 @use "./components/drop-zone";
 @use "./components/modern-table";
+@use "./components/custom-switch";
+@use "./components/custom-popover";
 @use "./components/animated-progress";
 @use "./components/_custom-select-green.scss";
 
 @use "./layout/image-operation";
 
 #graphics-tools-module-converter {
+
+  .select-files-btn {
+    min-height: 2.9375rem;
+    padding: 0.75rem 0.9375rem;
+  }
+
   .change-format {
     &__wrapper {
       display: flex;
@@ -23,19 +32,28 @@
       gap: 1rem;
 
       @media (min-width: $content-breakpoint-tablet) {
-        flex-wrap: nowrap;
+        flex-wrap: nowrap; 
         justify-content: space-between;
-        max-width: 42.5rem;
+        max-width: max-content;
         gap: 2rem;
-      }
+      } 
 
-      .custom-select-green {
-        max-width: 10rem;
-        font-size: bold;
+      .custom-popover-button, .custom-select-green {
+        min-width: 18rem; 
+      } 
+
+      .custom-select-green-styled {
+        font-weight: bold;
       }
     }
+
+    &__compress-switch {
+      width: max-content;
+    }
+
     &__label {
       display: block;
+      margin-bottom: 1rem;
       font-size: 1.1rem;
       font-weight: bold;
     }

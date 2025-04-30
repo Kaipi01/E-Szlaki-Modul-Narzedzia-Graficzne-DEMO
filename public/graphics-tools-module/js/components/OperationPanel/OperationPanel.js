@@ -1,8 +1,14 @@
 import AbstractPanel from "../../modules/AbstractPanel.js";
 import Toast from "../../modules/Toast.js";
+import { emitEvent } from "../../utils/events.js";
 import { downloadAjaxFile, formatFileSize } from "../../utils/file-helpers.js";
 
 export default class OperationPanel extends AbstractPanel {
+
+  EVENT_ON_CLEAR_TABLE = "gtm:event-on-clear-table";
+  EVENT_ON_ALL_IMAGES_COMPLETED = "gtm:event-on-all-images-completed";
+  EVENT_ON_FILE_INPUT_SELECT = "gtm:event-on-file-input-select";
+
   /**
    * @param {HTMLElement | string} container
    * @param {Object} options - Opcje konfiguracyjne
@@ -109,6 +115,8 @@ export default class OperationPanel extends AbstractPanel {
    */
   handleFileSelect(fileList) {
     const newFiles = this.InputFileManager.addFiles(fileList);
+
+    emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, {files: newFiles})
 
     if (newFiles.length > 0) {
       this.uiManager.displayCurrentResultMessage("Trwa operacja, proszę czekać", "...")
@@ -233,9 +241,9 @@ export default class OperationPanel extends AbstractPanel {
 
     this.state.images = [];
     this.state.uploading = false;
-    this.state.allOperationsCompleted = false;
-
-    this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", "0 KB")
+    this.state.allOperationsCompleted = false; 
+    
+    emitEvent(this.EVENT_ON_CLEAR_TABLE)
 
     this.elements.downloadButton.disabled = true
     this.elements.clearButton.disabled = true
@@ -249,7 +257,7 @@ export default class OperationPanel extends AbstractPanel {
   showError(message) {
     super.showError(message, this.elements.containerAlerts);
   }
-
+    
   updateUI() {
     const hasFiles = this.InputFileManager.hasFiles();
     this.uiManager.updateUI(hasFiles, this.state.uploading);
@@ -271,15 +279,13 @@ export default class OperationPanel extends AbstractPanel {
       }
     }, 1000)
 
-    if (allOperationsCompleted) {
-      const imagesTotalSizeAfter = this.state.images.reduce((prevValue, currImg) => prevValue + currImg.savedSize, 0)
-      const imagesTotalSizeBefore = this.InputFileManager.getFilesTotalSize()
-
+    if (allOperationsCompleted) { 
       this.state.allOperationsCompleted = allOperationsCompleted;
-      this.state.uploading = false;
-      this.uiManager.displayCurrentResultMessage("Udało się zaoszczędzić: ", formatFileSize(imagesTotalSizeBefore - imagesTotalSizeAfter))
+      this.state.uploading = false; 
       this.elements.downloadButton.removeAttribute("disabled");
       this.elements.clearButton.removeAttribute("disabled");
+
+      emitEvent(this.EVENT_ON_ALL_IMAGES_COMPLETED)
 
       Toast.show(Toast.SUCCESS, message);
     }

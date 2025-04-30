@@ -1,0 +1,116 @@
+@use "../base/variables" as *;
+@use "../base/_colors.scss" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  range-slider {
+    --track-size: 0.2rem;
+    --thumb-size: 1.2rem;
+    --slider-color: var(--very-light-green);
+    display: inline-flex;
+
+    position: relative;
+    box-sizing: border-box;
+    align-items: center;
+    block-size: var(--thumb-size);
+    inline-size: 100%;
+    outline: none;
+
+    /* Prevent selection relevant for touch devices */
+    -webkit-user-select: none;
+    user-select: none;
+
+    /* Make sure capture pointer events will work properly on touch devices */
+    touch-action: none;
+  }
+  range-slider[orientation="vertical"] {
+    flex-direction: column;
+    block-size: 130px;
+    inline-size: var(--thumb-size);
+  }
+
+  /* Track */
+  range-slider [data-track] {
+    box-sizing: inherit;
+    flex: 1;
+    block-size: var(--track-size);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  range-slider[orientation="vertical"] [data-track] {
+    block-size: 100%;
+    inline-size: var(--track-size);
+  }
+
+  /* Track fill */
+  range-slider [data-track-fill] {
+    position: absolute;
+    box-sizing: inherit;
+    block-size: var(--track-size);
+    pointer-events: none;
+    border-start-start-radius: inherit;
+    border-end-start-radius: inherit;
+  }
+  range-slider[orientation="vertical"] [data-track-fill] {
+    block-size: auto;
+    inline-size: var(--track-size);
+    border-start-start-radius: unset;
+    border-end-end-radius: inherit;
+  }
+
+  /* Runnable track */
+  range-slider [data-runnable-track] {
+    position: absolute;
+    box-sizing: inherit;
+    pointer-events: none;
+    inset: 0 calc(var(--thumb-size) / 2);
+  }
+  range-slider[orientation="vertical"] [data-runnable-track] {
+    inset: calc(var(--thumb-size) / 2) 0;
+  }
+
+  /* Thumb */
+  range-slider [data-thumb] {
+    position: absolute;
+    box-sizing: inherit;
+    block-size: var(--thumb-size);
+    inline-size: var(--thumb-size);
+    margin-inline-start: calc(var(--thumb-size) / 2 * -1);
+    pointer-events: auto;
+    touch-action: none;
+  }
+  range-slider[orientation="vertical"] [data-thumb] {
+    margin-block: calc(var(--thumb-size) / 2 * -1);
+    margin-inline-start: unset;
+  }
+ 
+  range-slider {
+    margin: 2px;
+    border-radius: var(--track-size);
+  }
+  range-slider:active {
+    opacity: 0.8;
+  }
+  range-slider[disabled] {
+    filter: grayscale(1);
+    opacity: 0.4;
+  }
+
+  /* Track */
+  range-slider [data-track] {
+    background-color: lightgray;
+    background-color: ButtonFace;
+  }
+
+  /* Track fill */
+  range-slider [data-track-fill] {
+    background-color: var(--slider-color);
+  }
+
+  /* Thumb */
+  range-slider [data-thumb] {
+    border-radius: 100%;
+    background-color: var(--slider-color);
+  }
+
+}
