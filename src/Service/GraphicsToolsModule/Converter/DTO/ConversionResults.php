@@ -8,6 +8,7 @@ class ConversionResults
 {
     public function __construct(
         public string $originalName,
+        public string $newName,
         public int $originalSize,
         public string $originalFormat,
         public int $conversionSize,
@@ -25,6 +26,7 @@ class ConversionResults
 
         return new self(
             originalName:    (string) $data['originalName'],            
+            newName:    (string) $data['newName'],            
             originalSize:    (int)   $data['originalSize'],
             originalFormat:  (int)   $data['originalFormat'],
             conversionSize:  (int)   $data['conversionSize'],
@@ -41,6 +43,7 @@ class ConversionResults
     {
         return [
             'originalName'      => $this->originalName,
+            'newName'           => $this->newName,
             'originalSize'      => $this->originalSize,
             'originalFormat'    => $this->originalFormat,
             'conversionSize'    => $this->conversionSize,
@@ -61,6 +64,7 @@ class ConversionResults
     {
         $requiredFields = [
             'originalName',
+            'newName',
             'originalSize',
             'originalFormat',
             'conversionSize',

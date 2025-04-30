@@ -37,6 +37,7 @@ class ConverterService implements ConverterInterface
 
         try {
             $image = $this->imageManager->read($imagePath);
+            $originalName = basename($imagePath);
             $destDir = dirname($imagePath);
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);
             $outputPath = "$destDir/$filename.$formatName";
@@ -50,7 +51,7 @@ class ConverterService implements ConverterInterface
                 ->save($outputPath);
 
             // Od razu skompresuj
-            $this->compressor->compress($outputPath);
+            // $this->compressor->compress($outputPath);
 
             $originalFormat = pathinfo($imagePath, PATHINFO_EXTENSION);
             $outputName = "$filename.$formatName";
@@ -70,7 +71,8 @@ class ConverterService implements ConverterInterface
         }
 
         return ConversionResults::fromArray([
-            'originalName' => $outputName,
+            'originalName' => $originalName,
+            'newName' => $outputName,
             'originalSize' => $originalSize,
             'originalFormat' => $originalFormat,
             'conversionSize' => $conversionSize,
