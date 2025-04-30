@@ -31,6 +31,7 @@
   --very-dark-gray-75: #252525c4;
 
   --background: var(--white);
+  --background-25: #ffffff52;
   --background-50: #ffffff94;
   --background-75: #ffffffae;
   --background-85: #ffffffd5;
@@ -65,6 +66,7 @@
 .theme-dark {
   #graphics-tools-module {
     --background: var(--very-dark-gray);
+    --background-25: #00000049;
     --background-50: var(--very-dark-gray-50);
     --background-75: #000000bd;
     --background-85: #000000d2;

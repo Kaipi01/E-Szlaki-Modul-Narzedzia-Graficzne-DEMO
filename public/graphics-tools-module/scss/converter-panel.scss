@@ -6,9 +6,9 @@
 @use "./components/modern-table";
 @use "./components/custom-switch";
 @use "./components/custom-popover";
+@use "./components/form-control";
 @use "./components/animated-progress";
 @use "./components/_custom-select-green.scss";
-
 @use "./layout/image-operation";
 
 #graphics-tools-module-converter {
@@ -16,6 +16,26 @@
   .select-files-btn {
     min-height: 2.9375rem;
     padding: 0.75rem 0.9375rem;
+  }
+
+  .change-quality {
+
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    &__label {
+      display: block;
+    }
+
+    &__control {
+      width: auto;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
+    }
   }
 
   .change-format {

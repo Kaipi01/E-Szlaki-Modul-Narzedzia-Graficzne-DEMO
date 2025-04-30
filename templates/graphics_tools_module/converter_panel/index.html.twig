@@ -27,12 +27,13 @@
 
                     <custom-popover data-class="custom-select-green">
                         <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
-                        <template data-class="custom-select-green-options" slot="content">
-                            
-                            <div>
-                                <span>Jakość Konwersji</span>
-                                    
-                                <range-slider min="0" max="100" step="1"></range-slider>
+                        <template data-class="custom-select-green-options" slot="content"> 
+
+                            <div class="change-quality__wrapper">
+                                <label class="change-quality__label" for="graphics-tools-module-converter-operation-quality">
+                                    Jakość Konwersji
+                                </label>
+                                <input class="change-quality__control upt-form-control" type="number" max="100" min="1" step="1" value="100" name="quality" data-quality-input id="graphics-tools-module-converter-operation-quality" placeholder="Jakość Konwersji"> 
                             </div>
 
                             <label class="custom-switch change-format__compress-switch">

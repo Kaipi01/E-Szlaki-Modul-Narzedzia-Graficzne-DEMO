@@ -4,12 +4,11 @@ import InputFileManager from "../components/OperationPanel/InputFileManager.js";
 import OperationPanel from "../components/OperationPanel/OperationPanel.js";
 import CustomSelect from "../modules/CustomSelect.js";
 import Popover from "../modules/Popover.js";
-import RangeSlider from "../modules/RangeSlider.js";
+import Toast from "../modules/Toast.js";
 import ConverterUploadService from "./ConverterUploadService.js";
 import UIConverterManager from "./UIConverterManager.js"; 
 
 customElements.define("custom-popover", Popover);
-customElements.define('range-slider', RangeSlider);
 
 /** Klasa ConverterPanel służąca do konwertowania obrazów */
 export default class ConverterPanel extends OperationPanel {
@@ -20,8 +19,9 @@ export default class ConverterPanel extends OperationPanel {
     this.formatSelectElement = this.getByAttribute('data-format-select')
     this.renderFormatSelectOptions()
     this.formatSelect = new CustomSelect(this.formatSelectElement);
-    this.qualitySlider = new RangeSlider(this.container)
+    this.qualityInput = this.getByAttribute('data-quality-input')
 
+    this.state.quality = this.qualityInput.value
     this.state.selectedFormat = this.formatSelect.getCurrentValue()
 
     this.initComponents();
@@ -52,6 +52,20 @@ export default class ConverterPanel extends OperationPanel {
 
     this.formatSelect.onChangeSelect((e) => this.state.selectedFormat = e.detail.value)
 
+    this.qualityInput.addEventListener('input', (e) => this.state.quality = e.target.value)
+
+    document.addEventListener(this.EVENT_ON_FILE_INPUT_SELECT, (e) => {
+      const {quality, selectedFormat} = this.state
+
+      if (quality <= 0 || quality > 100) {
+        throw new Error(Toast.ERROR, `Podano nie poprawną wartość dla pola jakość: ${quality}`)
+      }
+
+      if (! this.options.allowedTypes.includes(selectedFormat)) {
+        throw new Error(Toast.ERROR, `Format: ${selectedFormat} nie jest obsługiwany!`)
+      }
+    })
+
     document.addEventListener(this.EVENT_ON_ALL_IMAGES_COMPLETED, (e) => {
       const convertedImagesNumber = this.state.images.length
 
@@ -64,6 +78,8 @@ export default class ConverterPanel extends OperationPanel {
   }
 
   getSelectedFormat = () => this.state.selectedFormat
+
+  getSelectedQuality = () => this.state.quality 
 
   initComponents() {
 

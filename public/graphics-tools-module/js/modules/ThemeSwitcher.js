@@ -21,6 +21,8 @@ export default class ThemeSwitcher extends HTMLElement {
         this.checkboxEl.checked = isThemeDark
 
         localStorage.setItem(ThemeSwitcher.THEME_ITEM_NAME, themeMode)
+
+        document.cookie = `theme=${themeMode};path=/`;
     }
 
     init() {

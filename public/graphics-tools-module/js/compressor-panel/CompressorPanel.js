@@ -1,6 +1,5 @@
 "use strict";
 
-import Toast from "../modules/Toast.js";
 import { formatFileSize } from "../utils/file-helpers.js";
 import InputFileManager from "../components/OperationPanel/InputFileManager.js";
 import UploadService from "../components/OperationPanel/UploadService.js";
