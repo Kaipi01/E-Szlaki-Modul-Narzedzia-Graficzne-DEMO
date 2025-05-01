@@ -30,7 +30,7 @@ class GTMImage
     /**
      * @ORM\Column(type="datetime")
      */
-    private \DateTime $uploadedAt; 
+    private DateTime $uploadedAt; 
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="uploadedGTMImages")
@@ -52,6 +52,11 @@ class GTMImage
      * @ORM\Column(type="string", length=255)
      */
     private $name;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $serverName;
 
     /**
      * @ORM\Column(type="integer")
@@ -146,6 +151,18 @@ class GTMImage
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getServerName(): ?string
+    {
+        return $this->serverName;
+    }
+
+    public function setServerName(string $serverName): self
+    {
+        $this->serverName = $serverName;
 
         return $this;
     }
