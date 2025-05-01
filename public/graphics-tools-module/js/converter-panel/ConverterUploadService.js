@@ -19,12 +19,16 @@ export default class ConverterUploadService extends UploadService {
       this.uploadingImages.push(file.name);
 
       const selectedFormat = this.config.getSelectedFormat()
-        //   const selectedQuality = this.config.getSelectedQuality()
+      const selectedQuality = this.config.getSelectedQuality()
+      const addCompressIsChecked = this.config.getAddCompressIsChecked()
+      
+      
       const dataStep1 = await this.sendStepRequest({
         image: file,
         stepNumber: 1,
         toFormat: selectedFormat,
-        // quality: selectedQuality
+        quality: selectedQuality,
+        addCompress: addCompressIsChecked
       });
       const { processHash, progress } = dataStep1.processData;
 

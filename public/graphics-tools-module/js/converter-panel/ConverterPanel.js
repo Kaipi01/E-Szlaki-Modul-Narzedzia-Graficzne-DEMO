@@ -19,10 +19,14 @@ export default class ConverterPanel extends OperationPanel {
     this.formatSelectElement = this.getByAttribute('data-format-select')
     this.renderFormatSelectOptions()
     this.formatSelect = new CustomSelect(this.formatSelectElement);
+    /** @type {HTMLInputElement} */
     this.qualityInput = this.getByAttribute('data-quality-input')
+    /** @type {HTMLInputElement} */
+    this.addCompressCheckbox = this.getByAttribute('data-add-compress-checkbox')
 
     this.state.quality = this.qualityInput.value
     this.state.selectedFormat = this.formatSelect.getCurrentValue()
+    this.state.addCompressIsChecked = this.addCompressCheckbox.checked
 
     this.initComponents();
     this.initConverterEvents()
@@ -54,6 +58,8 @@ export default class ConverterPanel extends OperationPanel {
 
     this.qualityInput.addEventListener('input', (e) => this.state.quality = e.target.value)
 
+    this.addCompressCheckbox.addEventListener('change', (e) => this.state.addCompressIsChecked = e.target.checked)
+
     document.addEventListener(this.EVENT_ON_FILE_INPUT_SELECT, (e) => {
       const {quality, selectedFormat} = this.state
 
@@ -81,6 +87,8 @@ export default class ConverterPanel extends OperationPanel {
 
   getSelectedQuality = () => this.state.quality 
 
+  getAddCompressIsChecked = () => this.state.addCompressIsChecked
+
   initComponents() {
 
     this.InputFileManager = new InputFileManager({
@@ -99,7 +107,12 @@ export default class ConverterPanel extends OperationPanel {
     });
 
     this.uploadService = new ConverterUploadService(
-      {...this.options, getSelectedFormat: this.getSelectedFormat.bind(this)}, 
+      {
+        ...this.options, 
+        getSelectedFormat: this.getSelectedFormat.bind(this),
+        getSelectedQuality: this.getSelectedQuality.bind(this),
+        getAddCompressIsChecked: this.getAddCompressIsChecked.bind(this)
+      }, 
       this.uiManager, 
       this.InputFileManager
     );
