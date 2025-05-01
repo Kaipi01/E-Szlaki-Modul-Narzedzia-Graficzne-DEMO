@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\GTMImage;
 use App\Repository\GTMImageRepository;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,8 +18,8 @@ class GTMDownloadController extends AbstractController
 {
     public function __construct(private GTMImageRepository $gtmImageRepository, private GTMLoggerInterface $logger, private KernelInterface $kernel) {}
 
-    #[Route(path: '/narzedzia-graficzne/pobierz-grafike/{imageName}', name: 'gtm_download_image', methods: ['GET'])]
-    public function downloadImage(string $imageName): Response
+    #[Route(path: '/narzedzia-graficzne/pobierz-grafike/{serverName}', name: 'gtm_download_image', methods: ['GET'])]
+    public function downloadImage(string $serverName): Response
     {
         $plainTextHeader = ["Content-Type" => "text/plain"];
         $user = $this->getUser();
@@ -28,18 +29,18 @@ class GTMDownloadController extends AbstractController
         }
 
         // Zabezpieczenie przed wprowadzeniem ../ w nazwie pliku
-        if (str_contains($imageName, '..')) {
+        if (str_contains($serverName, '..')) {
             return new Response('Nieprawidłowa nazwa pliku.', 400, $plainTextHeader);
         }
+        /** @var GTMImage */
+        $image = $this->gtmImageRepository->findOneBy(['serverName' => $serverName]);   
+        $imagePath = $this->getParameter('gtm_uploads') . "/" . $user->getId() . "/$serverName"; 
 
-        $imagePath = $this->getParameter('gtm_uploads_compressed') . "/" . $user->getId() . "/$imageName";
-
-
-        if (!file_exists($imagePath)) {
+        if (! $image || !file_exists($imagePath)) {
             return new Response('Grafika nie istnieje.', 404, $plainTextHeader);
         }
 
-        return $this->file($imagePath);
+        return $this->file($imagePath, $image->getName());
     }
 
     /** Pobiera wszystkie grafiki w formie ZIP na podstawie hash-ów operacji */
@@ -75,7 +76,7 @@ class GTMDownloadController extends AbstractController
                 $imagePath = $this->kernel->getProjectDir() . "/public" . $image->getSrc();
 
                 if (file_exists($imagePath)) {
-                    $zip->addFile($imagePath, basename($imagePath));
+                    $zip->addFile($imagePath, $image->getName());
                 } else {
                     $this->logger->warning("Plik nie istnieje: $imagePath");
                 }

@@ -38,7 +38,8 @@ class ImageEntityManager implements ImageEntityManagerInterface
 
         $gtmImage
             ->setMimeType($this->mimeTypeGuesser->guessMimeType($imageSrc))
-            ->setName(basename($imageSrc))
+            ->setName($imageData['originalName'])
+            ->setServerName(basename($imageSrc))
             ->setOperationHash($operationHash)
             ->setOperationResults($imageData['operationResults'] ?? [])
             ->setOperationType($imageData['operationType'] ?? GTMImage::OPERATION_CONVERSION)
@@ -50,27 +51,6 @@ class ImageEntityManager implements ImageEntityManagerInterface
 
         $this->saveInDataBase($gtmImage);
     }
-
-    public function saveAsCompressed(CompressionResults $compressionResults, string $operationHash, int $userId): void
-    {
-        $owner = $this->findUser($userId);
-
-        $gtmImage = new GTMImage();
-
-        $gtmImage
-            ->setMimeType($compressionResults->mimeType)
-            ->setName($compressionResults->originalName)
-            ->setOperationHash($operationHash)
-            ->setOperationResults($compressionResults->toArray())
-            ->setOperationType(GTMImage::OPERATION_COMPRESSION)
-            ->setOwner($owner)
-            ->setSize($compressionResults->compressedSize)
-            ->setSrc($this->pathResolver->getRelativePath($compressionResults->src))
-            ->setUploadedAt(new DateTime("now"))
-        ;
-
-        $this->saveInDataBase($gtmImage);
-    } 
 
     /** 
      * @param \App\Entity\GTMImage $gtmImage

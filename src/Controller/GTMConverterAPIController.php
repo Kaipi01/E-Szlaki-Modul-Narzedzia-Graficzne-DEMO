@@ -6,25 +6,27 @@ use App\Service\GraphicsToolsModule\Converter\ConversionProcessHandler;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionProcessState;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 use App\Service\GraphicsToolsModule\Utils\Uuid;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessStateManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route; 
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Routing\Annotation\Route;
 use Exception;
 
 #[Route(path: '/profil')]
 class GTMConverterAPIController extends AbstractController
-{   
+{
     public function __construct(
         private readonly GTMLoggerInterface $logger,
         private readonly ImageFileValidatorInterface $imageFileValidator,
         private readonly ConversionProcessHandler $conversionHandler,
-        private readonly ImageProcessStateManagerInterface $processStateManager
-    ) {}
+        private readonly ImageProcessStateManagerInterface $processStateManager,
+        private readonly UploadImageServiceInterface $fileUploader
+    ) {
+    }
 
     /**
      * Endpoint API uruchamijący process konwersji, który jest podzielony na etapy
@@ -33,102 +35,136 @@ class GTMConverterAPIController extends AbstractController
     #[Route(path: '/narzedzia-graficzne/api/konwertuj-grafike-json', name: 'gtm_converter_api_convert_image', methods: ['POST'])]
     public function convertImage(Request $request): JsonResponse
     {
-        $image = $request->files->get('image');
-        $stepNumber = (int) $request->request->get('stepNumber');
-        $toFormat = $request->request->get('toFormat');
-        $quality = (int) ($request->request->get('quality') ?? 100);
-        $processHash = $request->request->get('processHash') ?? (new Uuid())->generate();
+        [$errorStatus, $errorMessage, $requestIsValid, $requestData] = $this->validateRequest($request); 
         $jsonData = [];
-        $status = 200;
+        $imageData = [];
+        $status = 200; 
 
-        try { 
-
-            if (!$this->getUser()) {
-                $status = 403;
-                throw new Exception('Odmowa dostępu!');
+        try {
+            if (! $requestIsValid) {
+                $status = $errorStatus;
+                throw new Exception($errorMessage);
             }
 
-            if (!$stepNumber) {
-                $status = 400;
-                throw new Exception('Niepoprawne dane! Brakuje pola stepNumber!');
+            if ($requestData['stepNumber'] === 1) {
+                $uploadDir = $this->getParameter('gtm_uploads') . "/" . $this->getUser()->getId();
+                $imageData = $this->fileUploader->upload($requestData['image'], $uploadDir, setUniqueName: true);
             }
 
-            if ($stepNumber === 1) { 
-                if (!$image) {
-                    $status = 400;
-                    throw new Exception('Niepoprawne dane! Brak pliku graficznego!');
-                }
-
-                if (! $toFormat) {
-                    $status = 400;
-                    throw new Exception('Niepoprawne dane! Nie podano docelowego formatu!');
-                }
-
-                $this->imageFileValidator->validate($image);
-            } 
-
-            $currentProcessState = $this->getCurrentState($processHash, $toFormat, $quality, $image);
+            $currentProcessState = $this->getCurrentState($requestData, $imageData);
 
             $this->conversionHandler->setState($currentProcessState);
 
-            $processData = match ($stepNumber) {
+            $processData = match ($requestData['stepNumber']) {
                 1 => $this->conversionHandler->prepare(),
                 2 => $this->conversionHandler->process(),
                 3 => $this->conversionHandler->finalize(),
-                default => throw new \InvalidArgumentException("Błędna wartość kroku w procesie: $stepNumber")
+                default => throw new \InvalidArgumentException("Błędna wartość kroku w procesie: " . $requestData['stepNumber'])
             };
 
-            $this->processStateManager->save($processHash, $currentProcessState);
+            $this->processStateManager->save($requestData['processHash'], $currentProcessState);
 
             $jsonData = [
-                'success' => true, 
-                'errorMessage' => '', 
+                'success' => true,
+                'errorMessage' => '',
                 'processData' => $processData->toArray(),
-                'processHash' => $processHash
-            ]; 
-            
+                'processHash' => $requestData['processHash']
+            ];
+
         } catch (Exception $e) {
             $status = $status === 200 ? 500 : $status;
             $jsonData = [
-                'success' => false, 
-                'errorMessage' => $e->getMessage(), 
+                'success' => false,
+                'errorMessage' => $e->getMessage(),
                 'processData' => [
                     'progress' => 0,
                     'status' => ImageOperationStatus::FAILED,
-                    'processHash' => $processHash
+                    'processHash' => $requestData['processHash']
                 ]
             ];
 
             $this->logger->error(self::class . "::convertImage() " . $e->getMessage());
-            
-            $this->processStateManager->clear($processHash);
+
+            $this->processStateManager->clear($requestData['processHash']);
         }
 
-        if ($stepNumber === 3 && $jsonData['processData']['status'] === ImageOperationStatus::COMPLETED) {
-            $this->processStateManager->clear($processHash);
+        if ($requestData['stepNumber'] === 3 && $jsonData['processData']['status'] === ImageOperationStatus::COMPLETED) {
+            $this->processStateManager->clear($requestData['processHash']);
         }
 
         return $this->json($jsonData, $status);
-    } 
+    }
 
-    private function getCurrentState(string $processHash, ?string $toFormat = null, int $quality = 100, ?UploadedFile $image): ConversionProcessState
+    private function validateRequest(Request $request): array
     {
-        $currentProcessState = $this->processStateManager->get($processHash);
+        $image = $request->files->get('image');
+        $stepNumber = (int) $request->request->get('stepNumber');
+        $toFormat = $request->request->get('toFormat');
+        $quality = (int) ($request->request->get('quality') ?? 100);
+        $addCompress = $request->request->get('addCompress') ?? false;
+        $processHash = $request->request->get('processHash') ?? Uuid::generate();
+        $errorStatus = 200;
+        $errorMessage = '';
+        $requestIsValid = true;
 
-        if ($currentProcessState === null) {
+        $requestData = [
+            'image' => $image,
+            'stepNumber' => $stepNumber,
+            'toFormat' => $toFormat,
+            'quality' => $quality,
+            'addCompress' => $addCompress,
+            'processHash' => $processHash
+        ];
 
-            $currentProcessState = new ConversionProcessState(
-                $processHash, 
-                $this->getUser()->getId(), 
-                $this->getParameter('gtm_uploads_converted'),
-                $toFormat,
-                $quality,
-                $image?->getRealPath(),
-                $image?->getMimeType(),
-                $image?->getClientOriginalName(),
+        if (!$this->getUser()) {
+            $errorStatus = 403;
+            $errorMessage = 'Odmowa dostępu!';
+        }
+
+        if (!$stepNumber) {
+            $errorStatus = 400;
+            $errorMessage = 'Niepoprawne dane! Brakuje pola stepNumber!';
+        }
+
+        if ($stepNumber === 1) {
+            if (!$image) {
+                $errorStatus = 400;
+                $errorMessage = 'Niepoprawne dane! Brak pliku graficznego!';
+            }
+            if (!$toFormat) {
+                $errorStatus = 400;
+                $errorMessage = 'Niepoprawne dane! Nie podano docelowego formatu!';
+            }
+            if ($quality <= 0 || $quality > 100) {
+                $errorStatus = 400;
+                $errorMessage = 'Nieprawidłowe dane! Jakość musi być od 1 do 100 !';
+            } 
+        }
+
+        if ($errorStatus != 200) {
+            $requestIsValid = false;
+        } 
+
+        return [$errorStatus, $errorMessage, $requestIsValid, $requestData];
+    }
+
+    private function getCurrentState(array $requestData, array $imageData = []): ConversionProcessState
+    {
+        $state = $this->processStateManager->get($requestData['processHash']); 
+
+        if ($state === null) {
+
+            $state = new ConversionProcessState(
+                $requestData['processHash'],
+                $this->getUser()->getId(),
+                $requestData['toFormat'],
+                $requestData['quality'],
+                $requestData['addCompress'], 
+                $imageData['originalName'],
+                $imageData['path']
             );
         }
 
-        return $currentProcessState;
+        return $state;
     }
 }

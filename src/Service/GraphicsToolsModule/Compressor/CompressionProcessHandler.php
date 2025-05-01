@@ -1,7 +1,8 @@
-<?php 
+<?php
 
 namespace App\Service\GraphicsToolsModule\Compressor;
- 
+
+use App\Entity\GTMImage;
 use App\Service\GraphicsToolsModule\Workflow\Abstract\ImageProcessHandler;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
@@ -13,22 +14,20 @@ use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 class CompressionProcessHandler extends ImageProcessHandler implements ImageProcessHandlerInterface
 {
     /** @var CompressionProcessState | null */
-    protected $state; 
-    
-    public function __construct(private CompressorInterface $compressor, protected ImageEntityManagerInterface $imageManager)
+    protected $state;
+
+    public function __construct(private CompressorInterface $compressor, private ImageEntityManagerInterface $imageManager)
     {
-        parent::__construct($imageManager);
-    }  
+    }
 
     public function process(): ImageProcessData
     {
-        if (!$this->state->destinationPath || !file_exists($this->state->destinationPath)) {
-            throw new \RuntimeException('Nie znaleziono pliku do kompresji. Wykonaj najpierw krok przygotowania obrazu.');
+        if (!$this->state->imagePath || !file_exists($this->state->imagePath)) {
+            throw new \RuntimeException('Nie znaleziono pliku do kompresji');
         }
 
-        $results = $this->compressor->compress($this->state->destinationPath);
-
-        $this->state->compressionResults = $results;
+        $this->state->compressionResults = $this->compressor->compress($this->state->imagePath); 
+        $this->state->compressionResults->originalName = $this->state->imageOriginalName;
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,
@@ -38,17 +37,22 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
     }
 
     public function finalize(): ImageProcessData
-    {
-        $this->imageManager->saveAsCompressed(
-            $this->state->compressionResults,
-            $this->state->processHash,
+    { 
+        $this->imageManager->save(
+            [
+                'src' => $this->state->imagePath, 
+                'originalName' => $this->state->imageOriginalName,
+                'operationHash' => $this->state->processHash,
+                'operationResults' => $this->state->compressionResults->toArray(),
+                'operationType' => GTMImage::OPERATION_COMPRESSION
+            ],
             $this->state->ownerId
         );
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,
-            'status' => ImageOperationStatus::PROCESSING,  
-            'progress' => 90 
+            'status' => ImageOperationStatus::PROCESSING,
+            'progress' => 90
         ]);
     }
 }

@@ -30,11 +30,7 @@ class ImageFileValidator implements ImageFileValidatorInterface
     ];
 
 
-    /**
-     * Waliduje obraz pod kątem typu MIME i bezpiecznej nazwy pliku 
-     * @param UploadedFile $image Plik obrazu do walidacji
-     * @throws InvalidArgumentException Gdy obraz nie przejdzie walidacji
-     */
+    /** @inheritDoc */
     public function validate(UploadedFile $image): void
     {
         // Sprawdzenie typu MIME
@@ -70,20 +66,6 @@ class ImageFileValidator implements ImageFileValidatorInterface
         }
     }
 
-    public function getSaveImageName(string $originalName, bool $keepOriginalName = false, bool $isUnique = false): string
-    {
-        if ($isUnique) {
-            return $this->generateUniqueName($originalName);
-        }
-
-        $originalFilename = pathinfo($originalName, PATHINFO_FILENAME);
-        $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
-        $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
-        $newFilename = $keepOriginalName ? $safeFilename : $safeFilename . '-' . uniqid();
-        $newFilename .= ".{$fileExtension}";
-
-        return $newFilename;
-    }
 
     /**
      * Sprawdza, czy plik faktycznie jest obrazem, a nie tylko ma zmienione rozszerzenie 
@@ -100,28 +82,5 @@ class ImageFileValidator implements ImageFileValidatorInterface
 
         return $imageInfo !== false;
     }
-
-    /**
-     * Generuje bezpieczną nazwę pliku na podstawie oryginalnej nazwy 
-     * @param string $originalFilename Oryginalna nazwa pliku
-     * @return string Bezpieczna nazwa pliku
-     */
-    private function generateUniqueName(string $originalFilename): string
-    {
-        // Wyciągnij rozszerzenie pliku
-        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
-
-        // Wyczyść nazwę pliku (usuń znaki specjalne, pozostaw tylko alfanumeryczne i podkreślenia)
-        $baseName = pathinfo($originalFilename, PATHINFO_FILENAME);
-        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $baseName);
-
-        // Ogranicz długość nazwy bazowej
-        $baseName = substr($baseName, 0, 100);
-
-        // Dodaj timestamp dla unikalności
-        $timestamp = time();
-
-        // Złóż bezpieczną nazwę pliku
-        return "{$baseName}_{$timestamp}.{$extension}";
-    } 
+ 
 }

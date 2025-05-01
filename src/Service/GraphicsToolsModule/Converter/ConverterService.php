@@ -31,13 +31,13 @@ class ConverterService implements ConverterInterface
     }
 
     /** @inheritDoc */
-    public function convert(string $imagePath, string $mimeType, int $quality = 100): ConversionResults
+    public function convert(string $imagePath, string $mimeType, bool $addCompress = false, int $quality = 100): ConversionResults
     {
         $formatName = $this->getFormatName($mimeType);
 
         try {
             $image = $this->imageManager->read($imagePath);
-            $originalName = basename($imagePath);
+            $imageName = basename($imagePath);
             $destDir = dirname($imagePath);
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);
             $outputPath = "$destDir/$filename.$formatName";
@@ -48,19 +48,16 @@ class ConverterService implements ConverterInterface
 
             $image
                 ->encodeByMediaType($mimeType, quality: $quality)
-                ->save($outputPath);
+                ->save($outputPath); 
 
-            // Od razu skompresuj
-            // $this->compressor->compress($outputPath);
+            if ($addCompress) {
+                $this->compressor->compress($outputPath);
+            }
 
             $originalFormat = pathinfo($imagePath, PATHINFO_EXTENSION);
             $outputName = "$filename.$formatName";
             $originalSize = filesize($imagePath);
-            $downloadUrl = $this->urlGenerator->generate(
-                'gtm_download_image',
-                ['imageName' => $outputName],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
+            $downloadUrl = $this->urlGenerator->generate('gtm_download_image',['serverName' => $outputName],UrlGeneratorInterface::ABSOLUTE_URL);
             $conversionSize = file_exists($outputPath) ? filesize($outputPath) : 0;
 
 
@@ -71,7 +68,7 @@ class ConverterService implements ConverterInterface
         }
 
         return ConversionResults::fromArray([
-            'originalName' => $originalName,
+            'imageName' => $imageName,
             'newName' => $outputName,
             'originalSize' => $originalSize,
             'originalFormat' => $originalFormat,

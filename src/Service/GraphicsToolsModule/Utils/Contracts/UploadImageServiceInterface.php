@@ -7,9 +7,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 interface UploadImageServiceInterface
 {
-    public function upload(UploadedFile $image, string $uploadDir, bool $keepOriginalName = false): ?string;
+    public function upload(UploadedFile $image, string $uploadDir, bool $keepOriginalName = false, bool $setUniqueName = false): array;
 
-    public function uploadAllFromRequest(Request $request, string $uploadDir, bool $keepOriginalName = false): array;
+    public function uploadAllFromRequest(Request $request, string $uploadDir, bool $keepOriginalName = false, bool $setUniqueName = false): array;
+
+    public function getSaveImageName(string $originalName, bool $keepOriginalName = false, bool $setUniqueName = false): string;
     
     public function ensureDirectoryExists(string $directory): void;
 }

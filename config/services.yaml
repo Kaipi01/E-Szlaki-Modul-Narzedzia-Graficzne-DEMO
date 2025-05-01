@@ -4,10 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    gtm_uploads_tmp: '%kernel.project_dir%/public/graphics-tools-module/uploads/temp'
-    gtm_uploads_compressed: '%kernel.project_dir%/public/graphics-tools-module/uploads/compressed'
-    gtm_uploads_converted: '%kernel.project_dir%/public/graphics-tools-module/uploads/converted'
-    gtm_uploads_compressed_short: 'graphics-tools-module/uploads/compressed'
+    gtm_uploads: '%kernel.project_dir%/public/graphics-tools-module/uploads'
+    gtm_uploads_short: 'graphics-tools-module/uploads/compressed'
 
 services:
     # default configuration for services in *this* file
@@ -41,16 +39,14 @@ services:
 
     App\Command\GTMClearGraphicsCommand:
         arguments: 
-            $compressedDir: '%gtm_uploads_compressed%'
-            $convertedDir: '%gtm_uploads_converted%'
-            $uploadsTmpDir: '%gtm_uploads_tmp%'
+            $uploadsDir: '%gtm_uploads%'
             $projectDir: '%kernel.project_dir%'
         tags:
             - { name: 'console.command' }
 
     App\Command\GTMCompressImageCommand:
         arguments: 
-            $compressedDir: '%gtm_uploads_compressed%' 
+            $uploadsDir: '%gtm_uploads%'
         tags:
             - { name: 'console.command' } 
 

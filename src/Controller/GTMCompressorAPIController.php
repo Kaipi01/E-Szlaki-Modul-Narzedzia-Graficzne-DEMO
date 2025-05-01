@@ -6,12 +6,12 @@ use App\Service\GraphicsToolsModule\Compressor\CompressionProcessHandler;
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionProcessState;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 use App\Service\GraphicsToolsModule\Utils\Uuid;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessStateManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route; 
 use Exception;
@@ -23,7 +23,8 @@ class GTMCompressorAPIController extends AbstractController
         private readonly GTMLoggerInterface $logger,
         private readonly ImageFileValidatorInterface $imageFileValidator,
         private readonly CompressionProcessHandler $compressionHandler,
-        private readonly ImageProcessStateManagerInterface $processStateManager
+        private readonly ImageProcessStateManagerInterface $processStateManager,
+        private readonly UploadImageServiceInterface $fileUploader    
     ) {}
 
     /**
@@ -37,6 +38,7 @@ class GTMCompressorAPIController extends AbstractController
         $stepNumber = (int) $request->request->get('stepNumber');
         $processHash = $request->request->get('processHash') ?? (new Uuid())->generate();
         $jsonData = [];
+        $imageData = [];
         $status = 200; 
 
         try {
@@ -56,10 +58,11 @@ class GTMCompressorAPIController extends AbstractController
                     throw new Exception('Niepoprawne dane! Brak pliku graficznego!');
                 }
 
-                $this->imageFileValidator->validate($image);
+                $uploadDir = $this->getParameter('gtm_uploads') . "/" . $this->getUser()->getId();
+                $imageData = $this->fileUploader->upload($image, $uploadDir, setUniqueName: true);
             } 
 
-            $currentProcessState = $this->getCurrentState($processHash, $image);
+            $currentProcessState = $this->getCurrentState($processHash, $imageData);
 
             $this->compressionHandler->setState($currentProcessState);
 
@@ -104,21 +107,19 @@ class GTMCompressorAPIController extends AbstractController
         return $this->json($jsonData, $status);
     } 
 
-    private function getCurrentState(string $processHash, ?UploadedFile $image): CompressionProcessState
+    private function getCurrentState(string $processHash, array $imageData): CompressionProcessState
     {
-        $currentProcessState = $this->processStateManager->get($processHash);
+        $state = $this->processStateManager->get($processHash);
 
-        if ($currentProcessState === null) {
-            $currentProcessState = new CompressionProcessState(
+        if ($state === null) { 
+            $state = new CompressionProcessState(
                 $processHash, 
-                $this->getUser()->getId(), 
-                $this->getParameter('gtm_uploads_compressed'),
-                $image?->getRealPath(),
-                $image?->getMimeType(),
-                $image?->getClientOriginalName(),
+                $this->getUser()->getId(),
+                $imageData['originalName'],
+                $imageData['path']
             );
         }
 
-        return $currentProcessState;
+        return $state;
     }
 }

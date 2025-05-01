@@ -27,19 +27,19 @@ class CompressorService implements CompressorInterface
             throw new \Exception("Plik nie istnieje: {$imagePath}");
         }
 
-        $originalName = basename($imagePath);
+        $imageName = basename($imagePath);
         $originalSize = filesize($imagePath);
-        $downloadUrl = $this->urlGenerator->generate(
-            'gtm_download_image', 
-            ['imageName' => $originalName], 
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $downloadUrl = $this->urlGenerator->generate('gtm_download_image', ['serverName' => $imageName], UrlGeneratorInterface::ABSOLUTE_URL);
 
         try { 
             $this->optimizer->optimize($imagePath); 
  
             $compressedSize = file_exists($imagePath) ? filesize($imagePath) : 0;
             $compressionRatio = $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0;
+
+            if ($compressionRatio < 0) {
+                $compressionRatio = 0;
+            }
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage()); 
 
@@ -47,7 +47,7 @@ class CompressorService implements CompressorInterface
         } 
 
         return CompressionResults::fromArray([
-            'originalName' => $originalName,
+            'imageName' => $imageName,
             'originalSize' => $originalSize,
             'compressedSize' => $compressedSize,
             'compressionRatio' => $compressionRatio,

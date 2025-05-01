@@ -3,73 +3,94 @@
 declare(strict_types=1);
 
 namespace App\Command;
- 
-use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface; 
+
+use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
+use App\Service\GraphicsToolsModule\Utils\Uuid;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;   
-use Psr\Log\LoggerInterface;  
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class GTMCompressImageCommand extends Command
 {
     protected static $defaultName = 'gtm:compress-image';
-    protected static $defaultDescription = 'Kompresuje obraz'; 
+    protected static $defaultDescription = 'Kompresuje obraz';
 
     public function __construct(
         private CompressorInterface $compressor,
-        private LoggerInterface $logger,
-        private ImageEntityManagerInterface $imageManager, 
-        private string $compressedDir
+        private GTMLoggerInterface $logger,
+        private ImageEntityManagerInterface $imageManager,
+        private string $uploadsDir
     ) {
-        parent::__construct();  
+        parent::__construct();
     }
 
     protected function configure(): void
     {
-        $this
-            ->addArgument('processHash', InputArgument::REQUIRED, 'Identyfikator zadania kompresji') 
-            ->addArgument('tempPath', InputArgument::REQUIRED, 'Ścieżka do obrazu do kompresji')
-            ->addArgument('originalName', InputArgument::REQUIRED, 'Orginalna nazwa grafiki')
-            ->addArgument('mimeType', InputArgument::REQUIRED, 'Typ MIME')
-            ->addArgument('userId', InputArgument::REQUIRED, 'ID Użytkownika');
+        $this->setDescription(self::$defaultDescription)
+            ->addOption(
+                'path',
+                'p',
+                InputOption::VALUE_REQUIRED,
+                'Ścieżka do obrazu do kompresji'
+            )
+            ->addOption(
+                'userId',
+                'id',
+                InputOption::VALUE_REQUIRED,
+                'ID Użytkownika'
+            )
+            ->addOption(
+                'processHash',
+                'ha',
+                InputOption::VALUE_OPTIONAL,
+                'Hash Operacji'
+            )
+            ->addOption(
+                'removeOrigin',
+                'rm',
+                InputOption::VALUE_OPTIONAL,
+                'Czy usunąć orginał?'
+            )
+            ->addOption(
+                'quality',
+                'qu',
+                InputOption::VALUE_OPTIONAL,
+                'Jakość kompresji'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
-    {  
-        $processHash = $input->getArgument('processHash'); 
-        $tempPath = $input->getArgument('tempPath');
-        $originalName = $input->getArgument('originalName');
-        $mimeType = $input->getArgument('mimeType');  
-        $userId = $input->getArgument('userId');   
+    {
+        $processHash = $input->getOption('processHash') ?? Uuid::generate();
+        $tempPath = $input->getOption('path');
+        $userId = $input->getOption('userId');
+        $quality = $input->getOption('quality');
+        $isRemoveOrigin = $input->getOption('removeOrigin');
+        $originalName = basename($tempPath);
 
-        $this->logger->debug('---------------------------------------------------------------------------------');
-        $this->logger->debug('Komenda kompresji grafiki', [
-            'processHash' => $processHash, 
-            'tempPath' => $tempPath,
-            'originalName' => $originalName,
-            'mimeType' => $mimeType,
-            'userId' => $userId,
-        ]); 
-        $this->logger->debug('---------------------------------------------------------------------------------'); 
         try {
-            $destinationDir = "{$this->compressedDir}/$userId";
+            $destinationDir = "{$this->uploadsDir}/$userId";
 
             if (!is_dir($destinationDir)) {
                 mkdir($destinationDir, 0755, true);
-            } 
+            }
 
-            $destinationPath = $destinationDir . "/" . basename($originalName);   
+            $destinationPath = "$destinationDir/$originalName";
 
             copy($tempPath, $destinationPath);
-            unlink($tempPath); 
+            
+            $compressionResults = $this->compressor->compress($destinationPath);
+            
+            $this->imageManager->saveAsCompressed($compressionResults, $processHash, (int) $userId);
+            
+            if ($isRemoveOrigin) {
+                unlink($tempPath);
+            }
 
-            $compressionResults = $this->compressor->compress($destinationPath, $mimeType); 
- 
-            $this->imageManager->saveAsCompressed($compressionResults, $processHash, $userId);  
-
-            $output->writeln("Kompresja zakończona pomyślnie"); 
+            $output->writeln("Kompresja zakończona pomyślnie");
 
             return Command::SUCCESS;
 
@@ -77,11 +98,11 @@ class GTMCompressImageCommand extends Command
             $this->logger->error('Błąd podczas kompresji obrazu', [
                 'processHash' => $processHash,
                 'error' => $e->getMessage()
-            ]); 
+            ]);
 
             $output->writeln("<error>Błąd: {$e->getMessage()}</error>");
 
             return Command::FAILURE;
         }
     }
-} 
+}
