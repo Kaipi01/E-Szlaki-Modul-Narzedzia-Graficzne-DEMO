@@ -8,18 +8,48 @@
 
 {% block panel_content %} 
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<div id="graphics-tools-module-editor">
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/src/Controller/IETMEditorPanelController.php'|file_link(0) }}">src/Controller/IETMEditorPanelController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'D:/mateu/Desktop/E-Szlaki-Moduł-Narzędzia-Graficzne-KOD/templates/ietm_editor_panel/index.html.twig'|file_link(0) }}">templates/ietm_editor_panel/index.html.twig</a></code></li>
-    </ul>
+    <div class="panel__header">
+        <h2 class="panel__title">Edytor Zdjęć</h2>
+    </div>
 
-    <div class="cropper-wrapper">
-        <img src="{{ asset('graphics-tools-module/images/place-img-5.webp') }}" id="image-test" alt="" />
-    </div>  
+    <div data-editor-loading class="editor-loading modern-card">
+        <span class="editor-loading-message">Trwa ładowanie edytora, proszę czekać ...</span>
+
+        <div data-editor-loading-progress class="animated-progress animated-progress--no-label">
+            <div class="animated-progress-bar">
+                <div class="animated-progress-per" data-progress-bar per="0"></div>
+            </div>
+            <div class="animated-progress-info">
+                <div data-progress-label class="animated-progress-name">Wczytywanie zasobów...</div>
+                <div class="animated-progress-stats">
+                    <span data-progress-text>0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div data-editor-container class="editor-container"> 
+
+        <div class="settings-panel-top modern-card"></div>
+
+        <div class="settings-panel-left modern-card"></div>
+        
+        <div class="image-preview-container modern-card">
+            {{ include('graphics_tools_module/components/drop-zone.html.twig', {
+                textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
+                textInfoBottom: 'Maksymalny rozmiar pliku:',
+                isTypeMultiple: false
+            }, with_context: false) }}
+        
+            <div class="cropper-wrapper">
+                <img src="{{ asset('graphics-tools-module/images/place-img-5.webp') }}" id="image-test" alt="" />
+            </div>  
+        </div>
+
+    </div>
+
 </div>
 
 {% endblock %}

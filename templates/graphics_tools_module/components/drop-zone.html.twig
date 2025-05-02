@@ -1,8 +1,8 @@
 <div class="drop-zone__upload-area" id="dropZone" data-drop-zone>
-    <input type="file" id="fileInput" class="drop-zone__file-input" multiple accept="image/*" data-file-input>
+    <input type="file" id="fileInput" class="drop-zone__file-input" {{ isTypeMultiple ? 'multiple' : '' }} accept="image/*" data-file-input>
     <div class="drop-zone__upload-placeholder">
         <i class="fa-solid fa-cloud-arrow-up drop-zone__upload-icon"></i> 
-        <p class="drop-zone__upload-text">Przeciągnij i upuść obrazy lub kliknij, aby wybrać pliki</p>
-        <p class="drop-zone__upload-text">Maksymalny rozmiar jednego pliku: <span max-file-size-info>100MB</span></p>
+        <p class="drop-zone__upload-text">{{ textInfoTop }}</p>
+        <p class="drop-zone__upload-text">{{ textInfoBottom }} <span max-file-size-info>100MB</span></p>
     </div>
 </div>

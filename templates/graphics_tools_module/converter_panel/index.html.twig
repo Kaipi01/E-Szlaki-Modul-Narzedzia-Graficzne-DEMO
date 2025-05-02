@@ -13,8 +13,8 @@
         <div class="image-operation"> 
 
             <div class="modern-card">
-                <div class="image-operation__header">
-                    <h2 class="image-operation__title">Konwerter obrazów</h2>
+                <div class="panel__header">
+                    <h2 class="panel__title">Konwerter obrazów</h2>
                 </div>
 
                 <div class="change-format__wrapper"> 
@@ -52,9 +52,15 @@
                     </button>
                 </div>  
 
-                <div class="image-operation__alerts" data-operation-alerts></div>
+                <div class="panel__alerts" data-operation-alerts>
+                    <custom-alert data-message="Wybranie plików automatycznie rozpocznie operacje"></custom-alert>
+                </div>
         
-                {% include "graphics_tools_module/components/drop-zone.html.twig" %}
+                {{ include('graphics_tools_module/components/drop-zone.html.twig', {
+                    textInfoTop: 'Przeciągnij i upuść obrazy lub kliknij, aby rozpocząć',
+                    textInfoBottom: 'Maksymalny rozmiar jednego pliku:',
+                    isTypeMultiple: true
+                }, with_context: false) }}
         
             </div>
         
