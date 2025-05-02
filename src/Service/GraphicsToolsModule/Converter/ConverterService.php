@@ -6,29 +6,20 @@ use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionResults;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
-use App\Service\GraphicsToolsModule\Utils\DTO\ImageExtensionTool;
+use App\Service\GraphicsToolsModule\Utils\GraphicsToolResolver;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
-use Intervention\Image\Drivers\Imagick\Driver as DriverImagick;
-use Intervention\Image\Drivers\GD\Driver as DriverGD;
-use Intervention\Image\ImageManager;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ConverterService implements ConverterInterface
-{
-    private ImageManager $imageManager;
-
+{ 
     public function __construct(
-        private ImageExtensionTool $imageExtensionTool,
         private GTMLoggerInterface $logger,
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
         private PathResolver $pathResolver,
         private CompressorInterface $compressor
-    ) {
-        $driver = $this->imageExtensionTool->isImagickAvailable() ? new DriverImagick() : new DriverGD();
-        $this->imageManager = new ImageManager($driver);
-    }
+    ) {}
 
     /** @inheritDoc */
     public function convert(string $imagePath, string $mimeType, bool $addCompress = false, int $quality = 100): ConversionResults
@@ -36,7 +27,7 @@ class ConverterService implements ConverterInterface
         $formatName = $this->getFormatName($mimeType);
 
         try {
-            $image = $this->imageManager->read($imagePath);
+            $image = GraphicsToolResolver::getImageManager()->read($imagePath);
             $imageName = basename($imagePath);
             $destDir = dirname($imagePath);
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);

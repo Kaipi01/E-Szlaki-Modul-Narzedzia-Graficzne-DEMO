@@ -1,8 +1,13 @@
 <?php 
 
-namespace App\Service\GraphicsToolsModule\Utils\DTO;
+namespace App\Service\GraphicsToolsModule\Utils;
 
-class ImageExtensionTool
+use Intervention\Image\Interfaces\ImageManagerInterface;
+use Intervention\Image\Drivers\Imagick\Driver as DriverImagick;
+use Intervention\Image\Drivers\GD\Driver as DriverGD;
+use Intervention\Image\ImageManager;
+
+class GraphicsToolResolver
 {
     public const DRIVER_IMAGICK = 'imagick';
     public const DRIVER_GD = 'gd'; 
@@ -20,6 +25,12 @@ class ImageExtensionTool
         } else {
             return self::DRIVER_GD;
         }
+    }
+
+    public static function getImageManager(): ImageManagerInterface
+    {
+        $driver = self::isImagickAvailable() ? new DriverImagick() : new DriverGD();
+        return new ImageManager($driver);
     }
 
     /**

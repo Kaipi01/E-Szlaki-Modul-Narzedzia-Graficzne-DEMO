@@ -5,6 +5,7 @@ namespace App\Service\GraphicsToolsModule\Compressor;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;  
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
+use App\Service\GraphicsToolsModule\Editor\Contracts\ResizerImageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
@@ -17,7 +18,8 @@ class CompressorService implements CompressorInterface
         private ImageOptimizerInterface $optimizer,  
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
-        private PathResolver $pathResolver
+        private PathResolver $pathResolver,
+        private ResizerImageInterface $resizer
     ) {} 
  
     /** @inheritDoc */
@@ -33,6 +35,9 @@ class CompressorService implements CompressorInterface
 
         try { 
             $this->optimizer->optimize($imagePath); 
+
+            // TODO: Dla testu !!!
+            //$this->resizer->scale($imagePath, $this->resizer->getWidth($imagePath) / 2);
  
             $compressedSize = file_exists($imagePath) ? filesize($imagePath) : 0;
             $compressionRatio = $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0;
