@@ -1,4 +1,4 @@
-import { formatFileSize } from "../../utils/file-helpers.js";
+import { formatFileSize } from "../utils/file-helpers.js";
 
 /**
  * Klasa InputFileManager
@@ -18,7 +18,7 @@ export default class InputFileManager {
      * @param {Function} options.onError - Callback wywoływany przy błędzie walidacji
      */
     constructor(options = {}) {
-        this.config = options;
+        this.config = options; 
 
         this.onFileAdded = options.onFileAdded || (() => {});
         this.onFileRemoved = options.onFileRemoved || (() => {});

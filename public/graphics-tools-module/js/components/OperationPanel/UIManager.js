@@ -1,4 +1,5 @@
 import { fadeAnimation } from "../../utils/animations.js";
+import DropZoneManager from "../DropZoneManager.js";
 
 /**
  * Klasa UIManager
@@ -39,6 +40,8 @@ export default class UIManager {
     this.attachEventListeners();
     this.initUI()
     this.renderTableHead()
+
+    this.DropZone = new DropZoneManager(this.elements.dropZone, droppedFiles => this.onFileSelect(droppedFiles))
   }
 
   /**
@@ -100,19 +103,8 @@ export default class UIManager {
 
   attachEventListeners() {
     this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-
-    this.elements.selectButton.addEventListener('click', () => {
-      this.elements.fileInput.click();
-    });
-
-    this.elements.dropZone.addEventListener('dragover', this.handleDragOver.bind(this));
-    this.elements.dropZone.addEventListener('dragleave', this.handleDragLeave.bind(this));
-    this.elements.dropZone.addEventListener('drop', this.handleDrop.bind(this));
-    this.elements.clearButton.addEventListener('click', () => this.onClear());
-
-    // Zapobieganie domyślnej akcji przeglądarki przy upuszczaniu plików 
-    document.addEventListener('dragover', this.preventBrowserDefaults.bind(this));
-    document.addEventListener('drop', this.preventBrowserDefaults.bind(this));
+    this.elements.selectButton.addEventListener('click', () => this.elements.fileInput.click()); 
+    this.elements.clearButton.addEventListener('click', () => this.onClear()); 
   }
 
   /** 
@@ -233,9 +225,9 @@ export default class UIManager {
   updateUI(hasFiles, isUploading) {
 
     if (hasFiles) {
-      this.elements.dropZone.classList.add('has-files');
+      this.DropZone.addClass('has-files');
     } else {
-      this.elements.dropZone.classList.remove('has-files');
+      this.DropZone.removeClass('has-files');
     }
   }
 
@@ -246,33 +238,5 @@ export default class UIManager {
     }
 
     this.elements.fileInput.value = '';
-  }
-
-  handleDrop(event) {
-    this.preventBrowserDefaults(event);
-    this.elements.dropZone.classList.remove('drag-over');
-
-    const droppedFiles = event.dataTransfer.files;
-    if (droppedFiles && droppedFiles.length > 0) {
-      this.onFileSelect(droppedFiles);
-    }
-  }
-
-  /** Zapobiega domyślnym akcjom przeglądarki */
-  preventBrowserDefaults(event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
-  /** Obsługa zdarzenia przeciągania plików nad obszarem drop zone */
-  handleDragOver(event) {
-    this.preventBrowserDefaults(event);
-    this.elements.dropZone.classList.add('drag-over');
-  }
-
-  /** Obsługa zdarzenia opuszczenia obszaru drop zone podczas przeciągania */
-  handleDragLeave(event) {
-    this.preventBrowserDefaults(event);
-    this.elements.dropZone.classList.remove('drag-over');
-  }
+  } 
 }
