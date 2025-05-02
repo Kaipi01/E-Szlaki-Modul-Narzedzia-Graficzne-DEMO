@@ -36,12 +36,12 @@
     }
 
     .animated-progress {
-        max-width: toRem(700);
-        color: #fff;
+      max-width: toRem(700);
+      color: #fff;
 
-        * {
-            color: #fff;
-        }
+      * {
+        color: #fff;
+      }
     }
   }
 
@@ -52,7 +52,7 @@
 
     @media (min-width: $content-breakpoint-tablet) {
       place-content: start;
-      grid-template-columns: toRem(300) 1fr;
+      grid-template-columns: 1fr toRem(300);
       gap: 1.5rem;
     }
 
@@ -60,13 +60,20 @@
       grid-column: span 2;
     }
 
-    .settings-panel-left {
+    .settings-panel-right {
       //   height: 100%;
     }
 
     .image-preview-container {
+
+      .image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
       .cropper-wrapper {
-        display: none;
+        // display: none;
 
         width: 100%;
         height: toRem(500);
@@ -77,10 +84,10 @@
         min-height: 100%;
       }
 
-      #image-test {
-        display: block;
-        max-width: 100%;
-      }
+      // #image-test {
+      //   display: block;
+      //   max-width: 100%;
+      // }
     }
   }
 }

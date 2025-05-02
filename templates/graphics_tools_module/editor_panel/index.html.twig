@@ -28,24 +28,34 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
 
     <div data-editor-container class="editor-container"> 
 
-        <div class="settings-panel-top modern-card"></div>
+        <div class="settings-panel-top modern-card"></div> 
 
-        <div class="settings-panel-left modern-card"></div>
-        
         <div class="image-preview-container modern-card">
+
+            <div class="panel__alerts" data-operation-alerts></div>
+
+            <div data-cropper-wrapper class="cropper-wrapper">
+                <img data-image-preview class="image-preview" alt="" />
+            </div>  
+
             {{ include('graphics_tools_module/components/drop-zone.html.twig', {
                 textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
                 textInfoBottom: 'Maksymalny rozmiar pliku:',
                 isTypeMultiple: false
-            }, with_context: false) }}
-        
-            <div class="cropper-wrapper">
-                <img src="{{ asset('graphics-tools-module/images/place-img-5.webp') }}" id="image-test" alt="" />
-            </div>  
+            }, with_context: false) }} 
+            
+        </div>
+
+        <div class="settings-panel-right modern-card">
+
+            <label for="add-crop">
+                Przytnij <input type="checkbox" data-add-crop-checkbox name="add-crop" id="add-crop">
+            </label>
+
         </div>
 
     </div>

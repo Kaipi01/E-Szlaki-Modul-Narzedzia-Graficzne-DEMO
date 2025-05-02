@@ -1,6 +1,6 @@
 "use strict";
 
-import InputFileManager from "../components/OperationPanel/InputFileManager.js";
+import InputFileManager from "../components/InputFileManager.js";
 import OperationPanel from "../components/OperationPanel/OperationPanel.js";
 import CustomSelect from "../modules/CustomSelect.js";
 import Popover from "../modules/Popover.js";

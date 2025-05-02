@@ -1,7 +1,7 @@
 "use strict";
 
 import { formatFileSize } from "../utils/file-helpers.js";
-import InputFileManager from "../components/OperationPanel/InputFileManager.js";
+import InputFileManager from "../components/InputFileManager.js";
 import UploadService from "../components/OperationPanel/UploadService.js";
 import OperationPanel from "../components/OperationPanel/OperationPanel.js";
 import CompressorUIManager from "./CompressorUIManager.js";

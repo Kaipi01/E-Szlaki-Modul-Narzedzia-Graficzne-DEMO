@@ -29,11 +29,11 @@ export default class AbstractPanel {
     /** 
      * @final
      * @param {Error | string} error 
-     * @param {HTMLElement | null} element
+     * @param {HTMLElement | null} container
      */
-    showError(error, element = null) {
+    showError(error, container = null) {
         const message = error instanceof Error ? error.message : error
-        const context = element ?? this.container
+        const context = container ?? this.container
         const anyErrorAlerts = context.querySelectorAll('.alert.error-alert')
 
         console.error(error);
