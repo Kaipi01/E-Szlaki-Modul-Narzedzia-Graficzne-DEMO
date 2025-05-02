@@ -527,21 +527,189 @@
   will-change: transform;
 }
 
+#graphics-tools-module .custom-popover {
+  height: 100%;
+}
+#graphics-tools-module .custom-popover-content {
+  display: block;
+  padding: 0.75rem 0.9375rem !important;
+}
+#graphics-tools-module .custom-popover-button {
+  width: 100%;
+  color: inherit;
+  font-size: inherit;
+}
+
+#graphics-tools-module .floating-label-grid {
+  display: grid;
+  gap: 1rem;
+}
+#graphics-tools-module .floating-label {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  padding: 0.25rem 0.75rem;
+  transform: translateY(-50%);
+  transition: transform 0.2s cubic-bezier(0.215, 0.61, 0.355, 1), color 0.2s;
+  border-radius: 0.375em;
+  background: #fff;
+  color: hsl(0, 0%, 50%);
+  font-size: 0.9375rem;
+  line-height: 1;
+  -webkit-clip-path: none;
+  clip-path: none;
+}
+#graphics-tools-module .floating-label--for-select {
+  transform: translateY(-100%);
+  background-color: transparent;
+}
+#graphics-tools-module .floating-label-control {
+  padding: 0.75rem;
+  color: var(--font-color);
+  background-color: var(--background-50);
+}
+#graphics-tools-module .floating-label-control:placeholder-shown + .floating-label {
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  transform: translateY(-25%);
+}
+#graphics-tools-module .floating-label-control:focus {
+  background-color: var(--background);
+}
+#graphics-tools-module .floating-label-control:focus ~ .upt-icon {
+  color: var(--green);
+}
+#graphics-tools-module .floating-label-control:focus + .floating-label {
+  color: var(--green);
+}
+#graphics-tools-module .upt-form-control {
+  position: relative;
+  width: 100%;
+  padding: 0.5rem;
+  padding-left: 1rem;
+  transition: 0.2s;
+  border: none;
+  background: var(--background-25);
+  font-family: inherit;
+  color: var(--font-color);
+  font-size: 1em;
+  line-height: 1.2;
+}
+#graphics-tools-module .upt-form-control::-webkit-input-placeholder {
+  opacity: 1;
+  color: var(--font-color-gray);
+}
+#graphics-tools-module .upt-form-control::-moz-placeholder {
+  opacity: 1;
+  color: var(--font-color-gray);
+}
+#graphics-tools-module .upt-form-control:-ms-input-placeholder {
+  opacity: 1;
+  color: var(--font-color-gray);
+}
+#graphics-tools-module .upt-form-control::-ms-input-placeholder {
+  opacity: 1;
+  color: var(--font-color-gray);
+}
+#graphics-tools-module .upt-form-control::placeholder {
+  opacity: 1;
+  color: var(--font-color-gray);
+}
+#graphics-tools-module .custom-select-green {
+  --box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  --border-radius: 5px;
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  min-height: 2.9375rem;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+}
+#graphics-tools-module .custom-select-green-hidden {
+  display: none;
+  visibility: hidden;
+  padding-right: 0.625rem;
+}
+#graphics-tools-module .custom-select-green-styled {
+  display: flex;
+  position: relative;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  align-items: center;
+  gap: 0.9375rem;
+  height: 100%;
+  min-height: 2.9375rem;
+  padding: 0.75rem 0.9375rem;
+  transition: all 0.2s ease-in;
+  border-radius: var(--border-radius);
+  background-color: var(--green);
+  box-shadow: var(--box-shadow);
+}
+#graphics-tools-module .custom-select-green-styled:after {
+  content: "";
+  position: absolute;
+  top: calc(50% + 3.5px);
+  right: 0.9375rem;
+  width: 0;
+  height: 0;
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+  border: 0.4375rem solid transparent;
+  border-color: #fff transparent transparent transparent;
+}
+#graphics-tools-module .custom-select-green-styled:hover, #graphics-tools-module .custom-select-green-styled:active, #graphics-tools-module .custom-select-green-styled.active {
+  background-color: var(--dark-green);
+}
+#graphics-tools-module .custom-select-green-styled:hover:after, #graphics-tools-module .custom-select-green-styled:active:after, #graphics-tools-module .custom-select-green-styled.active:after {
+  transform: translateY(-100%) rotate(180deg);
+}
+#graphics-tools-module .custom-select-green-styled.active {
+  background-color: var(--dark-green);
+}
+#graphics-tools-module .custom-select-green-styled.active:after {
+  transform: translateY(-100%) rotate(180deg);
+}
+#graphics-tools-module .custom-select-green-options {
+  display: none;
+  position: absolute;
+  z-index: 999;
+  top: 94%;
+  right: 0;
+  left: 0;
+  margin: 0;
+  padding: 0.75rem 0;
+  border-bottom-right-radius: var(--border-radius);
+  border-bottom-left-radius: var(--border-radius);
+  background-color: var(--dark-green);
+  box-shadow: var(--box-shadow);
+  list-style: none;
+}
+#graphics-tools-module .custom-select-green-options li {
+  display: inline-flex;
+  gap: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 0;
+  transition: all 0.15s ease-in;
+  border-top: 0.0625rem solid var(--dark-green);
+  text-indent: 0.9375rem;
+}
+#graphics-tools-module .custom-select-green-options li:hover, #graphics-tools-module .custom-select-green-options li.is-selected {
+  background: var(--green);
+  color: #fff;
+}
+#graphics-tools-module .custom-select-green-options li[rel=hide] {
+  display: none;
+}
+
 #graphics-tools-module .image-operation {
   margin: 0 auto;
   padding: 1.25rem 0;
   color: var(--font-color);
-}
-#graphics-tools-module .image-operation__header {
-  margin-bottom: 1.25rem;
-  text-align: center;
-}
-#graphics-tools-module .image-operation__alerts {
-  margin-bottom: 1rem;
-}
-#graphics-tools-module .image-operation__title {
-  margin: 0;
-  font-size: 2.75rem;
 }
 #graphics-tools-module .image-operation__table-container {
   margin-bottom: 2rem;
@@ -651,4 +819,39 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.9375rem;
+}
+
+#graphics-tools-module-compressor .change-params__wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+#graphics-tools-module-compressor .change-params__label {
+  display: block;
+}
+#graphics-tools-module-compressor .change-params__control {
+  width: auto;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+}
+#graphics-tools-module-compressor .change-dimensions__wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--very-light-green-opacity);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
+  gap: 1rem;
+}
+@media (min-width: 55em) {
+  #graphics-tools-module-compressor .change-dimensions__wrapper {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    max-width: max-content;
+    gap: 2rem;
+  }
 }

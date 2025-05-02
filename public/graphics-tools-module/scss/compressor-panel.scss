@@ -1,7 +1,59 @@
+@use "./base/variables" as *;
 @use "./components/toast";
 @use "./components/alert";
 @use "./components/drop-zone";
 @use "./components/modern-table";
-@use "./components/animated-progress";
+@use "./components/animated-progress"; 
+@use "./components/custom-popover";
+@use "./components/form-control"; 
+@use "./components/custom-select-green.scss";
 
 @use "./layout/image-operation"; 
+
+
+#graphics-tools-module-compressor { 
+  
+    .change-params {
+  
+      &__wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+  
+      &__label {
+        display: block;
+      }
+  
+      &__control {
+        width: auto;
+        border-radius: 5px;
+        color: #fff;
+        font-weight: bold;
+      }
+    }
+  
+    .change-dimensions {
+
+      &__wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin: 2rem auto;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background-color: var(--very-light-green-opacity);
+        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
+        gap: 1rem;
+  
+        @media (min-width: $content-breakpoint-tablet) {
+          flex-wrap: nowrap; 
+          justify-content: space-between;
+          max-width: max-content;
+          gap: 2rem;
+        }  
+      } 
+    }
+  }
+  

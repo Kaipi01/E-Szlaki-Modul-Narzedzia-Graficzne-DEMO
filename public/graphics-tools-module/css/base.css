@@ -678,6 +678,17 @@ body.theme-dark::after {
     scroll-behavior: auto !important;
   }
 }
+#graphics-tools-module .panel__header {
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+#graphics-tools-module .panel__alerts {
+  margin-bottom: 1rem;
+}
+#graphics-tools-module .panel__title {
+  margin: 0;
+  font-size: 2.75rem;
+}
 
 #graphics-tools-module .main-navigation {
   display: flex;

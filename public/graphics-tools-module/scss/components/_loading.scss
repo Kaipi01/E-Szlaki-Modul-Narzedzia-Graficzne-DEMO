@@ -4,22 +4,7 @@
 #graphics-tools-module {
   .loading {
     position: relative;
-    // z-index: 4;
-
-    &::before {
-      content: "";
-      position: absolute;
-      z-index: 28;
-      top: 50%;
-      left: 50%;
-      width: 100%;
-      height: 100%;
-      transform: translate(-50%, -50%);
-      border-radius: 20px;
-      background-color: var(--background-50);
-      -webkit-backdrop-filter: blur(15px);
-      backdrop-filter: blur(15px);
-    }
+    // z-index: 4; 
 
     &::after {
       content: "";
@@ -36,6 +21,23 @@
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
+    }
+
+    &--with-bg {
+      &::before {
+        content: "";
+        position: absolute;
+        z-index: 28;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        transform: translate(-50%, -50%);
+        border-radius: 20px;
+        background-color: var(--background-50);
+        -webkit-backdrop-filter: blur(15px);
+        backdrop-filter: blur(15px);
+      }
     }
   }
 }

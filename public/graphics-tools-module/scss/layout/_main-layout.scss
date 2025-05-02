@@ -24,4 +24,20 @@
       scroll-behavior: auto !important;
     }
   }  
+
+  .panel {
+    &__header {
+      margin-bottom: toRem(20);
+      text-align: center;
+    }
+
+    &__alerts {
+      margin-bottom: 1rem;
+    }
+
+    &__title {
+      margin: 0;
+      font-size: 2.75rem;
+    }
+  }
 }
