@@ -48,7 +48,7 @@ export default class Alert extends HTMLElement {
 
         switch (this.dataType) {
             case Alert.SUCCESS:
-                iconType = CustomToast.SUCCESS_ICON;
+                iconType = Alert.SUCCESS_ICON;
                 break;
             case Alert.ERROR:
                 iconType = Alert.ERROR_ICON;

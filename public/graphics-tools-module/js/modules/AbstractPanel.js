@@ -1,4 +1,3 @@
-import ApiService from './ApiService.js'
 import Alert from './Alert.js'
 import Toast from './Toast.js'
 
@@ -10,7 +9,6 @@ export default class AbstractPanel {
     constructor(container) {  
         /** @type {HTMLElement} */
         this.container = container instanceof HTMLElement ? container : document.querySelector(container);
-        this.apiService = ApiService.getInstance()  
         this.panelName = null 
         
         document.addEventListener(AbstractPanel.ERROR_EVENT, (e) => {
@@ -30,19 +28,21 @@ export default class AbstractPanel {
      * @final
      * @param {Error | string} error 
      * @param {HTMLElement | null} container
+     * @param {string | null} type
      */
-    showError(error, container = null) {
+    showError(error, container = null, type = "ERROR") {
         const message = error instanceof Error ? error.message : error
         const context = container ?? this.container
-        const anyErrorAlerts = context.querySelectorAll('.alert.error-alert')
 
-        console.error(error);
+        if (type === "ERROR") {
+            console.error(error);
+        } else {
+            console.warn(error);
+        }  
 
-        if (anyErrorAlerts.length === 0) {
-            Alert.show(Alert.ERROR, message, context)
-        }
+        Alert.show(Alert[type], message, context)
 
-        Toast.show(Toast.ERROR, message)
+        Toast.show(Toast[type], message)
     }
 
     /** 

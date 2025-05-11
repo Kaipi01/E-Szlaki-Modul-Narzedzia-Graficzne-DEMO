@@ -8,16 +8,11 @@
 
 {% block panel_content %} 
 
-<div class="example-wrapper">
-    <h1>Moje Pliki</h1>  
-    
-    {% for image in userImages %}
-        
-        <img style="max-width: 400px; aspect-ratio: 16/8; object-fit: cover;" src="{{ image.src }}" alt="{{ image.name }}" />
+    <div id="graphics-tools-module-main-panel">
 
-    {% endfor %}
-    
-</div> 
+        {% include "graphics_tools_module/main_panel/main-content.html.twig" %}
+        
+    </div> 
 
 {% endblock %} 
 

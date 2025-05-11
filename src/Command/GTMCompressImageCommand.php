@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\GTMImage;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
@@ -67,7 +68,7 @@ class GTMCompressImageCommand extends Command
         $processHash = $input->getOption('processHash') ?? Uuid::generate();
         $tempPath = $input->getOption('path');
         $userId = $input->getOption('userId');
-        $quality = $input->getOption('quality');
+        $quality = $input->getOption('quality') ?? 80;
         $isRemoveOrigin = $input->getOption('removeOrigin');
         $originalName = basename($tempPath);
 
@@ -82,10 +83,19 @@ class GTMCompressImageCommand extends Command
 
             copy($tempPath, $destinationPath);
             
-            $compressionResults = $this->compressor->compress($destinationPath);
-            
-            $this->imageManager->saveAsCompressed($compressionResults, $processHash, (int) $userId);
-            
+            $compressionResults = $this->compressor->compress($destinationPath, (int) $quality);
+
+            $this->imageManager->save(
+                [
+                    'src' => $destinationPath,
+                    'originalName' => $originalName,
+                    'operationHash' => $processHash,
+                    'operationResults' => $compressionResults->toArray(),
+                    'operationType' => GTMImage::OPERATION_COMPRESSION
+                ],
+                (int) $userId
+            );
+    
             if ($isRemoveOrigin) {
                 unlink($tempPath);
             }

@@ -1,5 +1,4 @@
 export default class CropperManager {
-
   /** 
    * @param {HTMLElement} cropperWrapper 
    * @param {HTMLImageElement} imagePreviewElement 

@@ -22,6 +22,7 @@
 /public/*/node_modules/
 /public/*/npm-cache/
 /public/graphics-tools-module/uploads
+/public/graphics-tools-module/dist
 /npm-cache
 /design
 /development

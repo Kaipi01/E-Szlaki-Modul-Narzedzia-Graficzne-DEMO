@@ -103,6 +103,7 @@ export default class ConverterPanel extends OperationPanel {
       onFileSelect: this.handleFileSelect.bind(this),
       onFileRemove: this.handleFileRemove.bind(this),
       onClear: this.handleClear.bind(this),
+      onError: this.showError.bind(this),
       getSelectedFormat: this.getSelectedFormat.bind(this)
     });
 
@@ -152,5 +153,23 @@ export default class ConverterPanel extends OperationPanel {
     }
 
     progressNameElement.textContent = "Zakończono";
+  }
+
+  validateState() {
+    const {quality, selectedFormat} = this.state
+
+    console.log(this.state)
+
+    if (!quality || quality < 1 || quality > 100) {
+      throw new Error(`Podano nie poprawną wartość dla jakości konwersji: ${quality}%`);
+    }
+
+    if (selectedFormat == '' || !selectedFormat) {
+      throw new Error("Nie podano docelowego formatu!")
+    }
+
+    if (! this.options.allowedTypes.includes(selectedFormat)) {
+      throw new Error(`Ten format nie jest obługiwany: ${selectedFormat}`)
+    }
   }
 }

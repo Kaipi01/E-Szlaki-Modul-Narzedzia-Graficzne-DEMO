@@ -6,6 +6,7 @@ use App\Service\GraphicsToolsModule\Editor\Contracts\ResizerImageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\GraphicsToolResolver;
 use Intervention\Image\Interfaces\ImageInterface;
+use Intervention\Image\Interfaces\SizeInterface;
 
 class ResizerImageService implements ResizerImageInterface
 {
@@ -19,16 +20,10 @@ class ResizerImageService implements ResizerImageInterface
     }
 
     /** @inheritDoc */
-    public function getWidth(string $imagePath): int
+    public function getSize(string $imagePath): SizeInterface
     {
-        return $this->getImage($imagePath)->size()->width();
-    }
-
-    /** @inheritDoc */
-    public function getHeight(string $imagePath): int
-    {
-        return $this->getImage($imagePath)->size()->height();
-    }
+        return $this->getImage($imagePath)->size();
+    } 
 
     /** @inheritDoc */
     public function resize(string $imagePath, ?int $width = null, ?int $height = null): void

@@ -1,7 +1,7 @@
 export default class CustomSelect {
   static HIDE_VALUE = "hide"
   static NULL_VALUE = "null"
-  static CHANGE_OPTION_EVENT = "upt-custom-select-change-option"
+  static CHANGE_OPTION_EVENT = "custom-select-change-option"
 
   selectElement
   wrapper = null
@@ -19,6 +19,7 @@ export default class CustomSelect {
     this.createCustomElements();
     this.attachEventListeners();
     this.isInitialized = false
+    this.isEnabled = true
   }
 
   /** @param {() => void} callback */
@@ -28,6 +29,16 @@ export default class CustomSelect {
     this.numberOfOptions = this.selectElement.children.length;
     this.createCustomElements();
     this.attachEventListeners();
+  }
+
+  disabled() {
+    this.isEnabled = false
+    this.styledSelect.setAttribute('disabled', 'true')
+  }
+
+  enabled() {
+    this.isEnabled = true
+    this.styledSelect.removeAttribute('disabled')
   }
 
   createCustomElements() {
@@ -79,6 +90,8 @@ export default class CustomSelect {
   }
 
   getCurrentValue() {
+    if (! this.isEnabled) return ''
+
     const currentSelectedOption = this.optionList.querySelector("li.is-selected")
 
     return currentSelectedOption.getAttribute("rel")
@@ -119,6 +132,8 @@ export default class CustomSelect {
 
   openSelect(e) {
     e.stopPropagation()
+
+    if (! this.isEnabled) return
 
     document
       .querySelectorAll(`div.${this.className}-styled.active`)

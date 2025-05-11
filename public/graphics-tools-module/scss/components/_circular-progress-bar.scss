@@ -1,0 +1,30 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .circular-progress-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      text {
+        fill: var(--blue);
+        font-size: 1.25em;
+        font-weight: bold;
+      }
+
+      circle {
+        stroke-width: 12;
+      }
+    }
+
+    .progress-desc {
+      padding-block: 1rem;
+      font-weight: bold;
+      text-align: center;
+      text-transform: capitalize;
+    }
+  }
+}

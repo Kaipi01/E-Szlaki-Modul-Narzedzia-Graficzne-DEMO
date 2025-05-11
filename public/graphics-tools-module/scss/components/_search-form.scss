@@ -3,12 +3,12 @@
 
 #graphics-tools-module { 
 
-  .upt-search-form {
+  .search-form {
     display: flex;
     align-items: center;
     width: 100%;
 
-    .upt-search-btn {
+    .search-btn {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -17,11 +17,13 @@
       border-radius: 0.375em;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-      font-size: 1.15rem;
+       i {
+        font-size: 1.15rem;
+       }
     }
   }
 
-  .upt-search-box {
+  .search-box {
     position: relative;
     width: 100%;
 

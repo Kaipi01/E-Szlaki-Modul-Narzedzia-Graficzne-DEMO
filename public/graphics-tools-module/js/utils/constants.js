@@ -7,7 +7,7 @@ const GRAPHICS_TOOLS_MODULE = {
     IMAGE_ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'],
     MAX_BATCH_SIZE: 10,
     MAX_BATCH_SIZE_BYTES: 100 * 1024 * 1024, 
-    MAX_CONCURRENT_UPLOADS: 3
+    MAX_CONCURRENT_UPLOADS: 2
 }
 
 export {

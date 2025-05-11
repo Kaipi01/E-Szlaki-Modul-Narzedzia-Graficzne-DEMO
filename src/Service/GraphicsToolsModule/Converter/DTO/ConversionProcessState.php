@@ -12,7 +12,7 @@ class ConversionProcessState
         public bool $addCompress, 
         public ?string $imageOriginalName = null,
         public ?string $imagePath = null,
-        public ?ConversionResults $conversionResults = null,
+        public ?ConversionResults $conversionResults = null
     ) {
     }
 }

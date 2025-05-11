@@ -1,13 +1,12 @@
 import UploadService from "../components/OperationPanel/UploadService.js";
 
 export default class ConverterUploadService extends UploadService {
-  constructor(options = {}, uiManager, fileManager) {
-    super(options, uiManager, fileManager) 
+  constructor(config = {}, uiManager, fileManager) {
+    super(config, uiManager, fileManager) 
   }
 
-  /** @override */
   async uploadFile(file, { onProgress, onError, onComplete }) {
-    onProgress(20);
+    onProgress(20); // FIXME: nie dokońca działa to jak trzeba ;/
 
     const errorHandler = (errorMessage) => {
       onProgress(0);
@@ -20,8 +19,7 @@ export default class ConverterUploadService extends UploadService {
 
       const selectedFormat = this.config.getSelectedFormat()
       const selectedQuality = this.config.getSelectedQuality()
-      const addCompressIsChecked = this.config.getAddCompressIsChecked()
-      
+      const addCompressIsChecked = this.config.getAddCompressIsChecked() 
       
       const dataStep1 = await this.sendStepRequest({
         image: file,
@@ -48,7 +46,7 @@ export default class ConverterUploadService extends UploadService {
 
       onComplete(processHash);
     } catch (error) {
-      errorHandler(`Wystąpił błąd podczas operacji: ${error.message}`);
+      errorHandler(error.message);
       console.error(error);
     }
   }

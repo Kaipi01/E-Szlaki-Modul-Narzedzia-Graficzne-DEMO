@@ -65,8 +65,6 @@ export async function loadModule(url, moduleName, onProgress) {
     // większość UMD/babelowanych modułów trafia do default
     const importedModule = module.default || module;
 
-    console.log(`${moduleName} załadowany:`, importedModule)
-
     return importedModule;
 
   } catch (err) {

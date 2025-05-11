@@ -1,0 +1,101 @@
+
+<div class="settings__wrapper">   
+
+    <div class="settings__wrapper-top">
+
+        <div class="custom-checkbox-group custom-checkbox-group--medium">
+            <input data-change-dimensions-checkbox id="graphics-tools-module-compressor-change-dimensions" name="change-dimensions" type="checkbox">
+            <label class="custom-checkbox-label" for="graphics-tools-module-compressor-change-dimensions">
+                <span class="custom-checkbox-icon" aria-hidden="true"></span>
+            </label>
+            <label class="custom-checkbox-label" for="graphics-tools-module-compressor-change-dimensions">
+                Zmniejsz rozmiary grafiki
+            </label>
+        </div>    
+
+        <custom-popover data-class="custom-select-green">
+            <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
+            <template data-class="custom-select-green-options" slot="content"> 
+
+                <label class="change-params__label" for="graphics-tools-module-compressor-operation-strength">
+                    Siła Kompresji
+                </label>
+                
+                <input class="change-params__control form-control" type="number" max="100" min="1" step="1" value="80" name="strength" data-strength-input id="graphics-tools-module-compressor-operation-strength" placeholder="Siła Kompresji">   
+
+            </template>
+        </custom-popover> 
+
+        <button class="link variant2 sr-only" id="selectButton" data-select-button>
+            <i class="fa-solid fa-file-export"></i> Wybierz pliki
+        </button>
+    </div>
+
+    <div data-dimensions-settings style="display: none;" class="settings__wrapper-bottom">
+
+        <div class="tab-navigation" role="tablist" aria-label="Zmniejsz rozmiary grafiki">
+            <button data-tab-button class="tab-button link variant2 small" role="tab" aria-selected="true" aria-controls="percent-tab">
+                Procentowo <i class="fa-solid fa-percent"></i>
+            </button>
+            <button data-tab-button class="tab-button link variant2 small" role="tab" aria-selected="false" aria-controls="numeric-tab">
+                Liczbowo <i class="fa-solid fa-ruler-combined"></i>
+            </button>
+        </div> 
+
+        <div data-tab-panel class="tab-panel active" id="percent-tab" role="tabpanel" aria-label="Procentowo">
+
+            <label class="change-params__label sr-only" for="graphics-tools-module-compressor-resize-percent">Zmniejsz grafikę o</label>
+                    
+            <div class="change-params__fields">
+                <select class="change-params__select" data-resize-percent data-custom-select data-class-name="custom-select-green" id="graphics-tools-module-compressor-resize-percent">
+                    <option hidden value="">Wybierz Procent</option>
+                    <option value="10">10%</option> 
+                    <option value="20">20%</option>
+                    <option value="25">25%</option>
+                    <option value="50">50%</option>
+                    <option value="75">75%</option>
+                </select>  
+
+                <div class="custom-checkbox-group">
+                    <label class="sr-only" for="graphics-tools-module-compressor-set-percent-custom">Ustaw własną wartość</label>
+
+                    <input data-set-percent-custom-checkbox id="graphics-tools-module-compressor-set-percent-custom" name="set-percent-custom" type="checkbox">
+                    <label class="custom-checkbox-label" for="graphics-tools-module-compressor-set-percent-custom">
+                        <span class="custom-checkbox-icon" aria-hidden="true"></span>
+                    </label> 
+                </div> 
+
+                <div class="change-params__wrapper-box"> 
+                    <label class="change-params__label" for="graphics-tools-module-compressor-resize-percent-custom">Własna wartość:</label>
+                    <input class="change-params__control form-control" disabled type="number" max="99" min="1" step="1" name="resize-percent-custom" data-resize-percent-custom-input id="graphics-tools-module-compressor-resize-percent-custom"> 
+                    <span class="change-params__label">%</span>
+                </div>
+            </div>
+        
+        </div>
+
+        <div data-tab-panel class="tab-panel" id="numeric-tab" role="tabpanel" aria-label="Liczbowo">
+
+            <div class="change-params__fields">
+                <span data-dimension-width-text class="label-text active">Szerokość</span>
+
+                <label class="custom-switch change-params__toggle-dimensions"> 
+                    <span class="sr-only">Przełącz</span>
+                    <input data-toggle-dimensions-checkbox type="checkbox" name="toggle-dimensions">
+                    <span class="toggle"><span class="toggle--handler"></span></span>
+                </label>
+
+                <span data-dimension-height-text class="label-text">Wysokość</span>
+
+                <div class="change-params__wrapper">
+                    <label class="sr-only" for="graphics-tools-module-compressor-custom-value">Wartość:</label>
+                    <input class="change-params__control form-control" type="number" max="99999" min="1" step="1" name="custom-value" data-custom-value-input id="graphics-tools-module-compressor-custom-value"> 
+                    <span class="change-params__label">px</span>
+                </div>  
+            </div>
+
+        </div>    
+
+    </div>
+    
+</div>     

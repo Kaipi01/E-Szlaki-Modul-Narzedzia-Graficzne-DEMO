@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Service\GraphicsToolsModule\Compressor;
 
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
@@ -16,29 +18,33 @@ class ImageOptimizerService implements ImageOptimizerInterface
     }
 
     /** @inheritDoc */
-    public function optimize(string $imagePath): void
+    public function optimize(string $imagePath, int $strength = 80): void
     {
         if (!file_exists($imagePath)) {
             throw new Exception("Plik nie istnieje: $imagePath");
-        } 
+        }
         $mimeType = $this->mimeTypeGuesser->guessMimeType($imagePath);
         $optimizerChain = OptimizerChainFactory::create();
+
+        if ($strength < 1 || $strength > 100) {
+            $strength = 80;
+        }
 
         $optimizerChain
             ->addOptimizer(new Jpegoptim([
                 '--strip-all',
                 '--all-progressive',
-                '--max=80'
+                "--max=$strength"
             ]))
             ->addOptimizer(new Pngquant([
                 '--force',
-                '--quality=65-80',
+                "--quality=$strength",
                 '--strip',
                 '--verbose'
             ]))
             ->addOptimizer(new Cwebp([
                 '-m 6',
-                '-q 80',
+                "-q $strength",
                 '-mt',
                 '-quiet'
             ]));
@@ -72,13 +78,13 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //         $driver = ImageExtensionTool::isImagickAvailable() ? new ImagickDriver() : new GdDriver();
 //         $this->imageManager = new ImageManager($driver);
 //         $this->useExternalTools = true;
-        
+
 //         // Sprawdź dostępność narzędzi zewnętrznych
 //         if ($this->useExternalTools) {
 //             $this->checkExternalTools();
 //         }
 //     }
-    
+
 //     /**
 //      * Sprawdza dostępność zewnętrznych narzędzi do optymalizacji
 //      */
@@ -92,7 +98,7 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             }
 //         }
 //     }
-    
+
 //     /** @inheritDoc */
 //     public function optimize(string $inputPath, array $options = []): bool
 //     {
@@ -107,13 +113,13 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             'strip_metadata' => true,
 //             'sharpen' => 0, // 0-100
 //         ];
-         
+
 //         $options = array_merge($defaultOptions, $options);
-        
+
 //         try {
 //             // Wczytaj obraz za pomocą Intervention/Image
 //             $image = $this->imageManager->read($inputPath);
-            
+
 //             // Zmiana rozmiaru, jeśli podano
 //             if ($options['resize'] && is_array($options['resize'])) {
 //                 list($width, $height) = $options['resize'];
@@ -124,31 +130,31 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             }
 
 //             // $image->
-            
+
 //             // Wyostrzanie, jeśli podano wartość > 0
 //             if ($options['sharpen'] > 0) {
 //                 $image->sharpen($options['sharpen'] / 10); // Dostosuj skalę do oczekiwań biblioteki
 //             }
-            
+
 //             // Usuń metadane, jeśli opcja jest włączona
 //             if ($options['strip_metadata'] && method_exists($image, 'removeMetadata')) {
 //                 $image->removeMetadata();
 //             }
-            
+
 //             // Określ format wyjściowy
 //             $format = $options['format'] ?? pathinfo($inputPath, PATHINFO_EXTENSION);
-            
+
 //             // Zapisz plik tymczasowy lub docelowy
 //             $tempFile = null;
-            
+
 //             if ($this->useExternalTools) {
 //                 // Jeśli używamy zewnętrznych narzędzi, zapisz do pliku tymczasowego
 //                 $tempFile = tempnam(sys_get_temp_dir(), 'img_') . '.' . $format;
 //                 $image->save($tempFile, $options['quality']);
-                
+
 //                 // Optymalizuj za pomocą zewnętrznych narzędzi
 //                 $this->optimizeWithExternalTools($tempFile, $outputPath, $format, $options);
-                
+
 //                 // Usuń plik tymczasowy
 //                 if (file_exists($tempFile)) {
 //                     unlink($tempFile);
@@ -176,14 +182,14 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //                         $image->save($outputPath, $options['quality']);
 //                 }
 //             }
-            
+
 //             return file_exists($outputPath);
 //         } catch (\Exception $e) {
 //             error_log("Błąd podczas optymalizacji obrazu: " . $e->getMessage());
 //             return false;
 //         }
 //     }
-    
+
 //     /**
 //      * Optymalizuje obraz za pomocą zewnętrznych narzędzi
 //      * 
@@ -196,7 +202,7 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //     private function optimizeWithExternalTools(string $inputPath, string $outputPath, string $format, array $options): bool
 //     {
 //         $format = strtolower($format);
-        
+
 //         switch ($format) {
 //             case 'jpg':
 //             case 'jpeg':
@@ -211,7 +217,7 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //                 return true;
 //         }
 //     }
-    
+
 //     /**
 //      * Optymalizuje obraz JPEG za pomocą jpegoptim
 //      * 
@@ -224,7 +230,7 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //     {
 //         // Skopiuj plik wejściowy do wyjściowego, ponieważ jpegoptim operuje na miejscu
 //         copy($inputPath, $outputPath);
-        
+
 //         // Przygotuj komendę jpegoptim
 //         $command = [
 //             $this->binaries['jpegoptim'],
@@ -232,10 +238,10 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             '--max=' . $options['quality'], // Ustaw maksymalną jakość
 //             $outputPath
 //         ];
-        
+
 //         return $this->runProcess($command);
 //     }
-    
+
 //     /**
 //      * Optymalizuje obraz PNG za pomocą pngquant
 //      * 
@@ -249,7 +255,7 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //         // Przygotuj komendę pngquant
 //         $quality = $options['quality'];
 //         $minQuality = max(1, $quality - 10); // Minimum 10% niższa jakość
-        
+
 //         $command = [
 //             $this->binaries['pngquant'],
 //             '--force',
@@ -257,10 +263,10 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             '--output=' . $outputPath,
 //             $inputPath
 //         ];
-        
+
 //         return $this->runProcess($command);
 //     }
-    
+
 //     /**
 //      * Optymalizuje obraz WebP za pomocą cwebp
 //      * 
@@ -279,10 +285,10 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             $inputPath,
 //             '-o', $outputPath
 //         ];
-        
+
 //         return $this->runProcess($command);
 //     }
-    
+
 //     /**
 //      * Uruchamia proces zewnętrzny
 //      * 
@@ -295,18 +301,18 @@ class ImageOptimizerService implements ImageOptimizerInterface
 //             $process = new Process($command);
 //             $process->setTimeout(60); // 60 sekund timeout
 //             $process->run();
-            
+
 //             if (!$process->isSuccessful()) {
 //                 throw new ProcessFailedException($process);
 //             }
-            
+
 //             return true;
 //         } catch (\Exception $e) {
 //             error_log("Błąd podczas uruchamiania procesu: " . $e->getMessage());
 //             return false;
 //         }
 //     } 
-    
+
 //     /**
 //      * Sprawdza, czy zewnętrzne narzędzia są używane 
 //      * @return bool Czy zewnętrzne narzędzia są używane

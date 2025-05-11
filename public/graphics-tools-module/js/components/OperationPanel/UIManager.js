@@ -29,6 +29,7 @@ export default class UIManager {
    * @param {Function} options.onFileSelect - Callback wywoływany po wyborze plików
    * @param {Function} options.onFileRemove - Callback wywoływany po usunięciu pliku 
    * @param {Function} options.onClear - Callback wywoływany po kliknięciu przycisku czyszczenia
+   * @param {Function} options.onError - Callback wywoływany w razie błędu
    */
   constructor(elements, options = {}) {
     this.elements = elements;
@@ -36,6 +37,7 @@ export default class UIManager {
     this.onFileSelect = options.onFileSelect || (() => {});
     this.onFileRemove = options.onFileRemove || (() => {});
     this.onClear = options.onClear || (() => {});
+    this.onError = options.onError || (() => {});
 
     this.attachEventListeners();
     this.initUI()
@@ -56,7 +58,7 @@ export default class UIManager {
    * @param {File} file - Plik obrazu do wyświetlenia
    * @param {string} formattedSize - Sformatowany rozmiar pliku
    */
-  renderImagesInfoTable(file, formattedSize) {}
+  async renderImagesInfoTable(file, formattedSize) {}
 
   /**
    * Aktualizacja tabeli po operacji
@@ -102,8 +104,15 @@ export default class UIManager {
   }
 
   attachEventListeners() {
-    this.elements.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
-    this.elements.selectButton.addEventListener('click', () => this.elements.fileInput.click()); 
+    this.elements.fileInput.addEventListener('change', (e) => {
+      try {
+        this.handleFileSelect(e)
+        
+      } catch(error) {
+        this.onError(error)
+      } 
+    });
+    this.elements.selectButton?.addEventListener('click', () => this.elements.fileInput.click()); 
     this.elements.clearButton.addEventListener('click', () => this.onClear()); 
   }
 
@@ -233,6 +242,7 @@ export default class UIManager {
 
   handleFileSelect(event) {
     const selectedFiles = event.target.files;
+
     if (selectedFiles && selectedFiles.length > 0) {
       this.onFileSelect(selectedFiles);
     }

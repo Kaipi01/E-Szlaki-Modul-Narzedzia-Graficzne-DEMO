@@ -5,7 +5,6 @@ namespace App\Service\GraphicsToolsModule\Utils;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
-use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\GTMImage;

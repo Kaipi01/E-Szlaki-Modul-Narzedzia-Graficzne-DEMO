@@ -5,7 +5,6 @@ namespace App\Service\GraphicsToolsModule\Compressor;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
 use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;  
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionResults;
-use App\Service\GraphicsToolsModule\Editor\Contracts\ResizerImageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
@@ -18,12 +17,11 @@ class CompressorService implements CompressorInterface
         private ImageOptimizerInterface $optimizer,  
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
-        private PathResolver $pathResolver,
-        private ResizerImageInterface $resizer
+        private PathResolver $pathResolver
     ) {} 
  
     /** @inheritDoc */
-    public function compress(string $imagePath): CompressionResults
+    public function compress(string $imagePath, int $strength = 80, ?\Closure $afterOperationCallback = null): CompressionResults
     {  
         if (!file_exists($imagePath)) {
             throw new \Exception("Plik nie istnieje: {$imagePath}");
@@ -34,10 +32,11 @@ class CompressorService implements CompressorInterface
         $downloadUrl = $this->urlGenerator->generate('gtm_download_image', ['serverName' => $imageName], UrlGeneratorInterface::ABSOLUTE_URL);
 
         try { 
-            $this->optimizer->optimize($imagePath); 
+            $this->optimizer->optimize($imagePath, $strength); 
 
-            // TODO: Dla testu !!!
-            //$this->resizer->scale($imagePath, $this->resizer->getWidth($imagePath) / 2);
+            if (is_callable($afterOperationCallback)) {
+                $afterOperationCallback($imagePath);
+            } 
  
             $compressedSize = file_exists($imagePath) ? filesize($imagePath) : 0;
             $compressionRatio = $originalSize > 0 ? round((1 - ($compressedSize / $originalSize)) * 100, 2) : 0;
@@ -55,6 +54,7 @@ class CompressorService implements CompressorInterface
             'imageName' => $imageName,
             'originalSize' => $originalSize,
             'compressedSize' => $compressedSize,
+            'compressionStrength' => $strength,
             'compressionRatio' => $compressionRatio,
             'src' => $this->pathResolver->getRelativePath($imagePath),  
             'downloadURL' => $downloadUrl,

@@ -1,0 +1,170 @@
+@use "./sr-only";
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+
+  .custom-checkbox-group {
+    --size: 1.25rem;
+    --border-radius: 2px;
+    --color: var(--green);
+    --box-shadow-base: rgba(0, 0, 0, 0.45) 0px 5px 15px;
+    --box-shadow: var(--color) 0px 0px 0px 2px, var(--box-shadow-base);
+    --focus-box-shadow: var(--color) 0px 0px 0px 4px, var(--box-shadow-base);
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: fit-content;
+
+    &[data-disabled] {
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 130%;
+        height: 130%;
+        transform: translate(-50%, -50%);
+        background-color: #ffffff8a;
+      }
+
+      input {
+        &:checked + .custom-checkbox-label .custom-checkbox-icon {
+          animation: none !important;
+        }
+      }
+    }
+
+    &--big {
+      --size: 1.85rem;
+      --border-radius: 4px;
+      --box-shadow-base: rgba(0, 0, 0, 0.35) 0px 54px 55px,
+        rgba(0, 0, 0, 0.22) 0px -12px 30px, rgba(0, 0, 0, 0.22) 0px 4px 6px,
+        rgba(0, 0, 0, 0.27) 0px 12px 13px, rgba(0, 0, 0, 0.19) 0px -3px 5px;
+      --box-shadow: var(--color) 0px 0px 0px 3px, var(--box-shadow-base);
+      --focus-box-shadow: var(--color) 0px 0px 0px 5px, var(--box-shadow-base);
+    }
+
+    &--medium {
+      --size: 1.5rem;
+      --border-radius: 3px;
+    }
+
+    input {
+      @extend .visually-hidden;
+
+      &:checked + .custom-checkbox-label .custom-checkbox-icon {
+        animation: animOnTransform 0.85s 1 forwards;
+
+        &::before {
+          background-color: var(--color);
+        }
+      }
+
+      &:checked + .custom-checkbox-label .custom-checkbox-icon::after {
+        transform: translate(-50%, -50%) scale(1);
+        transition-duration: 200ms;
+        transition-delay: 400ms;
+        opacity: 1;
+      }
+
+      &:focus + .custom-checkbox-label .custom-checkbox-icon {
+        box-shadow: var(--focus-box-shadow);
+      }
+    }
+
+    .custom-checkbox-label {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      min-height: toRem(30);
+      cursor: pointer;
+    }
+    .custom-checkbox-icon {
+      position: relative;
+      position: relative;
+      width: var(--size);
+      height: var(--size);
+      transition: all 300ms ease;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+
+      &::before {
+        --before-bg-size: calc(100% + 2px);
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: -1px;
+        width: var(--before-bg-size);
+        height: var(--before-bg-size);
+        transition: all 300ms ease;
+        border-radius: inherit;
+        background-color: transparent;
+      }
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 85%;
+        height: 85%;
+        transform: translate(-50%, -50%);
+        transition: all 0.3s ease;
+        opacity: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath fill='%23ffffff' d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+
+      &:hover {
+        box-shadow: var(--focus-box-shadow);
+      }
+    }
+  }
+
+  @keyframes animOn {
+    40% {
+      width: toRem(100);
+      height: toRem(20);
+    }
+    50% {
+      width: toRem(30);
+      height: toRem(60);
+    }
+    60% {
+      width: toRem(70);
+      height: toRem(40);
+    }
+    70% {
+      width: toRem(45);
+      height: toRem(55);
+    }
+    100% {
+      width: toRem(50);
+      height: toRem(50);
+    }
+  }
+
+  @keyframes animOnTransform {
+    40% {
+      transform: scale(1.5, 0.5);
+    }
+    50% {
+      transform: scale(0.5, 1.5);
+    }
+    60% {
+      transform: scale(1.3, 0.6);
+    }
+    70% {
+      transform: scale(0.8, 1.2);
+    }
+    100% {
+      transform: scale(1, 1);
+    }
+  }
+}

@@ -3,6 +3,7 @@
 namespace App\Service\GraphicsToolsModule\Converter;
 
 use App\Entity\GTMImage;
+use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageProcessData;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionProcessState;
@@ -16,23 +17,38 @@ class ConversionProcessHandler extends ImageProcessHandler implements ImageProce
     /** @var ConversionProcessState | null */
     protected $state;
 
-    public function __construct(private ConverterInterface $converter, private ImageEntityManagerInterface $imageManager)
+    public function __construct(private ConverterInterface $converter, private ImageEntityManagerInterface $imageManager, private CompressorInterface $compressor)
     {
     }
 
     public function process(): ImageProcessData
     {
-        if (!$this->state->imagePath || !file_exists($this->state->imagePath)) {
+        $imagePath = $this->state->imagePath;
+        $toFormat = $this->state->toFormat;
+        $addCompress = $this->state->addCompress;
+        $quality = $this->state->quality;
+        $imageOriginalName = $this->state->imageOriginalName;
+
+        $afterOperationCallback = null;
+
+        if (!$imagePath || !file_exists($imagePath)) {
             throw new \RuntimeException('Nie znaleziono pliku do kompresji. Wykonaj najpierw krok przygotowania obrazu.');
         }  
 
+        if ($addCompress) {
+            $afterOperationCallback = function (string $outPath) {
+                $this->compressor->compress($outPath);
+            };
+        }
+
         $this->state->conversionResults = $this->converter->convert(
-            $this->state->imagePath, 
-            $this->state->toFormat,
-            $this->state->addCompress, 
-            $this->state->quality
-        ); 
-        $this->state->conversionResults->originalName = $this->state->imageOriginalName;
+            $imagePath, 
+            $toFormat, 
+            $quality, 
+            $afterOperationCallback
+        );  
+
+        $this->state->conversionResults->originalName = $imageOriginalName;
 
         return ImageProcessData::fromArray([
             'processHash' => $this->state->processHash,

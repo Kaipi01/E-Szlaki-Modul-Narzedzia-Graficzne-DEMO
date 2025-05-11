@@ -1,59 +1,119 @@
 @use "./base/variables" as *;
+@use "./functions/toRem" as *;
 @use "./components/toast";
 @use "./components/alert";
+@use "./components/custom-switch";
 @use "./components/drop-zone";
 @use "./components/modern-table";
-@use "./components/animated-progress"; 
+@use "./components/animated-progress";
 @use "./components/custom-popover";
-@use "./components/form-control"; 
-@use "./components/custom-select-green.scss";
+@use "./components/form-control";
+@use "./components/tab-navigation";
+@use "./components/custom-select-green";
+@use "./components/custom-checkbox";
 
-@use "./layout/image-operation"; 
+@use "./layout/image-operation";
 
+#graphics-tools-module-compressor {
 
-#graphics-tools-module-compressor { 
-  
-    .change-params {
-  
-      &__wrapper {
+  .change-params {
+    &__wrapper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      &-box {
         display: flex;
         align-items: center;
-        gap: 1rem;
-      }
-  
-      &__label {
-        display: block;
-      }
-  
-      &__control {
-        width: auto;
-        border-radius: 5px;
-        color: #fff;
-        font-weight: bold;
+        gap: 0.25rem;
       }
     }
-  
-    .change-dimensions {
 
-      &__wrapper {
+    &__fields {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    &__label {
+      display: block;
+      margin-block: 0.5rem;
+      word-break: keep-all;
+      white-space: nowrap;
+    }
+
+    &__control {
+      width: auto;
+      border-radius: 5px;
+      font-weight: bold;
+
+      &[name="strength"] {
+        color: #fff;
+      }
+    } 
+  }
+
+  .settings {
+    position: relative;
+    z-index: 4;
+
+    &__wrapper {
+      margin: 2rem auto;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: var(--very-light-green-opacity);
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
+
+      @media (min-width: $content-breakpoint-tablet) {
+        max-width: toRem(600);
+      }
+
+      &-top {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        margin: 2rem auto;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        background-color: var(--very-light-green-opacity);
-        box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
         gap: 1rem;
-  
+
         @media (min-width: $content-breakpoint-tablet) {
-          flex-wrap: nowrap; 
+          flex-wrap: nowrap;
           justify-content: space-between;
-          max-width: max-content;
           gap: 2rem;
-        }  
-      } 
+        }
+
+        .custom-checkbox-group {
+          gap: 1rem;
+          font-weight: bold;
+
+          .custom-checkbox-label {
+            font-size: 1rem;
+          }
+        }
+      }
+
+      &-bottom {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-top: 1rem;
+      }
+
+      .custom-switch {
+        max-width: toRem(60);
+        margin: 0.5rem 0;
+      }
+
+      .custom-popover-button, .custom-select-green {
+        min-width: toRem(200);
+      }
+
+      .custom-select-green-styled {
+        font-weight: bold;
+      }
+
+      .label-text.active {
+        font-weight: bold;
+      }
     }
   }
-  
+}

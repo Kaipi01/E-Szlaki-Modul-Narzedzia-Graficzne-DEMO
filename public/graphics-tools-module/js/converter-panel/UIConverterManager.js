@@ -27,7 +27,7 @@ export default class UIConverterManager extends UIManager {
    * @param {File} file - Plik obrazu do wyświetlenia
    * @param {string} formattedSize - Sformatowany rozmiar pliku
    */
-  renderImagesInfoTable(file, formattedSize) {
+  async renderImagesInfoTable(file, formattedSize) {
 
     return new Promise((resolve, reject) => {
       const reader = new FileReader();

@@ -1,7 +1,8 @@
 import AbstractPanel from "../../modules/AbstractPanel.js";
+import Alert from "../../modules/Alert.js";
 import Toast from "../../modules/Toast.js";
 import { emitEvent } from "../../utils/events.js";
-import { downloadAjaxFile, formatFileSize } from "../../utils/file-helpers.js";
+import { downloadAjaxFile } from "../../utils/file-helpers.js";
 
 export default class OperationPanel extends AbstractPanel {
 
@@ -29,6 +30,7 @@ export default class OperationPanel extends AbstractPanel {
    *
    * @typedef {Object} State
    * @property {ImageState[]} images - Lista obiektów reprezentujących obrazy.
+   * @property {File[]} uploadsQueue - Kolejka grafik do przesłania.
    * @property {boolean} uploading - Czy trwa przesyła2nie.
    * @property {boolean} allOperationsCompleted - Czy wszystkie operacje są zakończone?.
    * @property {number | null} checkResultInterval - ID interwała obługującego koniec operacji
@@ -42,6 +44,7 @@ export default class OperationPanel extends AbstractPanel {
     this.state = {
       images: [],
       uploading: false,
+      uploadsQueue: [],
       allOperationsCompleted: false,
       checkResultInterval: null
     };
@@ -71,7 +74,8 @@ export default class OperationPanel extends AbstractPanel {
       clearButton: this.getByAttribute("data-clear-button"),
       containerAlerts: this.getByAttribute("data-operation-alerts"),
       maxFileSizeInfo: this.getByAttribute("max-file-size-info"),
-      tableHeadRow: this.getByAttribute("data-table-head-row")
+      tableHeadRow: this.getByAttribute("data-table-head-row"),
+      resultTable: document.querySelector('#graphics-tools-module-result-table')
     };
   }
 
@@ -109,11 +113,29 @@ export default class OperationPanel extends AbstractPanel {
     }
   }
 
+  /** 
+   * waliduje obecny stan danych wejściowych w panelu 
+   * @abstract 
+   * @throws {Error}
+   */
+  validateState() { }
+
   /**
    * Obsługa wyboru plików przez użytkownika
    * @param {FileList} fileList - Lista wybranych plików
    */
-  handleFileSelect(fileList) {
+  handleFileSelect(fileList) { 
+
+    // console.log('handleFileSelect(fileList)')
+
+    try {
+      this.validateState()
+    } catch (error) {
+      this.showError(error, "WARNING")
+
+      return
+    }
+
     const newFiles = this.InputFileManager.addFiles(fileList);
 
     emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, {files: newFiles})
@@ -121,22 +143,39 @@ export default class OperationPanel extends AbstractPanel {
     if (newFiles.length > 0) {
       this.uiManager.displayCurrentResultMessage("Trwa operacja, proszę czekać", "...")
       this.elements.resultTableElements.forEach(el => el.removeAttribute('hidden'))
-    }
+      this.elements.resultTable.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    } 
 
-    newFiles.forEach((file) => {
+    newFiles.reverse().forEach(async (file, index) => {
+
       const fileDetails = this.InputFileManager.getFileDetails(file);
 
-      this.uiManager
-        .renderImagesInfoTable(file, fileDetails.formattedSize)
-        .then(() => this.uploadFile(file))
-        .catch((error) => {
-          this.showError(`Błąd podczas wczytywania pliku "${file.name}".`);
-          this.showError(error.message);
-        });
-    });
+      await this.uiManager.renderImagesInfoTable(file, fileDetails.formattedSize)
+        // .then(() => )
+        // .catch((error) => {
+        //   this.showError(`Błąd podczas wczytywania pliku "${file.name}".`);
+        //   this.showError(error.message);
+        // });
+      this.uploadFile(file)
+        // this.state.uploadsQueue.push(file)
+    }); 
 
     this.updateUI();
+    // this.startUploadingFromQueue()
   }
+
+  // startUploadingFromQueue() {
+  //   console.log(this.state.uploadsQueue) 
+
+  //   const test1 = this.state.uploadsQueue.shift()
+  //   const test2 = this.state.uploadsQueue.shift()
+
+  //   console.log(test1)
+  //   console.log(test2)
+
+  //   this.uploadFile(test1)
+  //   this.uploadFile(test2)
+  // }
 
   getProgressElementsForFile(fileName) {
     const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -253,13 +292,19 @@ export default class OperationPanel extends AbstractPanel {
     this.updateUI();
   }
 
-  /** @param {string} message - Treść komunikatu */
-  showError(message) {
-    super.showError(message, this.elements.containerAlerts);
+  /** 
+   * @param {string} message - Treść komunikatu 
+   * @param {string | null} type
+   */
+  showError(message, type = "ERROR") {
+    this.elements.containerAlerts.innerHTML = ''
+
+    super.showError(message, this.elements.containerAlerts, type);
   }
     
   updateUI() {
     const hasFiles = this.InputFileManager.hasFiles();
+
     this.uiManager.updateUI(hasFiles, this.state.uploading);
   }
 
@@ -288,6 +333,8 @@ export default class OperationPanel extends AbstractPanel {
       emitEvent(this.EVENT_ON_ALL_IMAGES_COMPLETED)
 
       Toast.show(Toast.SUCCESS, message);
+      this.elements.containerAlerts.innerHTML = ''
+      Alert.show(Alert.SUCCESS, message, this.elements.containerAlerts)
     }
   } 
 }

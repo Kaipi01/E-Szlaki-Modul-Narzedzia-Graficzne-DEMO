@@ -13,7 +13,7 @@ class GTMEditorPanelController extends AbstractController
     public function index(): Response
     {
         return $this->render('graphics_tools_module/editor_panel/index.html.twig', [
-            'controller_name' => 'GTMEditorPanelController',
+            'GET_IMAGE_DATA_URL' => GTMImageDataAPIController::GET_IMAGE_DATA_URL
         ]);
     }
 }

@@ -15,7 +15,7 @@ class GTMMainPanelController extends AbstractController
         $userImages = $imageRepository->findBy(['owner' => $this->getUser()]);
 
         return $this->render('graphics_tools_module/main_panel/index.html.twig', [
-            'userImages' => $userImages,
+            'userImages' => $userImages
         ]);
     }
 }

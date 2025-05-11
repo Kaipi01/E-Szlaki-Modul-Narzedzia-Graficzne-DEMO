@@ -73,6 +73,16 @@ body.theme-dark::after {
     max-width: 95rem;
   }
 }
+@media (min-width: 128.125em) {
+  #graphics-tools-module .container {
+    max-width: 125rem;
+  }
+}
+@media (min-width: 153.125em) {
+  #graphics-tools-module .container {
+    max-width: 140rem;
+  }
+}
 #graphics-tools-module a {
   color: inherit;
   text-decoration: none;
@@ -186,10 +196,10 @@ body.theme-dark::after {
   --green-opacity: #00c8218f;
   --green-opacity-30: #00c82161;
   --green-opacity-10: #00c82113;
-  --dark-green: rgb(0, 113, 19);
+  --dark-green: rgb(0, 99, 16);
   --light-green: #00ff57;
   --very-light-green: #37ff7a;
-  --very-light-green-opacity: #37ff7a96;
+  --very-light-green-opacity: #37ff7a6c;
   /* gray */
   --very-light-gray: #efefef;
   --light-gray: #a9a9a9;
@@ -683,7 +693,7 @@ body.theme-dark::after {
   text-align: center;
 }
 #graphics-tools-module .panel__alerts {
-  margin-bottom: 1rem;
+  padding-bottom: 1rem;
 }
 #graphics-tools-module .panel__title {
   margin: 0;

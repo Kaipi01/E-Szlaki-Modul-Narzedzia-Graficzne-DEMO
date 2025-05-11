@@ -1,3 +1,4 @@
+import ThemeSwitcher from "../modules/ThemeSwitcher.js"
 import { GRAPHICS_TOOLS_MODULE } from '../utils/constants.js';
 import CompressorPanel from './CompressorPanel.js';
 

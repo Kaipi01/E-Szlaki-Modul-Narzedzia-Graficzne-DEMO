@@ -2,21 +2,16 @@
 
 namespace App\Service\GraphicsToolsModule\Editor\Contracts;
 
+use Intervention\Image\Interfaces\SizeInterface;
+
 interface ResizerImageInterface
 {
     /**
-     * Zwraca szerokość podanej grafiki
+     * Zwraca rozmiary (szerokość i wysokość) grafiki
      * @param string $imagePath
-     * @return int
+     * @return SizeInterface
     */
-    public function getWidth(string $imagePath): int;
-    
-    /**
-     * Zwraca wysokość podanej grafiki
-     * @param string $imagePath
-     * @return int
-    */
-    public function getHeight(string $imagePath): int;
+    public function getSize(string $imagePath): SizeInterface;
 
     /**
      * Zmienia rozmiary podanej grafiki

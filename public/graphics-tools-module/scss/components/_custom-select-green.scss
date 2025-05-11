@@ -16,9 +16,9 @@
     min-height: toRem(47);
     color: $select-color;
     font-size: 1rem;
-    cursor: pointer; 
+    cursor: pointer;
 
-    &-hidden { 
+    &-hidden {
       display: none;
       visibility: hidden;
       padding-right: toRem(10);
@@ -41,6 +41,12 @@
       background-color: $select-background;
       box-shadow: var(--box-shadow);
 
+      &[disabled] {
+        opacity: 0.4;
+        cursor: default;
+        pointer-events: none;
+      }
+
       &:after {
         content: "";
         position: absolute;
@@ -51,7 +57,7 @@
         transform: translateY(-50%);
         transition: all 0.3s ease;
         border: toRem(7) solid transparent;
-        border-color: $select-color transparent transparent transparent; 
+        border-color: $select-color transparent transparent transparent;
       }
       &:hover,
       &:active,
@@ -75,7 +81,7 @@
     &-options {
       display: none;
       position: absolute;
-      z-index: 999; 
+      z-index: 999;
       top: 94%;
       right: 0;
       left: 0;

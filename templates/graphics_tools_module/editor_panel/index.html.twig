@@ -30,31 +30,53 @@
         </div>
     </div> 
 
-    <div data-editor-container class="editor-container"> 
+    <div class="panel__alerts" data-operation-alerts></div>
 
-        <div class="settings-panel-top modern-card"></div> 
+    {{ include('graphics_tools_module/components/drop-zone.html.twig', {
+        textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
+        textInfoBottom: 'Maksymalny rozmiar pliku:',
+        isTypeMultiple: false
+    }, with_context: false) }} 
 
-        <div class="image-preview-container modern-card">
+    <div data-editor-container class="main-container">
 
-            <div class="panel__alerts" data-operation-alerts></div>
+        <div class="settings-panel-top modern-card">
 
-            <div data-cropper-wrapper class="cropper-wrapper">
-                <img data-image-preview class="image-preview" alt="" />
-            </div>  
+            <button class="link variant2" data-export-image-btn>
+                <i class="fa-solid fa-file-export"></i> Eksportuj
+            </button>
 
-            {{ include('graphics_tools_module/components/drop-zone.html.twig', {
-                textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
-                textInfoBottom: 'Maksymalny rozmiar pliku:',
-                isTypeMultiple: false
-            }, with_context: false) }} 
-            
-        </div>
+        </div>  
 
-        <div class="settings-panel-right modern-card">
+        <div class="editor-container"> 
 
-            <label for="add-crop">
-                Przytnij <input type="checkbox" data-add-crop-checkbox name="add-crop" id="add-crop">
-            </label>
+            <div class="image-preview-container modern-card">
+
+                <div data-cropper-wrapper class="cropper-wrapper">
+                    <img data-image-preview class="image-preview" alt="" />
+                </div>  
+                
+            </div>
+
+            <div class="settings-panel-right modern-card">
+
+                <label for="add-crop">
+                    Przytnij <input type="checkbox" data-add-crop-checkbox name="add-crop" id="add-crop">
+                </label>
+
+                <label for="add-blur">
+                    Dodaj Rozmycie <input type="checkbox" data-add-blur-checkbox name="add-blur" id="add-blur">
+                </label>
+
+                <label for="add-sepia">
+                    Dodaj Sepie <input type="checkbox" data-add-sepia-checkbox name="add-sepia" id="add-sepia">
+                </label>
+
+                <label for="clear-effects">
+                    Wyczyść efekty <input type="checkbox" data-clear-effects-checkbox name="clear-effects" id="clear-effects">
+                </label>
+
+            </div>
 
         </div>
 
@@ -65,7 +87,15 @@
 {% endblock %}
 
 {% block panel_javascripts %}
+
+<script> 
+
+    const EXPORT_IMAGE_URL = "{{ path('gtm_editor_api_export_image') }}"  
+    const GET_IMAGE_DATA_URL = "{{ GET_IMAGE_DATA_URL }}"
+
+</script> 
  
 <script type="module" src="{{ asset('graphics-tools-module/js/editor-panel/main.js') }}"></script>
+{# <script type="module" src="{{ asset('graphics-tools-module/dist/editor-panel.js') }}"></script> #}
 
 {% endblock %}

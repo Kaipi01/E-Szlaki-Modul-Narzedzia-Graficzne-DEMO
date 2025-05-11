@@ -53,6 +53,8 @@ export default class InputFileManager {
      * @returns {boolean} - Czy plik przeszedł walidację
      */
     validateFile(file) {
+        if (! file) return false;
+
         if (!this.config.allowedTypes.includes(file.type)) {
             const allowedTypesList = this.config.allowedTypes.map(format => {
                 return format.replace('image/', '').toUpperCase();

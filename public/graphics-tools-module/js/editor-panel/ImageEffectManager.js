@@ -1,71 +1,162 @@
 export default class ImageEffectManager {
 
-  /** @param {HTMLImageElement} imagePreviewContainer  */
-  /** @param {HTMLImageElement} imagePreviewElement  */
+  CANVAS_DATA_ATTR = "data-pixi-canvas"
+  CANVAS_ID = "pixiCanvas"
+  CANVAS_CLASSNAME = "pixi-canvas"
+
+  /** 
+   * @param {HTMLImageElement} imagePreviewContainer
+   * @param {HTMLImageElement} imagePreviewElement  
+   */
   constructor(PIXI, imagePreviewContainer, imagePreviewElement) {
     this.PIXI = PIXI
     this.imagePreviewElement = imagePreviewElement
     this.imagePreviewContainer = imagePreviewContainer
 
+    this.sprite = null
+    this.app = null
   }
 
-  /** @param {string} src - w formacie base64  */
-  async init(src) {
-    // const app = new this.PIXI.Application({
-    //   width: 1000,
-    //   height: 500
-    // });
-    // this.imagePreviewContainer.appendChild(app.view); 
+  async init() {
+    const { Application, Assets, Sprite } = this.PIXI;
+    const app = new Application();
 
-    // const image = this.PIXI.Sprite.from(src);
+    await app.init({ resizeTo: this.imagePreviewContainer, backgroundAlpha: 0 });
 
-    // app.stage.addChild(image);
+    app.canvas.className = this.CANVAS_CLASSNAME
+    app.canvas.id = this.CANVAS_ID;
+    app.canvas.setAttribute(this.CANVAS_DATA_ATTR, '')
 
-    // image.filters = []
+    this.imagePreviewContainer.appendChild(app.canvas);
 
-    // setTimeout(() => {
-    //   const blurFilter = new this.PIXI.BlurFilter(5);
-    //   image.filters = [blurFilter];
+    const texture = await Assets.load(this.imagePreviewElement);
+    const sprite = new Sprite(texture);
 
-    //   const colorMatrix = new this.PIXI.ColorMatrixFilter();
-    //   colorMatrix.sepia(true);
-    //   image.filters.push(colorMatrix);
-    // }, 4000)
+    app.stage.addChild(sprite);
 
-    const {Application, Assets, Sprite} = this.PIXI
+    function fitSpriteToContainer(sprite, container) {
+      const containerWidth = container.clientWidth
+      const containerHeight = container.clientHeight
+      const imageRatio = sprite.width / sprite.height;
+      const containerRatio = containerWidth / containerHeight;
 
-    // Create a new application
-    const app = new Application({ background: '#1099bb', resizeTo: this.imagePreviewContainer });
+      sprite.anchor.set(0.5);
+      sprite.position.set(containerWidth / 2, containerHeight / 2);
 
-    
+      let scale;
 
-    // Append the application canvas to the document body
-    this.imagePreviewContainer.appendChild(app.view);
+      if (containerRatio > imageRatio) {
+        scale = containerHeight / sprite.height;
+      } else {
+        scale = containerWidth / sprite.width;
+      }
 
-    console.log(Assets) 
+      sprite.scale.set(scale);
+    }
 
-    // Load the bunny texture
-    const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
+    fitSpriteToContainer(sprite, this.imagePreviewContainer);
 
-    // Create a bunny Sprite
-    const bunny = new Sprite(texture);
+    window.addEventListener('resize', () => fitSpriteToContainer(sprite, this.imagePreviewContainer));
 
-    // Center the sprite's anchor point
-    bunny.anchor.set(0.5);
+    sprite.filters = [];
 
-    // Move the sprite to the center of the screen
-    bunny.x = app.screen.width / 2;
-    bunny.y = app.screen.height / 2;
+    this.sprite = sprite
+    this.app = app
 
-    app.stage.addChild(bunny);
+    // app.ticker.add((time) =>
+    //   {
+    //       // Just for fun, let's rotate mr rabbit a little.
+    //       // * Delta is 1 if running at 100% performance *
+    //       // * Creates frame-independent transformation *
+    //       sprite.rotation += 0.1 * time.deltaTime;
+    //   });
+  }
 
-    // Listen for animate update
-    app.ticker.add((time) =>
-    {
-        // Just for fun, let's rotate mr rabbit a little.
-        // * Delta is 1 if running at 100% performance *
-        // * Creates frame-independent transformation *
-        bunny.rotation += 0.1 * time.deltaTime;
+  showCanvas() {
+    this.app.canvas.removeAttribute('hidden')
+    // this.imagePreviewContainer.appendChild(this.app.cavas);
+  }
+
+  hideCanvas() {
+    this.app.canvas.setAttribute('hidden', '')
+    // this.imagePreviewContainer.removeChild(this.app.cavas);
+  }
+
+  /** @returns {HTMLCanvasElement} */
+  getCanvas() {
+    return this.app.renderer.extract.canvas(this.app.stage)
+  }
+
+  clearEffects() {
+    console.log(this.sprite.filters)
+
+    this.sprite.filters = [];
+  }
+
+  /**
+   * Nakłada efekt sepii na sprite.
+   * @param {number} [amount=1] – siła efektu 0–1 (0 = brak, 1 = pełna sepii).
+   */
+  applySepia(amount = 1) {
+    const sepiaFilter = new this.PIXI.ColorMatrixFilter();
+
+    sepiaFilter.sepia(false);
+
+    if (amount !== 1) {
+      sepiaFilter.alpha = amount;
+    }
+    this.sprite.filters = [
+      ...this.sprite.filters || [],
+      sepiaFilter
+    ];
+  }
+
+  /** Usuwa efekt sepii z listy filtrów sprite. */
+  removeSepia() {
+    if (!this.sprite.filters) return;
+
+    this.sprite.filters = this.sprite.filters.filter(
+      f => !(f instanceof this.PIXI.ColorMatrixFilter)
+    );
+  }
+
+  addBlur(blurOptions) {
+    const blurFilter = new this.PIXI.BlurFilter(blurOptions);
+
+    this.sprite.filters = [...this.sprite.filters, blurFilter];
+  }
+
+  removeBlur() {
+    this.sprite.filters.forEach(element => {
+      console.log(element)
     });
+    this.sprite.filters.filter(filter => !filter instanceof this.PIXI.BlurFilter)
+
+    this.sprite.filters = []
+  }
+
+  /** 
+   * Funkcja dopasowująca obrazek do kontenera 
+   * @param {Sprite} sprite 
+   * @param {HTMLElement} container 
+   */
+  fitSpriteToContainer(sprite, container) {
+    const containerWidth = container.clientWidth
+    const containerHeight = container.clientHeight
+    const imageRatio = sprite.width / sprite.height;
+    const containerRatio = containerWidth / containerHeight;
+
+    sprite.anchor.set(0.5);
+    sprite.position.set(containerWidth / 2, containerHeight / 2);
+
+    let scale;
+
+    if (containerRatio > imageRatio) {
+      scale = containerHeight / sprite.height;
+    } else {
+      scale = containerWidth / sprite.width;
+    }
+
+    sprite.scale.set(scale);
   }
 }

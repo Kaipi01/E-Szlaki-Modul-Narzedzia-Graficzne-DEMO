@@ -1,5 +1,5 @@
-import { emitEvent } from "../utils/events";
-import { generateId } from "../utils/generateId";
+import { emitEvent } from "../utils/events.js";
+import { generateId } from "../utils/generateId.js";
 
 export default class SearchForm extends HTMLElement {
     static SEARCH_EVENT = "custom-search-form-search-event"
@@ -44,21 +44,21 @@ export default class SearchForm extends HTMLElement {
         inputLabel.className = "floating-label"
         inputLabel.setAttribute('for', this.dataId)
         inputLabel.textContent = "Szukaj"
-        inputBox.className = "upt-search-box"
+        inputBox.className = "search-box"
 
-        this.form.className = "upt-search-form"
+        this.form.className = "search-form"
 
-        this.button.className = "upt-search-btn link variant2"
+        this.button.className = "search-btn link variant2"
         this.button.type = "submit"
         this.button.innerHTML = `
-        <i class="upt-icon fa-solid fa-magnifying-glass"></i>
+        <i class="icon fa-solid fa-magnifying-glass"></i>
         <span class="sr-only">Szukaj</span>
       `
         this.input.id = this.dataId
         this.input.type = "search"
         this.input.name = "input-search"
         this.input.placeholder = "Szukaj"
-        this.input.className = "floating-label-control upt-form-control"
+        this.input.className = "floating-label-control form-control"
 
         inputBox.append(this.input)
         inputBox.append(inputLabel)

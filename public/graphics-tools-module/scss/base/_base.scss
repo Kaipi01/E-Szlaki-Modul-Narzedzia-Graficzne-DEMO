@@ -71,6 +71,15 @@ body {
     @media (min-width: 103.125em) {
       max-width: 95rem;
     }
+
+    @media (min-width: $content-breakpoint-desktop-very-large) {
+      max-width: 125rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-4k) {
+      max-width: 140rem;
+    }
+    
   }
 
   a {

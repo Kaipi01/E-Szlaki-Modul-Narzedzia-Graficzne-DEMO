@@ -2,7 +2,6 @@
 
 namespace App\Service\GraphicsToolsModule\Converter;
 
-use App\Service\GraphicsToolsModule\Compressor\Contracts\CompressorInterface;
 use App\Service\GraphicsToolsModule\Converter\Contracts\ConverterInterface;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionResults;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
@@ -17,14 +16,13 @@ class ConverterService implements ConverterInterface
         private GTMLoggerInterface $logger,
         private UrlGeneratorInterface $urlGenerator,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
-        private PathResolver $pathResolver,
-        private CompressorInterface $compressor
+        private PathResolver $pathResolver
     ) {}
 
     /** @inheritDoc */
-    public function convert(string $imagePath, string $mimeType, bool $addCompress = false, int $quality = 100): ConversionResults
+    public function convert(string $imagePath, string $convertToType, int $quality = 100, ?\Closure $afterOperationCallback = null): ConversionResults
     {
-        $formatName = $this->getFormatName($mimeType);
+        $formatName = $this->getFormatName($convertToType);
 
         try {
             $image = GraphicsToolResolver::getImageManager()->read($imagePath);
@@ -38,11 +36,11 @@ class ConverterService implements ConverterInterface
             }
 
             $image
-                ->encodeByMediaType($mimeType, quality: $quality)
+                ->encodeByMediaType($convertToType, quality: $quality)
                 ->save($outputPath); 
 
-            if ($addCompress) {
-                $this->compressor->compress($outputPath);
+            if (is_callable($afterOperationCallback)) {
+                $afterOperationCallback($outputPath);
             }
 
             $originalFormat = pathinfo($imagePath, PATHINFO_EXTENSION);

@@ -13,76 +13,13 @@
         <div class="image-operation"> 
 
             <div class="modern-card">
+
                 <div class="panel__header">
                     <h2 class="panel__title">Kompresja obrazów</h2>
                 </div> 
 
-                {# <div class="change-dimensions__wrapper">  
+                {% include "graphics_tools_module/compressor_panel/settings-box.html.twig" %}
 
-                    <label class="change-params__label sr-only" for="graphics-tools-module-compressor-resize-percent">Zmniejsz grafikę o</label>
-
-                    <select class="change-params__select" data-resize-percent data-custom-select data-class-name="custom-select-green" id="graphics-tools-module-compressor-resize-percent">
-                        <option hidden value="">Zmniejsz grafikę o</option>
-                        <option value="10">10%</option> 
-                        <option value="20">20%</option>
-                        <option value="25">25%</option>
-                        <option value="50">50%</option>
-                        <option value="75">75%</option>
-                    </select>  
-
-                    <div class="change-params__wrapper"> 
-                        
-                        <input class="change-params__control upt-form-control" type="number" max="99" min="1" step="1" name="resize-percent-custom" data-resize-percent-custom-input id="graphics-tools-module-compressor-resize-percent-custom"> 
-                    </div>
-
-                    <div class="change-params__wrapper">
-                        <label class="change-params__label" for="graphics-tools-module-compressor-width">
-                            Szerokość
-                        </label>
-                        
-                        <input class="change-params__control upt-form-control" type="number" max="99999" min="1" step="1" name="width" data-width-input id="graphics-tools-module-compressor-operation-width" placeholder="Szerokość"> 
-                    </div>
-
-                    <div class="change-params__wrapper">
-                        <label class="change-params__label" for="graphics-tools-module-compressor-height">
-                            Wysokość
-                        </label>
-                        
-                        <input class="change-params__control upt-form-control" type="number" max="99999" min="1" step="1" name="height" data-height-input id="graphics-tools-module-compressor-operation-height" placeholder="Wysokość"> 
-                    </div>
-
-                    <div class="change-params__wrapper">
-                        <label class="change-params__label" for="graphics-tools-module-compressor-operation-strength">
-                            Siła Kompresji
-                        </label>
-                        
-                        <input class="change-params__control upt-form-control" type="number" max="100" min="1" step="1" value="100" name="strength" data-strength-input id="graphics-tools-module-compressor-operation-strength" placeholder="Siła Kompresji"> 
-                    </div>
-
-                    
-
-                    
-                </div>   #}
-
-
-                {# <custom-popover data-class="custom-select-green">
-                        <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
-                        <template data-class="custom-select-green-options" slot="content">  
-
-                            <label class="custom-switch change-dimensions__compress-switch">
-                                <input data-add-compress-checkbox type="checkbox" name="add-compress">
-                                <span class="toggle"><span class="toggle--handler"></span></span>
-                                <span class="label-text">Dodaj Kompresje</span>
-                            </label>
-
-                        </template>
-                    </custom-popover>  #} 
-
-                    <button class="link variant2 sr-only" id="selectButton" data-select-button>
-                        <i class="fa-solid fa-file-export"></i>
-                        Wybierz pliki
-                    </button>
-        
                 <div class="panel__alerts" data-operation-alerts>
                     <custom-alert data-message="Wybranie plików automatycznie rozpocznie operacje"></custom-alert>
                 </div> 
@@ -112,6 +49,8 @@
     const DOWNLOAD_ALL_IMAGES_URL = "{{ path('gtm_download_all_images') }}"
 
 </script> 
+
 <script type="module" src="{{ asset('graphics-tools-module/js/compressor-panel/main.js') }}"></script>
+{# <script type="module" src="{{ asset('graphics-tools-module/dist/compressor-panel.js') }}"></script> #}
 
 {% endblock %}

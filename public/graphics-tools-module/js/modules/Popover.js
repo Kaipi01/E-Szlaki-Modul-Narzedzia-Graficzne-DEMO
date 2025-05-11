@@ -20,6 +20,7 @@ export default class Popover extends HTMLElement {
         this.buttonTextVal = buttonTextTemplate?.innerHTML || "";
         this.dataButtonClass = buttonTextTemplate.getAttribute("data-class") ?? "";
         this.dataContentClass = contentTemplate.getAttribute("data-class") ?? "";
+
         this.render();
         this.init();
     }
@@ -52,6 +53,7 @@ export default class Popover extends HTMLElement {
         this.button.classList.add('active')
         this.isOpen = true
     }
+
     hide() {
         this.content.style.display = "none"
         this.button.classList.remove('active')
@@ -60,15 +62,15 @@ export default class Popover extends HTMLElement {
 
     render() {
         this.innerHTML = `
-      <div data-custom-popover class="custom-popover ${this.dataClass}">
-        <button role="button" data-popover-button class="custom-popover-button ${this.dataButtonClass}">
-          ${this.buttonTextVal}
-        </button>
+            <div data-custom-popover class="custom-popover ${this.dataClass}">
+                <button role="button" data-popover-button class="custom-popover-button ${this.dataButtonClass}">
+                    ${this.buttonTextVal}
+                </button>
 
-        <div data-popover-content class="custom-popover-content ${this.dataContentClass}" role="dialog">
-          ${this.contentVal}
-        </div>
-      </div>
-    `
+                <div data-popover-content class="custom-popover-content ${this.dataContentClass}" role="dialog">
+                    ${this.contentVal}
+                </div>
+            </div>
+        `
     }
 }

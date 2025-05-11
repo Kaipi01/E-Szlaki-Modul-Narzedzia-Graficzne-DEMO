@@ -1,0 +1,35 @@
+
+<div class="change-format__wrapper"> 
+
+    <label class="change-format__label sr-only" for="graphics-tools-module-converter-format-select">Wybierz Docelowy Format</label>
+
+    <select class="change-format__select" data-format-select data-custom-select data-class-name="custom-select-green" id="graphics-tools-module-converter-format-select">
+        {# Renderowanie dynamiczne #}
+    </select>  
+
+    <custom-popover data-class="custom-select-green">
+        <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
+        <template data-class="custom-select-green-options" slot="content"> 
+
+            <div class="change-quality__wrapper">
+                <label class="change-quality__label" for="graphics-tools-module-converter-operation-quality">
+                    Jakość Konwersji
+                </label>
+                
+                <input class="change-quality__control form-control" type="number" max="100" min="1" step="1" value="100" name="quality" data-quality-input id="graphics-tools-module-converter-operation-quality" placeholder="Jakość Konwersji"> 
+            </div>
+
+            <label class="custom-switch change-format__compress-switch">
+                <input data-add-compress-checkbox type="checkbox" name="add-compress">
+                <span class="toggle"><span class="toggle--handler"></span></span>
+                <span class="label-text">Dodaj Kompresje</span>
+            </label>
+
+        </template>
+    </custom-popover> 
+
+    <button class="link variant2 select-files-btn sr-only" id="selectButton" data-select-button>
+        <i class="fa-solid fa-file-export"></i>
+        Wybierz pliki
+    </button>
+</div>  

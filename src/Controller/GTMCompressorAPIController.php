@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\GraphicsToolsModule\Compressor\CompressionProcessHandler;
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionProcessState;
+use App\Service\GraphicsToolsModule\Editor\DTO\ResizeImageOptions;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
@@ -13,19 +14,20 @@ use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessStateManagerI
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route; 
+use Symfony\Component\Routing\Annotation\Route;
 use Exception;
 
 #[Route(path: '/profil')]
 class GTMCompressorAPIController extends AbstractController
-{  
+{
     public function __construct(
         private readonly GTMLoggerInterface $logger,
         private readonly ImageFileValidatorInterface $imageFileValidator,
         private readonly CompressionProcessHandler $compressionHandler,
         private readonly ImageProcessStateManagerInterface $processStateManager,
-        private readonly UploadImageServiceInterface $fileUploader    
-    ) {}
+        private readonly UploadImageServiceInterface $fileUploader
+    ) {
+    }
 
     /**
      * Endpoint API uruchamijący process kompresji, który jest podzielony na etapy
@@ -36,13 +38,15 @@ class GTMCompressorAPIController extends AbstractController
     {
         $image = $request->files->get('image');
         $stepNumber = (int) $request->request->get('stepNumber');
-        $processHash = $request->request->get('processHash') ?? (new Uuid())->generate();
+        $processHash = $request->request->get('processHash') ?? Uuid::generate();
         $jsonData = [];
         $imageData = [];
-        $status = 200; 
+        $status = 200;
+
+        dump($request->request);
 
         try {
-            if (! $this->getUser()) {
+            if (!$this->getUser()) {
                 $status = 403;
                 throw new Exception('Odmowa dostępu!');
             }
@@ -52,7 +56,7 @@ class GTMCompressorAPIController extends AbstractController
                 throw new Exception('Niepoprawne dane! Brakuje pola stepNumber!');
             }
 
-            if ($stepNumber === 1) { 
+            if ($stepNumber === 1) {
                 if (!$image) {
                     $status = 400;
                     throw new Exception('Niepoprawne dane! Brak pliku graficznego!');
@@ -60,7 +64,8 @@ class GTMCompressorAPIController extends AbstractController
 
                 $uploadDir = $this->getParameter('gtm_uploads') . "/" . $this->getUser()->getId();
                 $imageData = $this->fileUploader->upload($image, $uploadDir, setUniqueName: true);
-            } 
+                $imageData["options"] = json_decode($request->request->get("options"), true);
+            }
 
             $currentProcessState = $this->getCurrentState($processHash, $imageData);
 
@@ -76,27 +81,27 @@ class GTMCompressorAPIController extends AbstractController
             $this->processStateManager->save($processHash, $currentProcessState);
 
             $jsonData = [
-                'success' => true, 
-                'errorMessage' => '', 
+                'success' => true,
+                'errorMessage' => '',
                 'processData' => $processData->toArray(),
                 'processHash' => $processHash
-            ]; 
-            
+            ];
+
         } catch (Exception $e) {
             $status = $status === 200 ? 500 : $status;
             $jsonData = [
-                'success' => false, 
-                'errorMessage' => 'Wystąpił błąd podczas kompresji grafiki: ' .  $e->getMessage(), 
+                'success' => false,
+                'errorMessage' => 'Wystąpił błąd podczas kompresji grafiki: ' . $e->getMessage(),
                 'processData' => [
                     'progress' => 0,
                     'status' => ImageOperationStatus::FAILED,
                     'processHash' => $processHash
                 ]
             ];
-            $this->logger->error(self::class . '::compressImage: ' .  $e->getMessage(), [
+            $this->logger->error(self::class . '::compressImage: ' . $e->getMessage(), [
                 'processHash' => $processHash
             ]);
-            
+
             $this->processStateManager->clear($processHash);
         }
 
@@ -105,21 +110,68 @@ class GTMCompressorAPIController extends AbstractController
         }
 
         return $this->json($jsonData, $status);
-    } 
+    }
 
     private function getCurrentState(string $processHash, array $imageData): CompressionProcessState
     {
         $state = $this->processStateManager->get($processHash);
 
-        if ($state === null) { 
+        if ($state === null) {
+            $options = $imageData['options'] ?? [];
+            $resizeOptions = null;
+
+            $this->validateOptions($options);
+
+            if ($options['isChange']) {
+                $resizeOptions = new ResizeImageOptions($options["changeBy"], $options["width"], $options["height"], $options["percent"]);
+            } 
+
             $state = new CompressionProcessState(
-                $processHash, 
+                $processHash,
                 $this->getUser()->getId(),
+                $options["strength"],
                 $imageData['originalName'],
-                $imageData['path']
+                $imageData['path'],
+                $resizeOptions
             );
         }
 
         return $state;
     }
+
+    /**
+     * Waliduje dane z pola "options" przesłane jako JSON.
+     * @param array $options Dane zdekodowane z JSON.
+     * @throws \InvalidArgumentException
+     */
+    private function validateOptions(array $options): void
+    {
+        $changeByTypes = [ResizeImageOptions::RESIZE_BY_PERCENT, ResizeImageOptions::RESIZE_BY_HEIGHT, ResizeImageOptions::RESIZE_BY_WIDTH];
+        $requiredKeys = array_merge(['strength', 'isChange', 'changeBy'], $changeByTypes);
+
+        foreach ($requiredKeys as $key) {
+            if (!array_key_exists($key, $options)) {
+                throw new \InvalidArgumentException("Brakuje wymaganej właściwości '$key' w options.");
+            }
+        }
+
+        if (!is_int($options['strength']) || $options['strength'] < 0 || $options['strength'] > 100) {
+            throw new \InvalidArgumentException("Wartość 'strength' musi być liczbą całkowitą z zakresu 0–100.");
+        }
+
+        if (!is_bool($options['isChange'])) {
+            throw new \InvalidArgumentException("Wartość 'isChange' musi być typu boolean.");
+        }
+
+        if (!in_array($options['changeBy'], $changeByTypes, true)) {
+            throw new \InvalidArgumentException("Wartość 'changeBy' musi być: " . implode(",", $changeByTypes));
+        }
+
+        foreach ($changeByTypes as $dim) {
+            if ($options[$dim] !== null && !is_int($options[$dim])) {
+                throw new \InvalidArgumentException("Wartość '$dim' musi być liczbą całkowitą lub null.");
+            }
+        }
+    }
+
 }

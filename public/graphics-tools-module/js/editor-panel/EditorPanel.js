@@ -6,11 +6,10 @@ import CropperManager from "./CropperManager.js";
 import ImageEffectManager from "./ImageEffectManager.js";
 
 export default class EditorPanel extends AbstractPanel {
-
   /**
    * @param {HTMLElement | string} container
    * @param {Object} options - Opcje konfiguracyjne
-   * @param {string} options.saveImageUrl - URL endpointu do zapisania obrazu
+   * @param {string} options.exportImageUrl - URL endpointu do zapisania obrazu
    * @param {string} options.getImageDataUrl - URL endpointu do pobrania danych obrazu 
    * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
    * @param {Array}  options.allowedTypes - Dozwolone typy plików
@@ -25,7 +24,7 @@ export default class EditorPanel extends AbstractPanel {
 
     // biblioteki
     this.libs = [
-      { url: "/graphics-tools-module/js/libs/pixi-modules.min.js", prop: "PIXI" },
+      { url: "/graphics-tools-module/js/libs/pixi.min.js", prop: "PIXI" },
       { url: "/graphics-tools-module/js/libs/cropper.min.js", prop: "Cropper" }
     ];
     this.PIXI = null;
@@ -52,9 +51,6 @@ export default class EditorPanel extends AbstractPanel {
     this.dropZoneElement = this.getByAttribute('data-drop-zone')
     this.fileInput = this.getByAttribute('data-file-input')
 
-    // Right Panel
-    this.addCropCheckbox = this.getByAttribute('data-add-crop-checkbox')
-
     // Cropper
     this.cropperWrapper = this.getByAttribute('data-cropper-wrapper')
     this.imagePreviewElement = this.getByAttribute('data-image-preview')
@@ -63,7 +59,7 @@ export default class EditorPanel extends AbstractPanel {
     // Leniwe zaimportowanie ciężkich bibliotek jak PIXI i Cropper
     this.importLibModules(() => {
       this.editorLoading.style.display = "none";
-      this.editorContainer.style.display = "";
+      // this.editorContainer.style.display = "";
 
       this.initComponents()
       this.setEventsListeners()
@@ -73,12 +69,45 @@ export default class EditorPanel extends AbstractPanel {
   setEventsListeners() {
     this.fileInput.addEventListener('change', (e) => this.handleSelectFile(e))
 
-    // Right Panel Options
-    this.addCropCheckbox.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        this.CropperManager.createCropper()
-      } else {
-        this.CropperManager.destroyCropper()
+    this.container.addEventListener('click', (e) => {
+      const target = e.target
+
+      switch (true) {
+        case target.hasAttribute('data-add-crop-checkbox'): {
+          if (target.checked) {
+            this.imagePreviewElement.src = this.ImageEffectManager.getCanvas().toDataURL()
+            // 
+            this.imagePreviewElement.style.display = ""
+            this.CropperManager.createCropper()
+            this.ImageEffectManager.hideCanvas()
+
+            this.cropperWrapper.removeChild(this.cropperWrapper.lastChild)
+          } else {
+            this.imagePreviewElement.style.display = "none"
+            this.ImageEffectManager.showCanvas()
+            this.CropperManager.destroyCropper()
+          }
+          break;
+        }
+
+        case target.hasAttribute('data-add-blur-checkbox'): {
+          target.checked ? this.ImageEffectManager.addBlur({ strength: 5 }) : this.ImageEffectManager.removeBlur();
+          break;
+        }
+
+        case target.hasAttribute('data-add-sepia-checkbox'): {
+          target.checked ? this.ImageEffectManager.applySepia() : this.ImageEffectManager.removeSepia();
+          break;
+        }
+
+        case target.hasAttribute('data-export-image-btn'): {
+          this.exportImage(this.ImageEffectManager.getCanvas())
+          break;
+        }
+
+        case target.hasAttribute('data-clear-effects-checkbox'):
+          this.ImageEffectManager.clearEffects();
+          break;
       }
     })
   }
@@ -95,9 +124,34 @@ export default class EditorPanel extends AbstractPanel {
 
     this.CropperManager = new CropperManager(this.Cropper, this.cropperWrapper, this.imagePreviewElement)
 
-    console.log(this.PIXI)
-
     this.ImageEffectManager = new ImageEffectManager(this.PIXI, this.cropperWrapper, this.imagePreviewElement)
+  }
+
+  /** @param {HTMLCanvasElement} canvas */
+  async exportImage(canvas) {
+    const { name: imageName, type: mimeType } = this.state.image
+    const formData = new FormData()
+    const getImageBlob = (mimeType) => new Promise(resolve => canvas.toBlob(blob => resolve(blob), mimeType, 1));
+    const imageBlob = await getImageBlob(mimeType)
+
+    formData.append('imageBlob', imageBlob, imageName)
+    formData.append('toFormat', mimeType) // TODO: Dodaj opcje wybrania docelowego formatu w którym użytkownik będzie chciał wyeksportować
+
+    const response = await fetch(this.options.exportImageUrl, {
+      method: 'POST',
+      body: formData
+    })
+    const responseData = await response.json()
+
+    if (response.ok) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(imageBlob);
+      link.download = imageName;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } else {
+      this.showError(responseData.errorMessage)
+    }
   }
 
   async importLibModules(onImportedSuccessfully) {
@@ -112,6 +166,8 @@ export default class EditorPanel extends AbstractPanel {
     for (let { url, prop } of this.libs) {
       this[prop] = await loadModule(url, prop, onChunkLoadedProgress);
     }
+    // Biblioteka PIXI ładuje swój cały moduł z klasami do obiektu window
+    this.PIXI = window.PIXI
 
     // Poczekaj aż animacja paska postępu się skończy
     setTimeout(onImportedSuccessfully, 1000)
@@ -132,12 +188,12 @@ export default class EditorPanel extends AbstractPanel {
   handleFileAdded(file) {
     this.state.image = file
 
-    console.log('grafika została dodana: ' + file.name)
-
     try {
       this.renderImage(file)
-      this.ImageEffectManager.init()
+      this.imagePreviewElement.addEventListener('load', () => this.ImageEffectManager.init())
+      this.dropZoneElement.style.display = "none"
       this.cropperWrapper.style.display = ""
+      this.editorContainer.style.display = "";
     } catch (error) {
       this.showError(error)
     }
@@ -169,6 +225,7 @@ export default class EditorPanel extends AbstractPanel {
 
   /** @param {string} message - Treść komunikatu */
   showError(message) {
+    this.containerAlerts.innerHTML = ''
     super.showError(message, this.containerAlerts);
   }
 }
