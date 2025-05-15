@@ -8,7 +8,7 @@
   --blue: #008be2;
   --light-blue: #14a5ff;
   --light-blue-opacity: #14a5ffb6;
-  
+
   /* red */
   --red: #b50000;
   --light-red: #e40000;
@@ -35,6 +35,7 @@
   --background-50: #ffffff94;
   --background-75: #ffffffae;
   --background-85: #ffffffd5;
+  --background-gray: var(--very-light-gray);
   --font-color: #000;
   --font-color-50: rgba(0, 0, 0, 0.5);
   --font-color-gray: var(--gray);
@@ -53,6 +54,23 @@
   --loading-icon: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' xmlns='http://www.w3.org/2000/svg' fill='none' class='hds-flight-icon--animation-loading'%3E%3Cg fill='%23008be2' fill-rule='evenodd' clip-rule='evenodd'%3E%3Cpath d='M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8z' opacity='.2'/%3E%3Cpath d='M7.25.75A.75.75 0 018 0a8 8 0 018 8 .75.75 0 01-1.5 0A6.5 6.5 0 008 1.5a.75.75 0 01-.75-.75z'/%3E%3C/g%3E%3C/svg%3E");
   --loading-icon-animation: loading-icon-spin-animation 0.6s linear infinite;
 
+  --checkered-bg: repeating-linear-gradient(
+      45deg,
+      #74747441 25%,
+      transparent 0,
+      transparent 75%,
+      #74747441 0,
+      #74747441
+    ),
+    repeating-linear-gradient(
+      45deg,
+      #74747441 25%,
+      transparent 0,
+      transparent 75%,
+      #74747441 0,
+      #74747441
+    );
+
   @keyframes loading-icon-spin-animation {
     0% {
       transform: translate(-50%, -50%) rotate(0deg);
@@ -70,6 +88,7 @@
     --background-50: var(--very-dark-gray-50);
     --background-75: #000000bd;
     --background-85: #000000d2;
+    --background-gray: var(--dark-gray);
     --background-gradient: linear-gradient(
       to top,
       #2c2c2c,
@@ -78,6 +97,6 @@
     --font-color: #fff;
     --font-color-50: rgba(255, 255, 255, 0.5);
     --font-color-gray: var(--very-light-gray);
-    --font-color-green: var(--very-light-green); 
+    --font-color-green: var(--very-light-green);
   }
 }

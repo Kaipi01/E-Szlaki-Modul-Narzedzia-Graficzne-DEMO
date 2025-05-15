@@ -4,20 +4,16 @@ export default class ImageEffectManager {
   CANVAS_ID = "pixiCanvas"
   CANVAS_CLASSNAME = "pixi-canvas"
 
-  /** 
-   * @param {HTMLImageElement} imagePreviewContainer
-   * @param {HTMLImageElement} imagePreviewElement  
-   */
-  constructor(PIXI, imagePreviewContainer, imagePreviewElement) {
+  /** @param {HTMLElement} imagePreviewContainer */
+  constructor(PIXI, imagePreviewContainer) {
     this.PIXI = PIXI
-    this.imagePreviewElement = imagePreviewElement
     this.imagePreviewContainer = imagePreviewContainer
-
     this.sprite = null
     this.app = null
   }
 
-  async init() {
+  /** @param {HTMLImageElement} imagePreviewElement */
+  async init(imagePreviewElement) {
     const { Application, Assets, Sprite } = this.PIXI;
     const app = new Application();
 
@@ -29,7 +25,7 @@ export default class ImageEffectManager {
 
     this.imagePreviewContainer.appendChild(app.canvas);
 
-    const texture = await Assets.load(this.imagePreviewElement);
+    const texture = await Assets.load(imagePreviewElement);
     const sprite = new Sprite(texture);
 
     app.stage.addChild(sprite);
@@ -70,16 +66,6 @@ export default class ImageEffectManager {
     //       // * Creates frame-independent transformation *
     //       sprite.rotation += 0.1 * time.deltaTime;
     //   });
-  }
-
-  showCanvas() {
-    this.app.canvas.removeAttribute('hidden')
-    // this.imagePreviewContainer.appendChild(this.app.cavas);
-  }
-
-  hideCanvas() {
-    this.app.canvas.setAttribute('hidden', '')
-    // this.imagePreviewContainer.removeChild(this.app.cavas);
   }
 
   /** @returns {HTMLCanvasElement} */

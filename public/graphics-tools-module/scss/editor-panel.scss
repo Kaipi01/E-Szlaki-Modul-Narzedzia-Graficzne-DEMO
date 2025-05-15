@@ -19,22 +19,22 @@
 
     @media (min-width: $content-breakpoint-tablet) {
       gap: 1.5rem;
-    } 
+    }
   }
 
   .editor-loading {
     display: flex;
-    align-items: center;
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 1.5rem;
     width: 100%;
     height: 100%;
-    position: absolute;
-    left: 50%;
-    top: 50%;
     transform: translate(-50%, -50%);
-    z-index: 3;
+    gap: 1.5rem;
 
     &-message {
       order: -1;
@@ -67,49 +67,39 @@
       place-content: start;
       grid-template-columns: 1fr toRem(300);
       gap: 1.5rem;
-    } 
+    }
 
     .image-preview-container {
-      background-color: #000;
-      
+      padding: 0 !important;
+      background-color: var(--background-gray);
+      background-image: var(--checkered-bg);
+      background-position: 0 0, 0.5rem 0.5rem;
+      background-size: 1rem 1rem;
+
       .image-preview {
         width: 100%;
         height: 100%;
-        // object-fit: cover;
         object-fit: contain;
       }
 
       .cropper-wrapper {
         position: relative;
-        // display: none;
-
         width: 100%;
         height: toRem(500);
         margin: 0 auto;
+        overflow: hidden;
+        border-radius: inherit;
 
         .pixi-canvas {
           position: absolute;
-          left: 0;
           top: 0;
+          left: 0;
+        }
+
+        cropper-canvas {
+          min-height: 100%;
         }
       }
-
-      cropper-canvas {
-        min-height: 100%;
-      }
-
-      // #image-test {
-      //   display: block;
-      //   max-width: 100%;
-      // }
-    }
-  }
-}
-
-.theme-dark {
-  #graphics-tools-module-editor {
-    .editor-loading {
-      background-color: var(--dark-green);
     }
   }
 }

@@ -66,25 +66,86 @@ export default class EditorPanel extends AbstractPanel {
     })
   }
 
+  /** @param {string} src */
+  replacePreviewWithNewImage(src) {
+    const img = document.createElement('img')
+
+    img.src = src
+    img.className = "image-preview"
+    img.setAttribute('data-image-preview', '')
+
+    this.imagePreviewElement = img
+
+    this.cropperWrapper.replaceChildren(img)
+
+    return img
+  }
+
   setEventsListeners() {
     this.fileInput.addEventListener('change', (e) => this.handleSelectFile(e))
 
-    this.container.addEventListener('click', (e) => {
+    this.container.addEventListener('click', async (e) => {
       const target = e.target
 
       switch (true) {
+        case target.hasAttribute('data-crop-image-btn'): {
+          // Get the cropped canvas
+          const cropperCanvas = await this.CropperManager.getCroppedCanvas()
+          
+          // Clean up existing PIXI canvas if it exists
+          const existingPixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
+          if (existingPixiCanvas) {
+            existingPixiCanvas.remove()
+          }
+          
+          // Replace the image preview with cropped version
+          const newImageElement = this.replacePreviewWithNewImage(cropperCanvas.toDataURL())
+          
+          // Uncheck crop checkbox
+          this.container.querySelector('[data-add-crop-checkbox]').checked = false
+          
+          // Make sure image is visible before initializing effects
+          newImageElement.style.display = ""
+          
+          // Initialize the effects manager with the new image
+          this.ImageEffectManager.init(newImageElement)
+          
+          // After initialization, hide the image and ensure PIXI canvas is visible
+          requestAnimationFrame(() => {
+            const newPixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
+            if (newPixiCanvas) {
+              newPixiCanvas.style.display = ""
+            }
+            newImageElement.style.display = "none"
+          })
+          
+          break;
+        }
+
         case target.hasAttribute('data-add-crop-checkbox'): {
           if (target.checked) {
+            // When enabling cropper:
+            // 1. Update image with current canvas state
             this.imagePreviewElement.src = this.ImageEffectManager.getCanvas().toDataURL()
-            // 
+            // 2. Show the image for cropping
             this.imagePreviewElement.style.display = ""
+            // 3. Create the cropper
             this.CropperManager.createCropper()
-            this.ImageEffectManager.hideCanvas()
-
-            this.cropperWrapper.removeChild(this.cropperWrapper.lastChild)
+            // 4. Hide the PIXI canvas
+            const pixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
+            if (pixiCanvas) {
+              pixiCanvas.style.display = "none"
+            }
           } else {
+            // When disabling cropper:
+            // 1. Hide the image
             this.imagePreviewElement.style.display = "none"
-            this.ImageEffectManager.showCanvas()
+            // 2. Show the PIXI canvas
+            const pixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
+            if (pixiCanvas) {
+              pixiCanvas.style.display = ""
+            }
+            // 3. Destroy the cropper
             this.CropperManager.destroyCropper()
           }
           break;
@@ -145,6 +206,7 @@ export default class EditorPanel extends AbstractPanel {
 
     if (response.ok) {
       const link = document.createElement('a');
+      
       link.href = URL.createObjectURL(imageBlob);
       link.download = imageName;
       link.click();
@@ -190,7 +252,7 @@ export default class EditorPanel extends AbstractPanel {
 
     try {
       this.renderImage(file)
-      this.imagePreviewElement.addEventListener('load', () => this.ImageEffectManager.init())
+      this.imagePreviewElement.addEventListener('load', () => this.ImageEffectManager.init(this.imagePreviewElement))
       this.dropZoneElement.style.display = "none"
       this.cropperWrapper.style.display = ""
       this.editorContainer.style.display = "";
