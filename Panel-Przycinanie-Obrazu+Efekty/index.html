@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel edycji zdjęć z efektami</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@2.0.0-beta.1/dist/cropper.min.css">-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+    integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+  <div id="graphics-tools-module">
+
+    <div class="container">
+      <div class="image-editor-panel">
+        <div class="editor-header">
+          <h2 class="header">Edytor zdjęć</h2>
+        </div>
+
+
+
+        <div class="effect-group">
+          <div class="effect-header">
+            <span>Przytnij</span>
+          </div>
+          <div class="effect-controls">
+            <label class="toggle-switch">
+              <input type="checkbox" id="crop-toggle-checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+
+        <div class="editor-content">
+
+          <!-- Sekcja z zakładkami -->
+          <div class="editor-tabs">
+            <div class="tabs-header">
+              <button class="tab-button active" data-tab="crop">
+                <i class="fas fa-crop-alt"></i> Przytnij
+              </button>
+              <button class="tab-button" data-tab="rotate">
+                <i class="fas fa-sync"></i> Obróć
+              </button>
+              <!-- Dodaj nowy przycisk zakładki w tabs-header -->
+              <button class="tab-button" data-tab="effects">
+                <i class="fas fa-magic"></i> Efekty
+              </button>
+            </div>
+
+            <!-- Zawartość zakładek -->
+            <div class="tab-content">
+              <!-- Zakładka przycinania -->
+              <div class="tab-pane active" id="crop-tab">
+                <div class="form-group">
+                  <label for="crop-width">Szerokość (px):</label>
+                  <input type="number" id="crop-width" min="1" placeholder="Szerokość">
+                </div>
+                <div class="form-group">
+                  <label for="crop-height">Wysokość (px):</label>
+                  <input type="number" id="crop-height" min="1" placeholder="Wysokość">
+                </div>
+                <div class="form-group">
+                  <label for="aspect-ratio">Proporcje:</label>
+                  <select id="aspect-ratio">
+                    <option value="free">Dowolne</option>
+                    <option value="1:1">1:1 (Kwadrat)</option>
+                    <option value="4:3">4:3</option>
+                    <option value="16:9">16:9</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Zakładka obracania -->
+              <div class="tab-pane" id="rotate-tab">
+                <div class="form-group">
+                  <label for="rotation-angle">Kąt obrotu (°):</label>
+                  <input type="number" id="rotation-angle" value="0" min="-180" max="180" step="1">
+                </div>
+                <div class="rotation-buttons">
+                  <button id="rotate-left" class="btn-icon">
+                    <i class="fas fa-undo"></i> -90°
+                  </button>
+                  <button id="rotate-right" class="btn-icon">
+                    <i class="fas fa-redo"></i> +90°
+                  </button>
+                  <button id="flip-horizontal" class="btn-icon">
+                    <i class="fas fa-arrows-left-right"></i> Odbij poziomo
+                  </button>
+                  <button id="flip-vertical" class="btn-icon">
+                    <i class="fas fa-arrows-up-down"></i> Odbij pionowo
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dodaj nową zawartość zakładki w tab-content -->
+              <div class="tab-pane" id="effects-tab">
+                <div class="effects-container">
+                  <!-- Blur -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Blur (Rozmycie)</span>
+                      <button class="effect-reset" data-effect="blur">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-blur" min="0" max="20" value="0" step="0.5" class="effect-slider">
+                      <span class="effect-value">0px</span>
+                    </div>
+                  </div>
+
+                  <!-- Brightness -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Brightness (Jasność)</span>
+                      <button class="effect-reset" data-effect="brightness">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-brightness" min="0" max="200" value="100" step="5"
+                        class="effect-slider">
+                      <span class="effect-value">100%</span>
+                    </div>
+                  </div>
+
+                  <!-- Contrast -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Contrast (Kontrast)</span>
+                      <button class="effect-reset" data-effect="contrast">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-contrast" min="0" max="200" value="100" step="5"
+                        class="effect-slider">
+                      <span class="effect-value">100%</span>
+                    </div>
+                  </div>
+
+                  <!-- Grayscale -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Grayscale (Skala szarości)</span>
+                      <button class="effect-reset" data-effect="grayscale">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-grayscale" min="0" max="100" value="0" step="5"
+                        class="effect-slider">
+                      <span class="effect-value">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- Saturation -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Saturation (Nasycenie)</span>
+                      <button class="effect-reset" data-effect="saturation">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-saturation" min="0" max="200" value="100" step="5"
+                        class="effect-slider">
+                      <span class="effect-value">100%</span>
+                    </div>
+                  </div>
+
+                  <!-- Sepia -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Sepia</span>
+                      <button class="effect-reset" data-effect="sepia">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-sepia" min="0" max="100" value="0" step="5" class="effect-slider">
+                      <span class="effect-value">0%</span>
+                    </div>
+                  </div>
+
+                  <!-- Hue Rotate -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Hue Rotate (Rotacja barw)</span>
+                      <button class="effect-reset" data-effect="hueRotate">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <input type="range" id="effect-hue-rotate" min="0" max="360" value="0" step="5"
+                        class="effect-slider">
+                      <span class="effect-value">0deg</span>
+                    </div>
+                  </div>
+
+                  <!-- Invert -->
+                  <div class="effect-group">
+                    <div class="effect-header">
+                      <span>Invert (Negatyw)</span>
+                      <button class="effect-reset" data-effect="invert">
+                        <i class="fas fa-undo"></i>
+                      </button>
+                    </div>
+                    <div class="effect-controls">
+                      <label class="toggle-switch">
+                        <input type="checkbox" id="effect-invert">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Sekcja z podglądem obrazu -->
+          <div class="editor-preview">
+            <div class="image-upload-container" id="upload-container">
+              <input type="file" id="image-input" accept="image/*" class="file-input">
+              <div class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Wybierz zdjęcie lub przeciągnij je tutaj</p>
+              </div>
+            </div>
+            <div class="image-preview-container hide" id="preview-container">
+              <img id="preview-image" src="" alt="Podgląd zdjęcia">
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-footer">
+          <button id="reset-all-button" class="btn btn-secondary">
+            <i class="fas fa-undo-alt"></i> Resetuj wszystko
+          </button>
+
+          <button id="export-button" class="btn btn-primary" disabled>
+            <i class="fas fa-download"></i> Eksportuj
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/cropperjs@2.0.0-beta.1/dist/cropper.min.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+    integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- <script src="./cropper.min.js"></script> -->
+  <script src="script.js"></script>
+</body>
+
+</html>
