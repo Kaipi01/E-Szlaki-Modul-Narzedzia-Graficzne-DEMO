@@ -720,7 +720,7 @@ body.theme-dark::after {
 
 #graphics-tools-module .main-navigation {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 1.5rem;
   width: 100%;
   margin-bottom: var(--panels-gap);
@@ -728,6 +728,7 @@ body.theme-dark::after {
 #graphics-tools-module .main-navigation-list {
   display: flex;
   position: relative;
+  flex-direction: column;
   width: 100%;
   max-width: 56.25rem;
   padding: 0;
@@ -735,9 +736,6 @@ body.theme-dark::after {
   background-color: var(--green);
   color: #fff;
   list-style: none;
-}
-#graphics-tools-module .main-navigation-item {
-  width: 25%;
 }
 #graphics-tools-module .main-navigation-link {
   display: flex;
