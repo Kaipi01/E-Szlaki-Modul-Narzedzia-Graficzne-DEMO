@@ -1,0 +1,25 @@
+{% extends 'graphics_tools_module/panel.html.twig' %}
+
+{% block title %}Narzędzia Graficzne | Moje pliki{% endblock %}
+
+{% block panel_stylesheets %}  
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/user-images-panel.css') }}">
+{% endblock %}
+
+{% block panel_content %} 
+
+    <div id="graphics-tools-module-user-images-panel">
+
+        <h1>Moje Grafiki</h1>
+
+        {% include "graphics_tools_module/user_images_panel/images-table.html.twig" %}
+        
+    </div> 
+
+{% endblock %} 
+
+{% block panel_javascripts %}
+ 
+<script type="module" src="{{ asset('graphics-tools-module/js/panels/user-images-panel/main.js') }}"></script>
+
+{% endblock %}

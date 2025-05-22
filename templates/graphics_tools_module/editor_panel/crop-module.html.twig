@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel edycji zdjęć</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@2.0.0-beta.1/dist/cropper.min.css">
+</head>
+<body>
+  <div id="graphics-tools-module">
+    <div class="container">
+      <div class="image-editor-panel">
+        <div class="editor-header">
+          <h2 class="header">Edytor zdjęć</h2>
+        </div>
+        
+        <div class="editor-content">
+          <!-- Sekcja z zakładkami -->
+          <div class="editor-tabs">
+            <div class="tabs-header">
+              <button class="tab-button active" data-tab="crop">
+                <i class="fas fa-crop-alt"></i> Przytnij
+              </button>
+              <button class="tab-button" data-tab="rotate">
+                <i class="fas fa-sync"></i> Obróć
+              </button>
+            </div>
+            
+            <!-- Zawartość zakładek -->
+            <div class="tab-content">
+              <!-- Zakładka przycinania -->
+              <div class="tab-pane active" id="crop-tab">
+                <div class="form-group">
+                  <label for="crop-width">Szerokość (px):</label>
+                  <input type="number" id="crop-width" min="1" placeholder="Szerokość">
+                </div>
+                <div class="form-group">
+                  <label for="crop-height">Wysokość (px):</label>
+                  <input type="number" id="crop-height" min="1" placeholder="Wysokość">
+                </div>
+                <div class="form-group">
+                  <label for="aspect-ratio">Proporcje:</label>
+                  <select id="aspect-ratio">
+                    <option value="free">Dowolne</option>
+                    <option value="1:1">1:1 (Kwadrat)</option>
+                    <option value="4:3">4:3</option>
+                    <option value="16:9">16:9</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Zakładka obracania -->
+              <div class="tab-pane" id="rotate-tab">
+                <div class="form-group">
+                  <label for="rotation-angle">Kąt obrotu (°):</label>
+                  <input type="number" id="rotation-angle" value="0" min="-180" max="180" step="1">
+                </div>
+                <div class="rotation-buttons">
+                  <button id="rotate-left" class="btn-icon">
+                    <i class="fas fa-undo"></i> -90°
+                  </button>
+                  <button id="rotate-right" class="btn-icon">
+                    <i class="fas fa-redo"></i> +90°
+                  </button>
+                  <button id="flip-horizontal" class="btn-icon">
+                    <i class="fas fa-arrows-left-right"></i> Odbij poziomo
+                  </button>
+                  <button id="flip-vertical" class="btn-icon">
+                    <i class="fas fa-arrows-up-down"></i> Odbij pionowo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sekcja z podglądem obrazu -->
+          <div class="editor-preview">
+            <div class="image-upload-container" id="upload-container">
+              <input type="file" id="image-input" accept="image/*" class="file-input">
+              <div class="upload-placeholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Wybierz zdjęcie lub przeciągnij je tutaj</p>
+              </div>
+            </div>
+            <div class="image-preview-container hide" id="preview-container">
+              <img id="preview-image" src="" alt="Podgląd zdjęcia">
+            </div>
+          </div>
+        </div>
+        
+        <div class="editor-footer">
+          <button id="export-button" class="btn btn-primary" disabled>
+            <i class="fas fa-download"></i> Eksportuj
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@2.0.0-beta.1/dist/cropper.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

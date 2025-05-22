@@ -9,9 +9,9 @@
 
 <div id="graphics-tools-module">
 
-    <div class="modern-card container">   
+    <div class="container">   
 
-        <!-- MAIN NAVIGATION START -->
+        {# <!-- MAIN NAVIGATION START -->
         <nav class="main-navigation">
 
             {% set currentPath = app.request.pathInfo %}
@@ -49,7 +49,7 @@
 
             <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
         </nav>
-        <!-- MAIN NAVIGATION START -->  
+        <!-- MAIN NAVIGATION START -->   #}
 
         {% block panel_content %}{% endblock %}
 
