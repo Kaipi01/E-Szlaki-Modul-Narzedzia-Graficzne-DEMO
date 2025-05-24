@@ -6,11 +6,11 @@
   --modal-transition-duration: 0.3s;
 
   .modal {
+    z-index: 800;
     width: 100%;
     max-width: none;
     min-height: 100%;
     border: 0;
-    z-index: 800;
     background: transparent;
     color: var(--font-color);
 
@@ -28,6 +28,13 @@
     &[open]::backdrop {
       -webkit-animation: fade-in var(--modal-transition-duration) forwards;
       animation: fade-in var(--modal-transition-duration) forwards;
+    }
+
+    &__header {
+      &-title {
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
     }
 
     &__content {

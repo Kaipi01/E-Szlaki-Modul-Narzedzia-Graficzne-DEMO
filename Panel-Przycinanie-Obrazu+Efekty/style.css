@@ -635,32 +635,3 @@ button * {
 .cropper-view-box canvas {
   transition: filter 0.3s ease;
 }
-
-
-
-
-
-
-/* ################################## */
-
- 
-/* .filter-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  mix-blend-mode: normal;
-  z-index: 5;
-}
- 
-.cropper-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.cropper-view-box {
-  position: relative;
-  z-index: 0;
-} */

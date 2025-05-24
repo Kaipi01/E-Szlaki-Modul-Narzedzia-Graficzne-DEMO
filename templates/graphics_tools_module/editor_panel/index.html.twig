@@ -2,103 +2,38 @@
 
 {% block title %}Narzędzia Graficzne | Edytor{% endblock %}
 
-{% block panel_stylesheets %}  
+{% block panel_stylesheets %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+        integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/editor-panel.css') }}">
 {% endblock %}
 
-{% block panel_content %} 
+{% block panel_content %}
 
-<div id="graphics-tools-module-editor">
+    <div class="main-area modern-card" id="graphics-tools-module-editor">
 
-    <div class="panel__header">
-        <h2 class="panel__title">Edytor Zdjęć</h2>
-    </div>
-
-    <div data-editor-loading class="editor-loading modern-card">
-        <span class="editor-loading-message">Trwa ładowanie edytora, proszę czekać ...</span>
-
-        <div data-editor-loading-progress class="animated-progress animated-progress--no-label">
-            <div class="animated-progress-bar">
-                <div class="animated-progress-per" data-progress-bar per="0"></div>
-            </div>
-            <div class="animated-progress-info">
-                <div data-progress-label class="animated-progress-name">Wczytywanie zasobów...</div>
-                <div class="animated-progress-stats">
-                    <span data-progress-text>0%</span>
-                </div>
-            </div>
+        <div class="panel__header">
+            <h2 class="panel__title">Edytor Zdjęć</h2>
         </div>
-    </div> 
 
-    <div class="panel__alerts" data-operation-alerts></div>
-
-    {{ include('graphics_tools_module/components/drop-zone.html.twig', {
-        textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
-        textInfoBottom: 'Maksymalny rozmiar pliku:',
-        isTypeMultiple: false
-    }, with_context: false) }} 
-
-    <div data-editor-container class="main-container">
-
-        <div class="settings-panel-top modern-card">
-
-            <button class="link variant2" data-export-image-btn>
-                <i class="fa-solid fa-file-export"></i> Eksportuj
-            </button>
-
-            <button class="link variant2" data-crop-image-btn>
-                <i class="fas fa-crop"></i> Przytnij Zdjęcie
-            </button>
-
-        </div>  
-
-        <div class="editor-container"> 
-
-            <div class="image-preview-container modern-card">
-
-                <div data-cropper-wrapper class="cropper-wrapper">
-                    <img data-image-preview class="image-preview" alt="" />
-                </div>  
-                
-            </div>
-
-            <div class="settings-panel-right modern-card">
-
-                <label for="add-crop">
-                    Przytnij <input type="checkbox" data-add-crop-checkbox name="add-crop" id="add-crop">
-                </label>
-
-                <label for="add-blur">
-                    Dodaj Rozmycie <input type="checkbox" data-add-blur-checkbox name="add-blur" id="add-blur">
-                </label>
-
-                <label for="add-sepia">
-                    Dodaj Sepie <input type="checkbox" data-add-sepia-checkbox name="add-sepia" id="add-sepia">
-                </label>
-
-                <label for="clear-effects">
-                    Wyczyść efekty <input type="checkbox" data-clear-effects-checkbox name="clear-effects" id="clear-effects">
-                </label>
-
-            </div>
-
-        </div>
+        {% include "graphics_tools_module/editor_panel/editor-module.html.twig" %}
 
     </div>
 
-</div>
-
-{% endblock %}
+{% endblock %} 
 
 {% block panel_javascripts %}
 
-<script> 
+<script>
 
-    const EXPORT_IMAGE_URL = "{{ path('gtm_editor_api_export_image') }}"  
+    const EXPORT_IMAGE_URL = "{{ path('gtm_editor_api_export_image') }}"
     const GET_IMAGE_DATA_URL = "{{ GET_IMAGE_DATA_URL }}"
 
-</script> 
- 
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+    integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="module" src="{{ asset('graphics-tools-module/js/panels/editor-panel/main.js') }}"></script>
 
-{% endblock %}
+{% endblock %} 

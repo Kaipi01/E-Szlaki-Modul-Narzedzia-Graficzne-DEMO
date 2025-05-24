@@ -40,13 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     sepia: 0,
     hueRotate: 0,
     invert: false
-  };
-
-
-
-
-
-
+  }; 
 
 
   // Element checkbox do włączania/wyłączania przycinania
@@ -65,8 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
       disableCropper();
     }
   });
-
-  // Funkcja włączająca Cropper.js
+ 
   function enableCropper() {
     document.querySelectorAll('[data-cropper-action]').forEach(cropperAction => cropperAction.removeAttribute('hidden'))
 
@@ -76,11 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (document.querySelector('.cropper-view-box')) {
       document.querySelector('.cropper-view-box').style.overflow = 'hidden'
-
     }
   }
-
-  // Funkcja wyłączająca Cropper.js
+ 
   function disableCropper() {
     document.querySelectorAll('[data-cropper-action]').forEach(cropperAction => cropperAction.setAttribute('hidden', ''))
 
@@ -90,22 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.querySelector('.cropper-view-box')) {
       document.querySelector('.cropper-view-box').style.overflow = 'initial'
     }
-
-
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }   
 
   // Obsługa przełączania zakładek
   tabButtons.forEach(button => {
@@ -133,22 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  });  
 
   // Przycisk resetowania wszystkich ustawień
   const resetAllButton = document.getElementById('reset-all-button');
@@ -298,21 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.removeChild(resetMessage);
       }, 500);
     }, 3000);
-  }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }  
 
   // Obsługa wyboru/upuszczenia pliku
   function setupImageUpload() {

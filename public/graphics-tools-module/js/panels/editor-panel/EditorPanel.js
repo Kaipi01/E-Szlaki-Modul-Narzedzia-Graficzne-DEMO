@@ -1,11 +1,25 @@
 import DropZoneManager from "../../components/DropZoneManager.js";
 import InputFileManager from "../../components/InputFileManager.js";
 import AbstractPanel from "../../modules/AbstractPanel.js"
-import { loadModule } from "../../utils/lazyImportModule.js";
-import CropperManager from "./CropperManager.js";
-import ImageEffectManager from "./ImageEffectManager.js";
+import Modal from "../../modules/Modal.js";
+import Toast from "../../modules/Toast.js";
+import { GRAPHICS_TOOLS_MODULE } from "../../utils/constants.js"
 
 export default class EditorPanel extends AbstractPanel {
+
+  CONFIRM_MODAL_ID = GRAPHICS_TOOLS_MODULE.CONFIRM_MODAL_ID
+
+  EFFECTS_VALUES_DEFAULT = {
+    blur: 0,
+    brightness: 100,
+    contrast: 100,
+    grayscale: 0,
+    saturation: 100,
+    sepia: 0,
+    hueRotate: 0,
+    invert: false
+  };
+
   /**
    * @param {HTMLElement | string} container
    * @param {Object} options - Opcje konfiguracyjne
@@ -14,163 +28,165 @@ export default class EditorPanel extends AbstractPanel {
    * @param {number} options.maxFileSize - Maksymalny rozmiar pliku w bajtach
    * @param {Array}  options.allowedTypes - Dozwolone typy plików
    *
+   * @typedef {Object} EffectsState
+   * @property {number} blur 
+   * @property {number} brightness 
+   * @property {number} contrast 
+   * @property {number} grayscale 
+   * @property {number} saturation 
+   * @property {number} sepia 
+   * @property {number} hueRotate 
+   * @property {boolean} invert 
+   * 
    * @typedef {Object} EditorState
    * @property {File | null} image - Aktualny obraz.
+   * @property {EffectsState} effectsValues - Aktualne efekty.
+   * @property {Object | null} cropper 
+   * @property {Object | null} originalImageData 
+   * @property {string} currentTab 
+   * @property {boolean} isCropperActive 
+   * @property {Object} currentChanges
    */
   constructor(container, options = {}) {
     super(container);
 
     this.options = options
 
-    // biblioteki
-    this.libs = [
-      //{ url: "/graphics-tools-module/js/libs/pixi.min.js", prop: "PIXI" },
-      { url: "/graphics-tools-module/js/libs/cropper.min.js", prop: "Cropper" }
-    ];
-    this.PIXI = null;
-    this.Cropper = null;
-
     /** @type {EditorState} */
     this.state = {
       image: null,
+      cropper: null,
+      originalImageData: null,
+      currentTab: 'crop',
+      isCropperActive: true,
+      effectsValues: this.EFFECTS_VALUES_DEFAULT,
+      currentChanges: {} // dodajemy to
     };
 
-    // Edytor
-    this.editorContainer = this.getByAttribute('data-editor-container')
-    this.containerAlerts = this.getByAttribute('data-operation-alerts')
-    this.editorContainer.style.display = "none"
+    // Elementy DOM
+    this.editorActionsContainer = this.container.querySelector('#editor-actions')
+    this.previewContainer = this.container.querySelector('#preview-container');
+    this.previewImage = this.container.querySelector('#preview-image');
+    this.exportButton = this.container.querySelector('#export-button');
+    this.removeImageButton = this.container.querySelector('#remove-image-button')
+    this.tabButtons = this.container.querySelectorAll('.tab-button');
+    this.tabPanes = this.container.querySelectorAll('.tab-pane');
 
-    // Loading
-    this.editorLoading = this.getByAttribute('data-editor-loading')
-    this.editorLoadingProgress = this.getByAttribute('data-editor-loading-progress')
-    this.editorLoadingProgressBar = this.editorLoadingProgress.querySelector('[data-progress-bar]')
-    this.editorLoadingProgressText = this.editorLoadingProgress.querySelector('[data-progress-text]')
-    this.editorLoadingProgressLabel = this.editorLoadingProgress.querySelector('[data-progress-label]')
+    // Elementy formularza
+    this.cropWidthInput = this.container.querySelector('#crop-width');
+    this.cropHeightInput = this.container.querySelector('#crop-height');
+    this.aspectRatioSelect = this.container.querySelector('#aspect-ratio');
+    this.rotationAngleInput = this.container.querySelector('#rotation-angle');
+    this.rotateLeftBtn = this.container.querySelector('#rotate-left');
+    this.rotateRightBtn = this.container.querySelector('#rotate-right');
+    this.flipHorizontalBtn = this.container.querySelector('#flip-horizontal');
+    this.flipVerticalBtn = this.container.querySelector('#flip-vertical');
 
-    // Drop Zone
+    // Elementy efektów
+    this.effectSliders = this.container.querySelectorAll('.effect-slider');
+    this.effectResetButtons = this.container.querySelectorAll('.effect-reset');
+    this.invertCheckbox = this.container.querySelector('#effect-invert');
+
+    this.cropToggleCheckbox = this.container.querySelector('#crop-toggle-checkbox');
+
+    this.resetAllButton = this.container.querySelector('#reset-all-button');
+
+    this.filterLayer = null;
+    this.filterLayerBackground = null;
+
+    // // Drop Zone
     this.dropZoneElement = this.getByAttribute('data-drop-zone')
     this.fileInput = this.getByAttribute('data-file-input')
 
-    // Cropper
-    this.cropperWrapper = this.getByAttribute('data-cropper-wrapper')
-    this.imagePreviewElement = this.getByAttribute('data-image-preview')
-    this.cropperWrapper.style.display = "none"
+    this.initComponents()
+    this.setEventsListeners()
 
-    // Leniwe zaimportowanie ciężkich bibliotek jak PIXI i Cropper
-    this.importLibModules(() => {
-      this.editorLoading.style.display = "none";
-      // this.editorContainer.style.display = "";
+    this.englishEffectsNameToPolish = new Map()
 
-      this.initComponents()
-      this.setEventsListeners()
-    })
+    // Podstawowe efekty
+    this.englishEffectsNameToPolish.set('brightness', 'jasność');
+    this.englishEffectsNameToPolish.set('contrast', 'kontrast');
+    this.englishEffectsNameToPolish.set('saturation', 'nasycenie');
+    this.englishEffectsNameToPolish.set('blur', 'rozmycie');
+    this.englishEffectsNameToPolish.set('grayscale', 'skala szarości');
+    this.englishEffectsNameToPolish.set('sepia', 'sepia');
+    this.englishEffectsNameToPolish.set('hueRotate', 'rotacja barw');
+    this.englishEffectsNameToPolish.set('invert', 'negatyw');
+
+    // Parametry przycinania
+    this.englishEffectsNameToPolish.set('crop', 'przycięcie');
+    this.englishEffectsNameToPolish.set('width', 'szerokość');
+    this.englishEffectsNameToPolish.set('height', 'wysokość');
+    this.englishEffectsNameToPolish.set('x', 'pozycja X');
+    this.englishEffectsNameToPolish.set('y', 'pozycja Y');
+
+    // Proporcje
+    this.englishEffectsNameToPolish.set('aspectRatio', 'proporcje');
+    this.englishEffectsNameToPolish.set('free', 'dowolne');
+    this.englishEffectsNameToPolish.set('1:1', '1:1');
+    this.englishEffectsNameToPolish.set('4:3', '4:3');
+    this.englishEffectsNameToPolish.set('16:9', '16:9');
+
+    // Obrót i odbicie
+    this.englishEffectsNameToPolish.set('rotate', 'obrót');
+    this.englishEffectsNameToPolish.set('scaleX', 'odbicie poziome');
+    this.englishEffectsNameToPolish.set('scaleY', 'odbicie pionowe');
   }
 
-  /** @param {string} src */
-  replacePreviewWithNewImage(src) {
-    const img = document.createElement('img')
+  /**
+   * @param {string} name - Nazwa parametru w języku angielskim
+   * @param {any} value - Wartość parametru
+   */
+  updateCurrentChanges(name, value) {
+    const polishName = this.englishEffectsNameToPolish.get(name) || name;
 
-    img.src = src
-    img.className = "image-preview"
-    img.setAttribute('data-image-preview', '')
-
-    this.imagePreviewElement = img
-
-    this.cropperWrapper.replaceChildren(img)
-
-    return img
-  }
-
-  setEventsListeners() {
-    this.fileInput.addEventListener('change', (e) => this.handleSelectFile(e))
-
-    this.container.addEventListener('click', async (e) => {
-      const target = e.target
-
-      switch (true) {
-        case target.hasAttribute('data-crop-image-btn'): {
-          // Get the cropped canvas
-          const cropperCanvas = await this.CropperManager.getCroppedCanvas()
-          
-          // Clean up existing PIXI canvas if it exists
-          const existingPixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
-          if (existingPixiCanvas) {
-            existingPixiCanvas.remove()
-          }
-          
-          // Replace the image preview with cropped version
-          const newImageElement = this.replacePreviewWithNewImage(cropperCanvas.toDataURL())
-          
-          // Uncheck crop checkbox
-          this.container.querySelector('[data-add-crop-checkbox]').checked = false
-          
-          // Make sure image is visible before initializing effects
-          newImageElement.style.display = ""
-          
-          // Initialize the effects manager with the new image
-          this.ImageEffectManager.init(newImageElement)
-          
-          // After initialization, hide the image and ensure PIXI canvas is visible
-          requestAnimationFrame(() => {
-            const newPixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
-            if (newPixiCanvas) {
-              newPixiCanvas.style.display = ""
-            }
-            newImageElement.style.display = "none"
-          })
-          
-          break;
-        }
-
-        case target.hasAttribute('data-add-crop-checkbox'): {
-          if (target.checked) {
-            // When enabling cropper:
-            // 1. Update image with current canvas state
-            this.imagePreviewElement.src = this.ImageEffectManager.getCanvas().toDataURL()
-            // 2. Show the image for cropping
-            this.imagePreviewElement.style.display = ""
-            // 3. Create the cropper
-            this.CropperManager.createCropper()
-            // 4. Hide the PIXI canvas
-            const pixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
-            if (pixiCanvas) {
-              pixiCanvas.style.display = "none"
-            }
-          } else {
-            // When disabling cropper:
-            // 1. Hide the image
-            this.imagePreviewElement.style.display = "none"
-            // 2. Show the PIXI canvas
-            const pixiCanvas = this.cropperWrapper.querySelector('[data-pixi-canvas]')
-            if (pixiCanvas) {
-              pixiCanvas.style.display = ""
-            }
-            // 3. Destroy the cropper
-            this.CropperManager.destroyCropper()
-          }
-          break;
-        }
-
-        case target.hasAttribute('data-add-blur-checkbox'): {
-          target.checked ? this.ImageEffectManager.addBlur({ strength: 5 }) : this.ImageEffectManager.removeBlur();
-          break;
-        }
-
-        case target.hasAttribute('data-add-sepia-checkbox'): {
-          target.checked ? this.ImageEffectManager.applySepia() : this.ImageEffectManager.removeSepia();
-          break;
-        }
-
-        case target.hasAttribute('data-export-image-btn'): {
-          this.exportImage(this.ImageEffectManager.getCanvas())
-          break;
-        }
-
-        case target.hasAttribute('data-clear-effects-checkbox'):
-          this.ImageEffectManager.clearEffects();
-          break;
+    const formatValue = (name, value) => {
+      if (typeof value === 'string') {
+        return this.englishEffectsNameToPolish.get(value) || value;
       }
-    })
+
+      if (typeof value === 'number') {
+        if (name === 'scaleX' || name === 'scaleY') {
+          return value < 0 ? 'włączone' : 'wyłączone';
+        }
+
+        if (name === 'blur') return `${value}px`;
+        if (name === 'rotate' || name === 'hueRotate') return `${value}°`;
+        if (['brightness', 'contrast', 'saturation', 'grayscale', 'sepia'].includes(name)) return `${value}%`;
+
+        return value;
+      }
+
+      if (typeof value === 'boolean') {
+        return value ? 'włączone' : 'wyłączone';
+      }
+
+      return value;
+    }
+
+    if (value !== null && typeof value === 'object') {
+      if (!this.state.currentChanges[polishName]) {
+        this.state.currentChanges[polishName] = {};
+      }
+
+      for (const key in value) {
+        if (Object.prototype.hasOwnProperty.call(value, key)) {
+          const polishKey = this.englishEffectsNameToPolish.get(key) || key;
+          this.state.currentChanges[polishName][polishKey] = formatValue(key, value[key]);
+        }
+      }
+      return;
+    }
+
+    this.state.currentChanges[polishName] = formatValue(name, value);
+  }
+
+  resetCurrentChanges() {
+    this.state.currentChanges = {}
+  }
+
+  getCurrentChangesJSON() {
+    return JSON.stringify(this.state.currentChanges)
   }
 
   initComponents() {
@@ -182,57 +198,669 @@ export default class EditorPanel extends AbstractPanel {
     });
 
     this.DropZone = new DropZoneManager(this.dropZoneElement, (droppedFiles) => this.InputFileManager.addFiles(droppedFiles))
-
-    this.CropperManager = new CropperManager(this.Cropper, this.cropperWrapper, this.imagePreviewElement)
-
-    this.ImageEffectManager = new ImageEffectManager(this.PIXI, this.cropperWrapper, this.imagePreviewElement)
   }
 
-  /** @param {HTMLCanvasElement} canvas */
-  async exportImage(canvas) {
+  initCropper() {
+    if (this.state.cropper) {
+      this.state.cropper.destroy();
+    }
+
+    this.state.cropper = new Cropper(this.previewImage, {
+      viewMode: 1,
+      dragMode: 'crop',
+      autoCropArea: 1,
+      restore: false,
+      modal: true,
+      guides: true,
+      highlight: true,
+      cropBoxMovable: true,
+      cropBoxResizable: true,
+      toggleDragModeOnDblclick: false,
+      ready: () => {
+        this.updateCropBoxInputs();
+
+        if (this.state.currentTab === 'rotate') {
+          this.state.cropper.setDragMode('move');
+        } else if (this.state.currentTab === 'effects') {
+          this.state.cropper.setDragMode('none');
+        }
+
+        this.initFilterLayers();
+        this.setupEffectsHandlers();
+        this.hideCropper();
+      },
+      crop: (event) => {
+        const data = event.detail;
+
+        // Aktualizacja inputów tylko gdy użytkownik zmienia rozmiar ręcznie
+        if (!this.cropWidthInput.matches(':focus') && !this.cropHeightInput.matches(':focus')) {
+          this.cropWidthInput.value = Math.round(data.width);
+          this.cropHeightInput.value = Math.round(data.height);
+        }
+
+        this.updateCurrentChanges('crop', {
+          x: Math.round(data.x),
+          y: Math.round(data.y),
+          width: Math.round(data.width),
+          height: Math.round(data.height)
+        });
+      }
+    });
+  }
+
+  setEventsListeners() {
+    this.fileInput.addEventListener('change', (e) => this.handleSelectFile(e))
+
+    this.removeImageButton.addEventListener('click', () => this.removeImageButtonHandler())
+
+    this.exportButton.addEventListener('click', () => {
+      try {
+        this.exportImage()
+
+        Toast.show(Toast.SUCCESS, "Obraz został pomyślnie wyeksportowany!")
+
+      } catch (error) {
+        this.showError(error)
+      }
+    })
+
+    this.cropToggleCheckbox.addEventListener('change', (e) => {
+      const { cropper, isCropperActive } = this.state
+
+      if (cropper && isCropperActive) {
+        cropper.setAspectRatio(NaN);
+        this.updateCropBoxInputs();
+
+        const aspectRatioSelect = document.getElementById('aspect-ratio');
+        if (aspectRatioSelect) {
+          aspectRatioSelect.value = 'free';
+        }
+      }
+
+      if (e.target.checked) {
+        this.showCropper();
+      } else {
+        this.hideCropper();
+      }
+    });
+
+    // Obsługa kliknięcia przycisku resetowania
+    this.resetAllButton.addEventListener('click', () => this.resetSettingsButtonHandler());
+
+    // Obsługa przełączania zakładek
+    this.tabButtons.forEach(button => {
+      button.addEventListener('click', (e) => this.tabButtonClickHandler(e));
+    });
+
+    this.cropWidthInput.addEventListener('change', (e) => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        const width = parseInt(e.target.value);
+
+        if (width > 0) {
+          const data = cropper.getData();
+          data.width = width;
+          cropper.setData(data);
+        }
+      }
+    });
+
+    this.cropHeightInput.addEventListener('change', (e) => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        const height = parseInt(e.target.value);
+        if (height > 0) {
+          const data = cropper.getData();
+          data.height = height;
+          cropper.setData(data);
+        }
+      }
+    });
+
+    this.aspectRatioSelect.addEventListener('change', (e) => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        const value = e.target.value;
+        let aspectRatio;
+
+        switch (value) {
+          case '1:1':
+            aspectRatio = 1;
+            break;
+          case '4:3':
+            aspectRatio = 4 / 3;
+            break;
+          case '16:9':
+            aspectRatio = 16 / 9;
+            break;
+          default:
+            aspectRatio = NaN; // Dowolne proporcje
+        }
+
+        cropper.setAspectRatio(aspectRatio);
+        this.updateCropBoxInputs();
+
+        this.updateCurrentChanges('aspectRatio', value);
+      }
+    });
+
+    this.rotationAngleInput.addEventListener('change', (e) => {
+      const cropper = this.state.cropper;
+
+      if (cropper) {
+        const angle = parseInt(e.target.value) || 0;
+        cropper.rotateTo(angle);
+
+        this.updateCurrentChanges('rotate', angle)
+      }
+    });
+
+    this.rotateLeftBtn.addEventListener('click', () => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        cropper.rotate(-90);
+        this.updateRotationAngle();
+      }
+    });
+
+    this.rotateRightBtn.addEventListener('click', () => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        cropper.rotate(90);
+        this.updateRotationAngle();
+      }
+    });
+
+    this.flipHorizontalBtn.addEventListener('click', () => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        const newScaleX = -cropper.getData().scaleX || -1;
+        cropper.scaleX(newScaleX);
+
+        this.updateCurrentChanges('scaleX', newScaleX);
+      }
+    });
+
+    this.flipVerticalBtn.addEventListener('click', () => {
+      const cropper = this.state.cropper;
+      if (cropper) {
+        const newScaleY = -cropper.getData().scaleY || -1;
+        cropper.scaleY(newScaleY);
+
+        this.updateCurrentChanges('scaleY', newScaleY);
+      }
+    });
+  }
+
+  /** @param {MouseEvent} e  */
+  tabButtonClickHandler(e) {
+    const tab = e.target.dataset.tab;
+
+    // Aktywacja przycisku zakładki
+    this.tabButtons.forEach(btn => btn.classList.remove('active'));
+    e.target.classList.add('active');
+
+    // Aktywacja zawartości zakładki
+    this.tabPanes.forEach(pane => pane.classList.remove('active'));
+    document.getElementById(`${tab}-tab`).classList.add('active');
+
+    this.state.currentTab = tab;
+    const cropper = this.state.cropper
+    // Aktualizacja ustawień croppera w zależności od zakładki
+    if (cropper) {
+      if (tab === 'crop') {
+        cropper.setDragMode('crop');
+      } else if (tab === 'rotate') {
+        cropper.setDragMode('move');
+      } else if (tab === 'effects') {
+        cropper.setDragMode('none');
+      }
+    }
+  }
+
+  removeImageButtonHandler() {
+    Modal.show(this.CONFIRM_MODAL_ID);
+
+    const modal = Modal.get(this.CONFIRM_MODAL_ID);
+    const modalMessage = modal.querySelector('[data-message]');
+    const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    const denyBtn = modal.querySelector('[data-deny-btn]');
+
+    const closeModal = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
+
+    const removeImage = (e) => {
+      this.editorActionsContainer.setAttribute('hidden', '')
+      this.dropZoneElement.removeAttribute('hidden')
+      this.previewContainer.setAttribute('hidden', '')
+
+      if (this.state.cropper) {
+        this.state.cropper.destroy();
+      }
+
+      this.state.image = null
+      this.state.effectsValues = this.EFFECTS_VALUES_DEFAULT
+      this.state.cropper = null
+      this.state.originalImageData = null
+      this.state.isCropperActive = true;
+      this.state.currentChanges = {}
+
+      this.resetAllSettings();
+
+      Toast.show(Toast.INFO, "Grafika została usunięta")
+
+      closeModal();
+    };
+
+    modalMessage.textContent = "Czy na pewno chcesz usunąć aktualnie przerabianą grafikę?"
+
+    confirmBtn.addEventListener('click', removeImage, { once: true });
+    denyBtn.addEventListener('click', closeModal, { once: true });
+  }
+
+  resetSettingsButtonHandler() {
+    Modal.show(this.CONFIRM_MODAL_ID, "Test");
+
+    const modal = Modal.get(this.CONFIRM_MODAL_ID);
+    const modalMessage = modal.querySelector('[data-message]');
+    const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    const denyBtn = modal.querySelector('[data-deny-btn]');
+
+    const closeModal = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
+    const resetSettingsAndClose = (e) => {
+      this.resetAllSettings();
+
+      Toast.show(Toast.INFO, "Wszystkie ustawienia zostały zresetowane")
+
+      closeModal();
+    };
+
+    modalMessage.textContent = "Czy na pewno chcesz zresetować wszystkie ustawienia?"
+
+    confirmBtn.addEventListener('click', resetSettingsAndClose, { once: true });
+    denyBtn.addEventListener('click', closeModal, { once: true });
+  }
+
+  initFilterLayers() {
+    const cropperContainer = document.querySelector('.cropper-container');
+
+    this.filterLayer = cropperContainer.querySelector('.cropper-view-box > img')
+    this.filterLayerBackground = cropperContainer.querySelector('.cropper-canvas > img')
+  }
+
+  updateCropBoxInputs() {
+    if (this.state.cropper) {
+      const data = this.state.cropper.getData();
+      this.cropWidthInput.value = Math.round(data.width);
+      this.cropHeightInput.value = Math.round(data.height);
+    }
+  }
+
+  updateRotationAngle() {
+    if (this.state.cropper) {
+      const data = this.state.cropper.getData();
+      this.rotationAngleInput.value = Math.round(data.rotate);
+      this.updateCurrentChanges('rotate', Math.round(data.rotate));
+    }
+
+  }
+
+  setupEffectsHandlers() {
+    this.effectSliders.forEach(slider => {
+      const effectId = slider.id;
+      const effectName = effectId.replace('effect-', '').replace('-', '');
+      const valueDisplay = slider.parentElement.querySelector('.effect-value');
+
+      // Ustaw początkowe wartości
+      this.updateEffectValueDisplay(slider, valueDisplay);
+
+      slider.addEventListener('input', (e) => {
+        // Aktualizuj wartość w obiekcie efektów
+        if (effectName === 'hue-rotate' || effectName === 'hueRotate') {
+          this.state.effectsValues.hueRotate = parseInt(e.target.value);
+          this.updateCurrentChanges('hueRotate', parseInt(e.target.value));
+        } else {
+          this.state.effectsValues[effectName] = parseInt(e.target.value);
+          this.updateCurrentChanges(effectName, parseInt(e.target.value));
+        }
+
+        this.updateEffectValueDisplay(e.target, valueDisplay);
+        this.applyEffects();
+      });
+    });
+
+    // Obsługa przycisku resetowania dla każdego efektu
+    this.effectResetButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const effectName = e.target.dataset.effect;
+        const slider = document.getElementById(`effect-${effectName.replace(/([A-Z])/g, '-$1').toLowerCase()}`);
+        const effectsValues = this.state.effectsValues
+
+        if (effectName === 'invert') {
+          this.updateCurrentChanges(effectName, false);
+        } else if (effectName === 'brightness' || effectName === 'contrast' || effectName === 'saturation') {
+          this.updateCurrentChanges(effectName, 100);
+        } else {
+          this.updateCurrentChanges(effectName, 0);
+        }
+
+        switch (effectName) {
+          case 'blur':
+            effectsValues.blur = 0;
+            slider.value = 0;
+            break;
+          case 'brightness':
+          case 'contrast':
+          case 'saturation':
+            effectsValues[effectName] = 100;
+            slider.value = 100;
+            break;
+          case 'grayscale':
+          case 'sepia':
+            effectsValues[effectName] = 0;
+            slider.value = 0;
+            break;
+          case 'hueRotate':
+            effectsValues.hueRotate = 0;
+            slider.value = 0;
+            break;
+          case 'invert':
+            effectsValues.invert = false;
+            this.invertCheckbox.checked = false;
+            break;
+        }
+
+        const valueDisplay = slider ? slider.parentElement.querySelector('.effect-value') : null;
+
+        if (valueDisplay) {
+          this.updateEffectValueDisplay(slider, valueDisplay);
+        }
+
+        this.applyEffects();
+      });
+    });
+
+    this.invertCheckbox.addEventListener('change', (e) => {
+      this.state.effectsValues.invert = e.target.checked;
+      this.updateCurrentChanges('invert', e.target.checked);
+      this.applyEffects();
+    });
+  }
+
+  updateEffectValueDisplay(slider, valueDisplay) {
+    if (!slider || !valueDisplay) return;
+
+    const effectId = slider.id;
+    let unit = '';
+
+    if (effectId.includes('blur')) {
+      unit = 'px';
+    } else if (effectId.includes('hue-rotate')) {
+      unit = 'deg';
+    } else {
+      unit = '%';
+    }
+
+    valueDisplay.textContent = `${slider.value}${unit}`;
+  }
+
+  applyEffects() {
+    const { cropper, effectsValues } = this.state
+
+    if (!cropper || !this.filterLayer) return;
+
+    // Budowanie stringa CSS filter
+    let filterString = '';
+
+    if (effectsValues.blur > 0) {
+      filterString += `blur(${effectsValues.blur}px) `;
+    }
+
+    if (effectsValues.brightness !== 100) {
+      filterString += `brightness(${effectsValues.brightness}%) `;
+    }
+
+    if (effectsValues.contrast !== 100) {
+      filterString += `contrast(${effectsValues.contrast}%) `;
+    }
+
+    if (effectsValues.grayscale > 0) {
+      filterString += `grayscale(${effectsValues.grayscale}%) `;
+    }
+
+    if (effectsValues.saturation !== 100) {
+      filterString += `saturate(${effectsValues.saturation}%) `;
+    }
+
+    if (effectsValues.sepia > 0) {
+      filterString += `sepia(${effectsValues.sepia}%) `;
+    }
+
+    if (effectsValues.hueRotate > 0) {
+      filterString += `hue-rotate(${effectsValues.hueRotate}deg) `;
+    }
+
+    if (effectsValues.invert) {
+      filterString += `invert(100%) `;
+    }
+
+    // Zastosowanie filtrów do warstwy filtrów
+    this.filterLayer.style.filter = filterString;
+    this.filterLayerBackground.style.filter = filterString;
+
+    // Dodaj tło z mixBlendMode, aby efekty działały poprawnie
+    this.filterLayer.style.background = 'transparent';
+    this.filterLayer.style.mixBlendMode = 'normal';
+
+    this.filterLayerBackground.style.background = 'transparent';
+    this.filterLayerBackground.style.mixBlendMode = 'normal';
+  }
+
+  async getImageBlob(mimeType = 'image/png') {
+    const cropper = this.state.cropper
+
+    if (!cropper) {
+      throw new Error('Wystąpił błąd podaczas eksportu grafiki !')
+    }
+
+    const canvas = cropper.getCroppedCanvas({
+      minWidth: 256,
+      minHeight: 256,
+      maxWidth: 4096,
+      maxHeight: 4096,
+      fillColor: 'transparent',
+      imageSmoothingEnabled: true,
+      imageSmoothingQuality: 'high',
+    });
+
+    if (!canvas) {
+      throw new Error('Wystąpił błąd podaczas eksportu grafiki !')
+    }
+
+    // Tworzenie nowego canvas do zastosowania efektów
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width = canvas.width;
+    finalCanvas.height = canvas.height;
+    const ctx = finalCanvas.getContext('2d');
+
+    // Narysuj oryginalny obraz na nowym canvas
+    ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+
+    // Zastosuj efekty przy użyciu filtrów CSS
+    ctx.filter = this.filterLayer.style.filter;
+
+    // Narysuj obraz ponownie z zastosowanymi filtrami
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(canvas, 0, 0);
+
+    ctx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
+    ctx.drawImage(tempCanvas, 0, 0);
+
+    return new Promise(resolve => finalCanvas.toBlob(blob => resolve(blob), mimeType, 1))
+  }
+
+  async exportImage() {
     const { name: imageName, type: mimeType } = this.state.image
     const formData = new FormData()
-    const getImageBlob = (mimeType) => new Promise(resolve => canvas.toBlob(blob => resolve(blob), mimeType, 1));
-    const imageBlob = await getImageBlob(mimeType)
+    const imageBlob = await this.getImageBlob(mimeType)
+
+    console.log(this.state.currentChanges)
 
     formData.append('imageBlob', imageBlob, imageName)
+    formData.append('imageChanges', this.getCurrentChangesJSON())
     formData.append('toFormat', mimeType) // TODO: Dodaj opcje wybrania docelowego formatu w którym użytkownik będzie chciał wyeksportować
 
-    const response = await fetch(this.options.exportImageUrl, {
-      method: 'POST',
-      body: formData
-    })
-    const responseData = await response.json()
+    try {
+      const response = await fetch(this.options.exportImageUrl, {
+        method: 'POST',
+        body: formData
+      })
+      const responseData = await response.json()
 
-    if (response.ok) {
+      if (!response.ok) {
+        throw new Error("Wystąpił błąd podczas zapisywania grafiki: " + responseData.errorMessage)
+      }
+    } catch (error) {
+      throw new Error(message)
+
+    } finally {
       const link = document.createElement('a');
-      
+
       link.href = URL.createObjectURL(imageBlob);
       link.download = imageName;
       link.click();
       URL.revokeObjectURL(link.href);
-    } else {
-      this.showError(responseData.errorMessage)
     }
   }
 
-  async importLibModules(onImportedSuccessfully) {
-    const onChunkLoadedProgress = (percent, moduleName) => {
-      this.editorLoadingProgressBar.setAttribute('per', percent)
-      this.editorLoadingProgressBar.style.width = `${percent}%`;
-      this.editorLoadingProgressText.textContent = `${percent}%`;
-      this.editorLoadingProgressLabel.textContent = `Pobieranie modułu: ${moduleName}`;
+  /** Funkcja resetująca wszystkie ustawienia */
+  resetAllSettings() {
+    this.resetAllFilters();
+    this.resetCropping();
+    this.resetRotation();
+    this.resetCurrentChanges();
+  }
+
+  /** Funkcja resetująca wszystkie filtry */
+  resetAllFilters() {
+    // Resetuj stan edytora
+    this.state.effectsValues = this.EFFECTS_VALUES_DEFAULT
+
+    // Resetuj wartości wszystkich suwaków
+    const effectSliders = document.querySelectorAll('.effect-slider');
+
+    effectSliders.forEach(slider => {
+      const effectId = slider.id;
+
+      // Ustaw domyślne wartości w zależności od typu efektu
+      if (effectId.includes('brightness') || effectId.includes('contrast') || effectId.includes('saturation')) {
+        slider.value = 100;
+      } else if (effectId.includes('hue-rotate')) {
+        slider.value = 0;
+      } else if (effectId.includes('blur') || effectId.includes('grayscale') || effectId.includes('sepia')) {
+        slider.value = 0;
+      }
+
+      // Aktualizuj wyświetlanie wartości
+      const valueDisplay = slider.parentElement.querySelector('.effect-value');
+      if (valueDisplay) {
+        this.updateEffectValueDisplay(slider, valueDisplay);
+      }
+    });
+
+    // Resetuj checkbox invert
+    const invertCheckbox = document.getElementById('effect-invert');
+    if (invertCheckbox) {
+      invertCheckbox.checked = false;
     }
 
-    // ładujemy je sekwencyjnie 
-    for (let { url, prop } of this.libs) {
-      this[prop] = await loadModule(url, prop, onChunkLoadedProgress);
+    // Zastosuj zresetowane filtry
+    if (typeof this.applyEffects === 'function') {
+      this.applyEffects();
+    } else {
+      // Alternatywne podejście, jeśli metoda applyEffects nie istnieje
+      const imgElement = document.querySelector('.cropper-container img');
+      if (imgElement) {
+        imgElement.style.filter = '';
+      }
     }
-    // Biblioteka PIXI ładuje swój cały moduł z klasami do obiektu window
-    this.PIXI = window.PIXI
+  }
 
-    // Poczekaj aż animacja paska postępu się skończy
-    setTimeout(onImportedSuccessfully, 1000)
+  showCropper() {
+    const cropperActionElements = this.container.querySelectorAll('[data-cropper-action]')
+    const cropperDashedElements = this.container.querySelectorAll('.cropper-dashed')
+    const cropperCenterElement = this.container.querySelector('.cropper-center')
+    const cropperViewBox = this.container.querySelector('.cropper-view-box')
+
+    cropperActionElements.forEach(cropperAction => cropperAction.removeAttribute('hidden'))
+    cropperDashedElements.forEach(cropperAction => cropperAction.removeAttribute('hidden'))
+    cropperCenterElement?.removeAttribute('hidden')
+
+    if (cropperViewBox) {
+      cropperViewBox.style.overflow = 'hidden'
+    }
+  }
+
+  hideCropper() {
+    const cropperActionElements = this.container.querySelectorAll('[data-cropper-action]')
+    const cropperDashedElements = this.container.querySelectorAll('.cropper-dashed')
+    const cropperCenterElement = this.container.querySelector('.cropper-center')
+    const cropperViewBox = this.container.querySelector('.cropper-view-box')
+
+    cropperActionElements.forEach(cropperAction => cropperAction.setAttribute('hidden', ''))
+    cropperDashedElements.forEach(cropperAction => cropperAction.setAttribute('hidden', ''))
+    cropperCenterElement?.setAttribute('hidden', '')
+
+    if (cropperViewBox) {
+      cropperViewBox.style.overflow = 'initial'
+    }
+  }
+
+  /** Funkcja resetująca przycinanie */
+  resetCropping() {
+    const { cropper, isCropperActive } = this.state
+
+    if (cropper && isCropperActive) {
+      // Resetuj obszar przycinania do domyślnego
+      cropper.reset();
+      cropper.setAspectRatio(NaN); // Resetuj proporcje
+
+      // Aktualizuj inputy
+      this.updateCropBoxInputs();
+
+      // Resetuj select z proporcjami
+      const aspectRatioSelect = document.getElementById('aspect-ratio');
+      if (aspectRatioSelect) {
+        aspectRatioSelect.value = 'free';
+      }
+    }
+  }
+
+  /** Funkcja resetująca obrót */
+  resetRotation() {
+    const { cropper } = this.state
+
+    if (cropper) {
+      // Resetuj obrót
+      cropper.rotateTo(0); //FIXME: dla grafik pionowych powinno być cropper.rotateTo(-90)
+
+      // Resetuj skalowanie (odbicie)
+      const data = cropper.getData();
+      if (data.scaleX < 0) {
+        cropper.scaleX(1);
+      }
+      if (data.scaleY < 0) {
+        cropper.scaleY(1);
+      }
+
+      // Aktualizuj input z kątem obrotu
+      const rotationAngleInput = document.getElementById('rotation-angle');
+      if (rotationAngleInput) {
+        rotationAngleInput.value = 0;
+      }
+    }
   }
 
   handleSelectFile(e) {
@@ -252,10 +880,6 @@ export default class EditorPanel extends AbstractPanel {
 
     try {
       this.renderImage(file)
-      this.imagePreviewElement.addEventListener('load', () => this.ImageEffectManager.init(this.imagePreviewElement))
-      this.dropZoneElement.style.display = "none"
-      this.cropperWrapper.style.display = ""
-      this.editorContainer.style.display = "";
     } catch (error) {
       this.showError(error)
     }
@@ -269,8 +893,6 @@ export default class EditorPanel extends AbstractPanel {
     this.InputFileManager.removeFile(fileName);
 
     this.state.image = null
-
-    console.log('grafika została usunięta: ' + fileName)
   }
 
   /**
@@ -280,7 +902,19 @@ export default class EditorPanel extends AbstractPanel {
   renderImage(file) {
     const reader = new FileReader();
 
-    reader.onload = (e) => this.imagePreviewElement.src = e.target.result;
+    reader.onload = (e) => {
+      this.state.originalImageData = e.target.result;
+
+      this.previewImage.src = this.state.originalImageData;
+      this.dropZoneElement.setAttribute('hidden', '')
+      this.previewContainer.removeAttribute('hidden')
+
+      this.previewImage.onload = () => {
+        this.initCropper();
+        this.editorActionsContainer.removeAttribute('hidden')
+      };
+    };
+
     reader.onerror = () => new Error('Błąd odczytu pliku przez FileReader');
     reader.readAsDataURL(file);
   }

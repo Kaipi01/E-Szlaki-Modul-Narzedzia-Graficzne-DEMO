@@ -1,15 +1,15 @@
 @use "../base/variables" as *;
-@use "../functions/toRem" as *; 
+@use "../functions/toRem" as *;
 
-#graphics-tools-module { 
-  --panels-gap: 2rem;
+#graphics-tools-module {
+  --current-gap: 1rem;
 
   position: relative;
   width: 100%;
   min-height: 90vh;
   padding-block: 4rem;
   padding-inline: 0;
-  color: var(--font-color);  
+  color: var(--font-color);
 
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -23,7 +23,70 @@
       animation-iteration-count: 1 !important;
       scroll-behavior: auto !important;
     }
-  }  
+  }
+
+  &.main-layout,
+  .main-layout {
+    display: grid;
+    position: relative;
+    width: 100%;
+    gap: var(--current-gap);
+    height: 100%;
+    grid-template-columns: 1fr;
+
+    .app-name {
+      text-align: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .nav-area {
+      display: none;
+      order: 2;
+      position: relative;
+
+      .nav-container {
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        gap: 1rem;
+        top: var(--current-gap);
+        align-items: center;
+        right: 0;
+        // height: calc(100vh - (var(--current-gap) * 2));
+        width: 100%;
+      }
+    }
+
+    // .main-area {
+
+    // }
+
+    @media (min-width: $content-breakpoint-tablet) {
+      grid-template-columns: 1fr toRem(225);
+
+      .nav-area {
+        display: block;
+      }
+    }
+
+    @media (min-width: $content-breakpoint-desktop) {
+      --current-gap: 1.25rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-large) {
+      --current-gap: 1.5rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-very-large) {
+      --current-gap: 1.75rem;
+    }
+
+    @media (min-width: $content-breakpoint-desktop-4k) {
+      --current-gap: 2rem;
+    }
+  }
 
   .panel {
     &__header {
@@ -39,5 +102,9 @@
       margin: 0;
       font-size: 2.75rem;
     }
+  }
+
+  #graphics-tools-module-result-table {
+    margin-top: var(--current-gap);
   }
 }

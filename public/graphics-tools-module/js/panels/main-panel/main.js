@@ -2,11 +2,6 @@ import ThemeSwitcher from "../../modules/ThemeSwitcher.js"
 import SearchForm from "../../modules/SearchForm.js"
 import ImagesGalleryModal from "../../modules/ImagesGallery.js"
 import CircularProgressBar from "../../modules/CircularProgressBar.js"
-// import CircularProgressBar from "../../modules/CircularProgressBar.js"
-
-console.log('hello main-panel.js !')
-
-
 
 
 /*

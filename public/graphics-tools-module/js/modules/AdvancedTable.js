@@ -704,7 +704,7 @@ function initializeSorting() {
 
 function initializeModalHandlers() {
   // Obsługa przycisków
-  $('#addNewTrail').click(() => openModal());
+  // $('#addNewTrail').click(() => openModal());
   $('.modal-close').click(() => $('#trailModal').fadeOut(300));
 
   $(window).click(e => {

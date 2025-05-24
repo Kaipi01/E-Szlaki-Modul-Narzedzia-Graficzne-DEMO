@@ -44,6 +44,7 @@ body {
 }
 
 #graphics-tools-module {
+  &.container,
   .container {
     max-width: 83.5rem;
     margin: 0 auto;
@@ -113,8 +114,7 @@ body {
   .hide,
   [hidden] {
     display: none !important;
-  }
-
+  } 
   .header {
     display: flex;
     align-items: center;

@@ -23,7 +23,7 @@
   --very-light-green-opacity: #37ff7a6c;
   /* gray */
   --very-light-gray: #efefef;
-  --light-gray: #a9a9a9;
+  --light-gray: #656565;
   --gray: #2d4233;
   --dark-gray: #1d2d2b;
   --very-dark-gray: #252525;
@@ -38,7 +38,7 @@
   --background-gray: var(--very-light-gray);
   --font-color: #000;
   --font-color-50: rgba(0, 0, 0, 0.5);
-  --font-color-gray: var(--gray);
+  --font-color-gray: var(--light-gray);
   --font-color-green: var(--green);
 
   --background-gradient: linear-gradient(

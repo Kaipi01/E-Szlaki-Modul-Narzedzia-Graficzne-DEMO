@@ -21,10 +21,15 @@
     }
 
     .progress-desc {
-      padding-block: 1rem;
+      padding-block: 0.5rem;
+      color: var(--font-color-gray);
       font-weight: bold;
       text-align: center;
       text-transform: capitalize;
+
+      @media (min-width: $content-breakpoint-desktop) {
+        padding-block: 1rem;
+      }
     }
   }
 }

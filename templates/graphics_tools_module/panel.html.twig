@@ -1,66 +1,89 @@
-{% extends 'base.html.twig' %} 
+{% extends 'base.html.twig' %}
 
-{% block stylesheets %} 
-    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/base.css') }}"> 
-    {% block panel_stylesheets %}{% endblock %} 
+{% block stylesheets %}
+
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/base.css') }}">
+    {% block panel_stylesheets %}{% endblock %}
+
 {% endblock %}
 
 {% block body %} 
 
-<div id="graphics-tools-module">
+    <div id="graphics-tools-module" class="main-layout container">
 
-    <div class="container">   
+        <div class="nav-area">
 
-        {# <!-- MAIN NAVIGATION START -->
-        <nav class="main-navigation">
+            <div class="nav-container modern-card">
+                <p class="app-name">Narzędzia Graficzne</p> 
 
-            {% set currentPath = app.request.pathInfo %}
-            {% set mainPanelPath = path('gtm_main_panel') %}
-            {% set compressorPanelPath = path('gtm_compressor_panel') %}
-            {% set converterPanelPath = path('gtm_converter_panel') %}
-            {% set editorPanelPath = path('gtm_editor_panel') %}  
+                <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
 
-            <ul class="main-navigation-list modern-card">
-                <li class="main-navigation-item">
-                    <a class="main-navigation-link {{ currentPath == mainPanelPath ? 'active' : '' }}" href="{{ mainPanelPath }}">
-                        <i class="main-navigation-link-icon fa-solid fa-house"></i>
-                        <span class="main-navigation-link-text">Panel Główny</span>
-                    </a>
-                </li>
-                <li class="main-navigation-item">
-                    <a class="main-navigation-link {{ currentPath == compressorPanelPath ? 'active' : '' }}" href="{{ compressorPanelPath }}">
-                        <i class="main-navigation-link-icon fa-solid fa-list-check"></i>
-                        <span class="main-navigation-link-text">Kompresor</span>
-                    </a>
-                </li>
-                <li class="main-navigation-item">
-                    <a class="main-navigation-link {{ currentPath == converterPanelPath ? 'active' : '' }}" href="{{ converterPanelPath }}">
-                        <i class="main-navigation-link-icon fa-solid fa-icons"></i>
-                        <span class="main-navigation-link-text">Konwerter</span>
-                    </a>
-                </li> 
-                <li class="main-navigation-item">
-                    <a class="main-navigation-link {{ currentPath == editorPanelPath ? 'active' : '' }}" href="{{ editorPanelPath }}">
-                        <i class="main-navigation-link-icon fa-regular fa-folder"></i>
-                        <span class="main-navigation-link-text">Edytor Zdjęć</span>
-                    </a>
-                </li>  
-            </ul>
+                <nav class="main-navigation">
 
-            <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
-        </nav>
-        <!-- MAIN NAVIGATION START -->   #}
+                    {% set currentPath = app.request.pathInfo %}
+                    {% set mainPanelPath = path('gtm_main_panel') %}
+                    {% set compressorPanelPath = path('gtm_compressor_panel') %}
+                    {% set converterPanelPath = path('gtm_converter_panel') %}
+                    {% set editorPanelPath = path('gtm_editor_panel') %}
+                    {% set myImagesPanelPath = path('gtm_user_images_panel') %}
+
+                    <ul class="main-navigation-list">
+
+                        <li class="main-navigation-item">
+                            <a class="main-navigation-link {{ currentPath == mainPanelPath ? 'active' : '' }}"
+                                href="{{ mainPanelPath }}">
+                                <i class="main-navigation-link-icon fa-solid fa-house"></i>
+                                <span class="main-navigation-link-text">Panel Główny</span>
+                            </a>
+                        </li>
+
+                        <li class="main-navigation-item">
+                            <a class="main-navigation-link {{ currentPath == myImagesPanelPath ? 'active' : '' }}"
+                                href="{{ myImagesPanelPath }}">
+                                <i class="main-navigation-link-icon fa-solid fa-image"></i>
+                                <span class="main-navigation-link-text">Moje Grafiki</span>
+                            </a>
+                        </li>
+
+                        <li class="main-navigation-item">
+                            <a class="main-navigation-link {{ currentPath == compressorPanelPath ? 'active' : '' }}"
+                                href="{{ compressorPanelPath }}">
+                                <i class="main-navigation-link-icon fa-solid fa-minimize"></i>
+                                <span class="main-navigation-link-text">Kompresor</span>
+                            </a>
+                        </li>
+
+                        <li class="main-navigation-item">
+                            <a class="main-navigation-link {{ currentPath == converterPanelPath ? 'active' : '' }}"
+                                href="{{ converterPanelPath }}">
+                                <i class="main-navigation-link-icon fa-solid fa-icons"></i>
+                                <span class="main-navigation-link-text">Konwerter</span>
+                            </a>
+                        </li>
+
+                        <li class="main-navigation-item">
+                            <a class="main-navigation-link {{ currentPath == editorPanelPath ? 'active' : '' }}"
+                                href="{{ editorPanelPath }}">
+                                <i class="main-navigation-link-icon fa-solid fa-screwdriver-wrench"></i>
+                                <span class="main-navigation-link-text">Edytor Zdjęć</span>
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </nav>
+            </div>
+
+        </div>
 
         {% block panel_content %}{% endblock %}
 
     </div>
 
-</div>
-
 {% endblock %}
 
 {% block javascripts %}
 
-{% block panel_javascripts %}{% endblock %}
+    {% block panel_javascripts %}{% endblock %}
 
 {% endblock %}

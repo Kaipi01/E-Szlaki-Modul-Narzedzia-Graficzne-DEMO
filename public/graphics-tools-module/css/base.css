@@ -22,7 +22,7 @@
   --very-light-green-opacity: #37ff7a6c;
   /* gray */
   --very-light-gray: #efefef;
-  --light-gray: #a9a9a9;
+  --light-gray: #656565;
   --gray: #2d4233;
   --dark-gray: #1d2d2b;
   --very-dark-gray: #252525;
@@ -36,7 +36,7 @@
   --background-gray: var(--very-light-gray);
   --font-color: #000;
   --font-color-50: rgba(0, 0, 0, 0.5);
-  --font-color-gray: var(--gray);
+  --font-color-gray: var(--light-gray);
   --font-color-green: var(--green);
   --background-gradient: linear-gradient(
     to top,
@@ -130,47 +130,56 @@ body.theme-dark::after {
   opacity: 0.15;
 }
 
+#graphics-tools-module.container,
 #graphics-tools-module .container {
   max-width: 83.5rem;
   margin: 0 auto;
   padding-inline: 0rem;
 }
 @media (min-width: 30em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     padding-inline: 1.25rem;
   }
 }
 @media (min-width: 31.25em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     padding-inline: 2rem;
   }
 }
 @media (min-width: 62.5em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     padding-inline: 4rem;
   }
 }
 @media (min-width: 87.5em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     padding-inline: 0rem;
   }
 }
 @media (min-width: 87.5em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     padding-inline: 0rem;
   }
 }
 @media (min-width: 103.125em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     max-width: 95rem;
   }
 }
 @media (min-width: 128.125em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     max-width: 125rem;
   }
 }
 @media (min-width: 153.125em) {
+  #graphics-tools-module.container,
   #graphics-tools-module .container {
     max-width: 140rem;
   }
@@ -685,7 +694,7 @@ body.theme-dark::after {
 }
 
 #graphics-tools-module {
-  --panels-gap: 2rem;
+  --current-gap: 1rem;
   position: relative;
   width: 100%;
   min-height: 90vh;
@@ -706,6 +715,73 @@ body.theme-dark::after {
     scroll-behavior: auto !important;
   }
 }
+#graphics-tools-module.main-layout,
+#graphics-tools-module .main-layout {
+  display: grid;
+  position: relative;
+  width: 100%;
+  gap: var(--current-gap);
+  height: 100%;
+  grid-template-columns: 1fr;
+}
+#graphics-tools-module.main-layout .app-name,
+#graphics-tools-module .main-layout .app-name {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+#graphics-tools-module.main-layout .nav-area,
+#graphics-tools-module .main-layout .nav-area {
+  display: none;
+  order: 2;
+  position: relative;
+}
+#graphics-tools-module.main-layout .nav-area .nav-container,
+#graphics-tools-module .main-layout .nav-area .nav-container {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  gap: 1rem;
+  top: var(--current-gap);
+  align-items: center;
+  right: 0;
+  width: 100%;
+}
+@media (min-width: 55em) {
+  #graphics-tools-module.main-layout,
+  #graphics-tools-module .main-layout {
+    grid-template-columns: 1fr 14.0625rem;
+  }
+  #graphics-tools-module.main-layout .nav-area,
+  #graphics-tools-module .main-layout .nav-area {
+    display: block;
+  }
+}
+@media (min-width: 85em) {
+  #graphics-tools-module.main-layout,
+  #graphics-tools-module .main-layout {
+    --current-gap: 1.25rem;
+  }
+}
+@media (min-width: 103.125em) {
+  #graphics-tools-module.main-layout,
+  #graphics-tools-module .main-layout {
+    --current-gap: 1.5rem;
+  }
+}
+@media (min-width: 128.125em) {
+  #graphics-tools-module.main-layout,
+  #graphics-tools-module .main-layout {
+    --current-gap: 1.75rem;
+  }
+}
+@media (min-width: 153.125em) {
+  #graphics-tools-module.main-layout,
+  #graphics-tools-module .main-layout {
+    --current-gap: 2rem;
+  }
+}
 #graphics-tools-module .panel__header {
   margin-bottom: 1.25rem;
   text-align: center;
@@ -716,6 +792,9 @@ body.theme-dark::after {
 #graphics-tools-module .panel__title {
   margin: 0;
   font-size: 2.75rem;
+}
+#graphics-tools-module #graphics-tools-module-result-table {
+  margin-top: var(--current-gap);
 }
 
 #graphics-tools-module .main-navigation {
@@ -730,11 +809,8 @@ body.theme-dark::after {
   position: relative;
   flex-direction: column;
   width: 100%;
-  max-width: 56.25rem;
   padding: 0;
   border-radius: 10px;
-  background-color: var(--green);
-  color: #fff;
   list-style: none;
 }
 #graphics-tools-module .main-navigation-link {
@@ -747,6 +823,7 @@ body.theme-dark::after {
   border-radius: 10px;
   font-weight: bold;
   text-align: center;
+  color: var(--font-color-gray);
 }
 #graphics-tools-module .main-navigation-link-text {
   display: none;
@@ -757,7 +834,7 @@ body.theme-dark::after {
   }
 }
 #graphics-tools-module .main-navigation-link.active, #graphics-tools-module .main-navigation-link:hover, #graphics-tools-module .main-navigation-link:focus {
-  background-color: var(--light-green);
+  color: var(--green);
 }
 #graphics-tools-module .main-navigation-link-icon {
   font-size: 1.5rem;

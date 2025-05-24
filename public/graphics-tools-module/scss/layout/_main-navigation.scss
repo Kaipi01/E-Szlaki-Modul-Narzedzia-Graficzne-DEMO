@@ -15,17 +15,13 @@
       position: relative;
       flex-direction: column;
       width: 100%;
-      max-width: toRem(900);
+      // max-width: toRem(900);
       padding: 0; 
       border-radius: 10px;
-      background-color: var(--green);
-      color: #fff;
+      // background-color: var(--green);
+      // color: #fff;
       list-style: none;
-    }
-
-    &-item {
-      // width: 25%;
-    }
+    } 
 
     &-link {
       display: flex;
@@ -37,6 +33,7 @@
       border-radius: 10px;
       font-weight: bold;
       text-align: center;
+      color: var(--font-color-gray);
 
       &-text {
         display: none;
@@ -49,7 +46,7 @@
       &.active,
       &:hover,
       &:focus {
-        background-color: var(--light-green);
+        color: var(--green);
       }
 
       &-icon {

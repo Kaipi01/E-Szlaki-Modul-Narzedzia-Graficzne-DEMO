@@ -7,11 +7,7 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class AppExtension extends AbstractExtension
-{ 
-    public function __construct(protected ContainerInterface $container)
-    {
-    }
-
+{   
     public function getFilters()
     {
         return [
@@ -27,5 +23,4 @@ class AppExtension extends AbstractExtension
 
         return sprintf("%.{$precision}f", $bytesValue) . " " . @$size[$factor];
     }
-
 }

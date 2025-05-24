@@ -1,188 +1,155 @@
-<div class="app-container">
+<div class="search-area modern-card">
+    <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
+</div>
 
-    <div class="nav-area">
+<div class="quick-access-area">
+    {# <p class="section-header">Szybki dostęp</p> modern-card #}
 
-        <div class="nav-container modern-card">
-            <p class="app-name">Narzędzia Graficzne</p>
+    <ul class="access-links">
+        <li>
+            <a class="access-link-wrapper access-link-wrapper-1 modern-card" href="{{ path('gtm_user_images_panel') }}">
+                <i class="fa-solid fa-image access-icon"></i>
+                <span class="access-text">Moje grafiki</span>
+            </a>
+        </li>
+        <li>
+            <a class="access-link-wrapper access-link-wrapper-2 modern-card" href="{{ path('gtm_compressor_panel') }}">
+                <i class="fa-solid fa-minimize access-icon"></i>
+                <span class="access-text">Kompresor</span>
+            </a>
+        </li>
+        <li>
+            <a class="access-link-wrapper access-link-wrapper-3 modern-card" href="{{ path('gtm_converter_panel') }}">
+                <i class="fa-solid fa-icons access-icon"></i>
+                <span class="access-text">Konwerter</span>
+            </a>
+        </li>
+        <li>
+            <a class="access-link-wrapper access-link-wrapper-3 modern-card" href="{{ path('gtm_editor_panel') }}">
+                <i class="fa-solid fa-screwdriver-wrench access-icon"></i>
+                <span class="access-text">Edytor</span>
+            </a>
+        </li>
+    </ul>
+</div>
 
-            <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
+<div class="stats-area modern-card">
 
-            <theme-switcher role="button" aria-label="Przełącznik motywu" data-id="theme-switcher"></theme-switcher>
+    {# <p class="area-header">Statystyki</p> #}
 
-            <nav class="main-navigation">
+    <div class="stats-chart-container">
 
-                {% set currentPath = app.request.pathInfo %}
-                {% set mainPanelPath = path('gtm_main_panel') %}
-                {% set compressorPanelPath = path('gtm_compressor_panel') %}
-                {% set converterPanelPath = path('gtm_converter_panel') %}
-                {% set editorPanelPath = path('gtm_editor_panel') %}
-
-                <ul class="main-navigation-list modern-card">
-                    <li class="main-navigation-item">
-                        <a class="main-navigation-link {{ currentPath == mainPanelPath ? 'active' : '' }}"
-                            href="{{ mainPanelPath }}">
-                            <i class="main-navigation-link-icon fa-solid fa-house"></i>
-                            <span class="main-navigation-link-text">Panel Główny</span>
-                        </a>
-                    </li>
-                    <li class="main-navigation-item">
-                        <a class="main-navigation-link {{ currentPath == compressorPanelPath ? 'active' : '' }}"
-                            href="{{ compressorPanelPath }}">
-                            <i class="main-navigation-link-icon fa-solid fa-list-check"></i>
-                            <span class="main-navigation-link-text">Kompresor</span>
-                        </a>
-                    </li>
-                    <li class="main-navigation-item">
-                        <a class="main-navigation-link {{ currentPath == converterPanelPath ? 'active' : '' }}"
-                            href="{{ converterPanelPath }}">
-                            <i class="main-navigation-link-icon fa-solid fa-icons"></i>
-                            <span class="main-navigation-link-text">Konwerter</span>
-                        </a>
-                    </li>
-                    <li class="main-navigation-item">
-                        <a class="main-navigation-link {{ currentPath == editorPanelPath ? 'active' : '' }}"
-                            href="{{ editorPanelPath }}">
-                            <i class="main-navigation-link-icon fa-regular fa-folder"></i>
-                            <span class="main-navigation-link-text">Edytor Zdjęć</span>
-                        </a>
-                    </li>
-                </ul>
-
-
-            </nav>
-        </div>
-
-    </div>
-
-    <div class="quick-access-area">
-        {# <p class="section-header">Szybki dostęp</p> modern-card #}
-
-        <ul class="access-links">
-            <li>
-                <a class="access-link-wrapper access-link-wrapper-1 modern-card"
-                    href="{{ path('gtm_user_images_panel') }}">
-                    <i class="fa-solid fa-image access-icon"></i>
-                    <span class="access-text">Moje grafiki</span>
-                </a>
-            </li>
-            <li>
-                <a class="access-link-wrapper access-link-wrapper-2 modern-card"
-                    href="{{ path('gtm_compressor_panel') }}">
-                    <i class="fa-solid fa-calendar-days access-icon"></i>
-                    <span class="access-text">Kompresor</span>
-                </a>
-            </li>
-            <li>
-                <a class="access-link-wrapper access-link-wrapper-3 modern-card"
-                    href="{{ path('gtm_converter_panel') }}">
-                    <i class="fa-solid fa-cloud-arrow-down access-icon"></i>
-                    <span class="access-text">Konwerter</span>
-                </a>
-            </li>
-            <li>
-                <a class="access-link-wrapper access-link-wrapper-3 modern-card" href="{{ path('gtm_editor_panel') }}">
-                    <i class="fa-solid fa-cloud-arrow-down access-icon"></i>
-                    <span class="access-text">Edytor</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <div class="stats-area modern-card">
-
-        {# <p class="area-header">Statystyki</p> #}
-
-        <div class="stats-chart-container">
-
-            <circular-progress-bar data-label="6.5 GB z 10 GB wykorzystane" data-pie='{
+        <circular-progress-bar data-size="125"
+            data-label="{{ userCurrentDiscStorage }} {{ discStorageUnit }} z {{ userMaxDiscStorage }} {{ discStorageUnit }} wykorzystane"
+            data-pie='{
                 "lineargradient": ["#14a5ff", "#008be2"],
                 "round": true,
-                "percent": 37,
+                "percent": {{ userCurrentDiscStoragePercent }},
                 "colorCircle": "rgba(63, 98, 74, 0.25)"
                 }'>
-            </circular-progress-bar>
-
-        </div>
+        </circular-progress-bar>
 
     </div>
 
-    <div class="main-area modern-card">
+</div>
 
-        {% if userImages | length > 0 %}
+<div class="content-area modern-card">
 
-        <section class="content-section">
-            <div class="section-header-wrapper">
-                <p class="section-header">Ostatnie zdjęcia</p>
-                <a href="#" class="section-header-link">Zobacz wszystkie</a>
-            </div>
+    {% if userImages | length > 0 %}
 
-            <images-gallery-modal></images-gallery-modal>
+    <section class="content-section">
+        <div class="section-header-wrapper">
+            <p class="section-header">Ostatnie zdjęcia</p>
+            <a href="#" class="section-header-link">Zobacz wszystkie</a>
+        </div>
 
-            <div class="content-section-line">
+        <images-gallery-modal></images-gallery-modal>
 
-                {% for image in userImages | slice(0, 3) %}
+        <div class="content-section-line">
 
-                <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ image.src }}">
-                    <div class="image-overlay">
-                        <div class="photo-info">
-                            <div class="photo-info-text">
-                                <p class="photo-name medium">{{ image.name }}</p>
-                                <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
-                            </div>
+            {% for image in userImages | slice(0, 3) %}
+
+            <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ image.src }}">
+                <div class="image-overlay">
+                    <div class="photo-info">
+                        <div class="photo-info-text">
+                            <p class="photo-name medium">{{ image.name }}</p>
+                            <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
                         </div>
                     </div>
+                </div>
 
-                    <img src="{{ image.src }}" />
+                <img src="{{ image.src }}" />
 
-                    <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
-                </a>
+                <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+            </a>
 
-                {% endfor %}
+            {% endfor %}
 
-            </div>
+        </div>
 
-            <div class="image-operation__table-container">
-                <div class="table-responsive-vertical">
-                    <table class="table table-hover table-striped">
-                        <thead>
-                            <th>Format</th>
-                            <th>Nazwa pliku</th>
-                            <th>Rozmiar</th>
-                            <th>Data Modyfikacji</th>
-                            <th>Akcje</th>
-                        </thead>
-                        <tbody>
+        <div class="image-operation__table-container">
+            <div class="table-responsive-vertical">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <th>Format</th>
+                        <th>Nazwa pliku</th>
+                        <th>Rozmiar</th>
+                        <th>Data Modyfikacji</th>
+                        {# <th>Typ Operacji</th> #}
+                        <th>Akcje</th>
+                    </thead>
+                    <tbody>
 
-                            {% for image in userImages %}
+                        {% for image in userImages | slice(0, 8) %}
 
-                            <tr>
-                                <td>
-                                    <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
-                                </td>
-                                <td>{{ image.name }}</td>
-                                <td>{{ image.size | formatBytes }}</td>
-                                <td>{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</td>
-                                <td>
+                        <tr>
+                            <td>
+                                <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
+                            </td>
+                            <td>{{ image.name }}</td>
+                            <td>{{ image.size | formatBytes }}</td>
+                            <td>{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</td>
+                            {# <td>
+                                {% set operationType = 'Inny' %}
+
+                                {% if image.operationType == 'compression' %}
+                                {% set operationType = 'Kompresja' %}
+                                {% elseif image.operationType == 'conversion' %}
+                                {% set operationType = 'Konwersja' %}
+                                {% elseif image.operationType == 'edition' %}
+                                {% set operationType = 'Edycja' %}
+                                {% endif %}
+
+                                {{ operationType }}
+                            </td> #}
+                            <td>
+                                <span class="image-operation__table-actions">
                                     <a href="{{ image.src }}" download
                                         class="mx-auto badge image-operation__item-download">
                                         <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
                                         <span>Pobierz</span>
                                     </a>
-                                </td>
-                            </tr>
 
-                            {% endfor %}
+                                    <a href="#" aria-current="page" class="mx-auto badge image-operation__item"
+                                        data-gallery-preview data-src="{{ image.src }}">
+                                        <i class="fa-solid fa-eye image-operation__item-icon"></i>
+                                        <span>Podgląd</span>
+                                    </a>
+                                </span>
+                            </td>
+                        </tr>
 
-                        </tbody>
-                    </table>
-                    <div class="table-footer"></div>
-                </div>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+                <div class="table-footer"></div>
             </div>
+        </div>
 
-        </section>
+    </section>
 
-        {% endif %}
-
-    </div>
+    {% endif %}
 
 </div>

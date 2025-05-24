@@ -30,6 +30,7 @@ class GTMEditorAPIController extends AbstractController
         /** @var UploadedFile */
         $imageBlob = $request->files->get('imageBlob');
         $toFormat = $request->request->get('toFormat');
+        $imageChanges = json_decode($request->request->get('imageChanges'), true);
         $status = 200;
 
         try {
@@ -56,7 +57,7 @@ class GTMEditorAPIController extends AbstractController
                     'src' => $imageData['path'],
                     'originalName' => $imageData['originalName'],
                     'operationHash' => Uuid::generate(),
-                    'operationResults' => [],
+                    'operationResults' => $imageChanges ?? [],
                     'operationType' => GTMImage::OPERATION_EDITION
                 ],
                 $this->getUser()->getId()
