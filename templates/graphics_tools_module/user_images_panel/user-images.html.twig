@@ -1,0 +1,80 @@
+<div class="panel-header">
+    <h2 class="header">Moje zdjęcia</h2>
+    <div class="panel-controls">
+
+        <div class="search-container">
+            <div class="search-input-wrapper">
+                <input type="text" id="image-search" class="search-input" placeholder="Wyszukaj zdjęcia...">
+                <button class="search-button" id="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="filters-container">
+
+
+
+            <div class="filter-group">
+                <label class="sr-only" for="filter-date">Data:</label>
+
+                <select id="filter-date" data-custom-select data-class-name="custom-select-green">
+                    <option disabled selected value="hide">Data:</option>
+                    <option value="all">Wszystkie</option>
+                    <option value="today">Dzisiaj</option>
+                    <option value="week">Ten tydzień</option>
+                    <option value="month">Ten miesiąc</option>
+                    <option value="year">Ten rok</option>
+                </select>
+
+                {# <select id="filter-date" class="filter-select">
+                    <option value="all">Wszystkie</option>
+                    <option value="today">Dzisiaj</option>
+                    <option value="week">Ten tydzień</option>
+                    <option value="month">Ten miesiąc</option>
+                    <option value="year">Ten rok</option>
+                </select> #}
+            </div>
+
+            <div class="filter-group">
+                <label class="sr-only" for="sort-by">Sortuj według:</label>
+
+                <select id="sort-by" data-custom-select data-class-name="custom-select-green">
+                    <option disabled selected value="hide">Sortuj według:</option>
+                    <option value="date-desc">Od najnowszych</option>
+                    <option value="date-asc">Od najstarszych</option>
+                    <option value="name-asc">Nazwa (A-Z)</option>
+                    <option value="name-desc">Nazwa (Z-A)</option>
+                    <option value="size-desc">Rozmiar (malejąco)</option>
+                    <option value="size-asc">Rozmiar (rosnąco)</option>
+                </select> 
+            </div>
+
+            <button id="filter-reset" class="link small variant2">
+                <i class="fas fa-undo"></i> Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="panel-content">
+
+    <div class="status-container">
+        <div class="results-info">
+            Znaleziono: <span id="results-count">0</span> zdjęć
+        </div>
+        <div class="loading-indicator" id="loading-indicator">
+            <i class="fas fa-spinner fa-spin"></i> Ładowanie...
+        </div>
+    </div>
+
+    <div class="images-grid" id="images-container"></div>
+
+    <div class="no-results" id="no-results" style="display: none;">
+        <div class="no-results-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <p class="no-results-text">Nie znaleziono zdjęć spełniających podane kryteria</p>
+        <button id="clear-filters" class="link variant2">Wyczyść filtry</button>
+    </div>
+</div>

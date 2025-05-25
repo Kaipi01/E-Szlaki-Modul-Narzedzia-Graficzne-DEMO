@@ -2,81 +2,81 @@
 @use "../functions/toRem" as *;
 
 #graphics-tools-module {
-  .advanced-tabel-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    animation: fadeIn 0.3s ease;
-    background: rgba(0, 0, 0, 0.7);
+  // .advanced-tabel-modal {
+  //   display: none;
+  //   position: fixed;
+  //   z-index: 1000;
+  //   top: 0;
+  //   left: 0;
+  //   width: 100%;
+  //   height: 100%;
+  //   animation: fadeIn 0.3s ease;
+  //   background: rgba(0, 0, 0, 0.7);
 
-    .modal-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 90%;
-      max-width: 500px;
-      padding: 20px;
-      transform: translate(-50%, -50%);
-      border-radius: 8px;
-      background: var(--secondary-color);
-    }
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .modal-close {
-      border: none;
-      background: none;
-      color: white;
-      font-size: 24px;
-      cursor: pointer;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      color: var(--text-color);
-    }
-    .form-control {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
-      background: rgba(255, 255, 255, 0.1);
-      color: var(--text-color);
-    }
-  }
+  //   .modal-content {
+  //     position: absolute;
+  //     top: 50%;
+  //     left: 50%;
+  //     width: 90%;
+  //     max-width: 500px;
+  //     padding: 20px;
+  //     transform: translate(-50%, -50%);
+  //     border-radius: 8px;
+  //     background: var(--secondary-color);
+  //   }
+  //   .modal-header {
+  //     display: flex;
+  //     align-items: center;
+  //     justify-content: space-between;
+  //     margin-bottom: 20px;
+  //   }
+  //   .modal-close {
+  //     border: none;
+  //     background: none;
+  //     color: white;
+  //     font-size: 24px;
+  //     cursor: pointer;
+  //   }
+  //   .form-group {
+  //     margin-bottom: 15px;
+  //   }
+  //   .form-group label {
+  //     display: block;
+  //     margin-bottom: 5px;
+  //     color: var(--text-color);
+  //   }
+  //   .form-control {
+  //     width: 100%;
+  //     padding: 8px;
+  //     border: 1px solid var(--border-color);
+  //     border-radius: 5px;
+  //     background: rgba(255, 255, 255, 0.1);
+  //     color: var(--text-color);
+  //   }
+  // }
 
   .advanced-tabel-container {
-    --primary-color: #2c3e50;
-    --secondary-color: #34495e;
-    --accent-color: #3498db;
-    --text-color: #ecf0f1;
-    --hover-color: #2980b9;
-    --border-color: #465668;
+    --primary-color: var(--green);
+    --secondary-color: var(--green);
+    --accent-color: var(--green-light);
+    --text-color: var(--font-color);
+    --hover-color: var(--green-light);
+    --border-color: var(--green);
 
-    max-width: 1200px;
-    margin: 0 auto;
-    overflow: hidden; // ???
-    border-radius: 15px;
-    background: rgba(44, 62, 80, 0.95);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    padding: 0 !important;
+
+    // margin: 0 auto;
+    // overflow: hidden; // ???
+    //border-radius: 15px;
+    //background: var(--background);
+    //box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
     color: var(--text-color);
 
     .table-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px;
-      background: var(--secondary-color);
+      padding: 20px; 
     }
     .search-box {
       position: relative;
@@ -375,7 +375,6 @@
       position: sticky;
       z-index: 10;
       top: 0;
-      background: var(--secondary-color);
     }
     /* Adaptacyjne szerokości kolumn */
     .fantasy-table th,

@@ -8,18 +8,24 @@
 
 {% block panel_content %} 
 
-    <div class="main-area" id="graphics-tools-module-user-images-panel">
+    <div class="main-area modern-card" id="graphics-tools-module-user-images-panel">
 
-        <h1>Moje Grafiki</h1>
+        <images-gallery-modal></images-gallery-modal>
 
-        {% include "graphics_tools_module/user_images_panel/images-table.html.twig" %}
+        {% include "graphics_tools_module/user_images_panel/user-images.html.twig" %}
         
     </div> 
 
 {% endblock %} 
 
 {% block panel_javascripts %}
- 
-<script type="module" src="{{ asset('graphics-tools-module/js/panels/user-images-panel/main.js') }}"></script>
+
+    <script> 
+
+        const GET_USER_IMAGES_JSON = "{{ GET_USER_IMAGES_JSON }}"
+
+    </script> 
+    
+    <script type="module" src="{{ asset('graphics-tools-module/js/panels/user-images-panel/main.js') }}"></script>
 
 {% endblock %}

@@ -1,3 +1,13 @@
-import "../../modules/AdvancedTable.js"
+import ThemeSwitcher from "../../modules/ThemeSwitcher.js" 
+import ImagesGalleryModal from "../../modules/ImagesGallery.js"
+import UserImagesPanel from "./UserImagesPanel.js";
 
-console.log('hi from user images panel !')
+document.addEventListener('DOMContentLoaded', () => {
+  
+  new UserImagesPanel({
+    containerSelector: '#graphics-tools-module-user-images-panel',
+    apiUrl: GET_USER_IMAGES_JSON,
+    perPage: 12,
+    scrollThreshold: 200
+  });
+})

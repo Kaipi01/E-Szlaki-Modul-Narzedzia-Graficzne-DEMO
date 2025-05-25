@@ -2,6 +2,8 @@ import printImage from "../utils/printImage.js";
 
 export default class ImagesGalleryModal extends HTMLElement {
 
+  static IMAGES_PREVIEWS_RERENDERED_EVENT = "gallery-images-previews-rerendered-event"
+
   constructor() {
     super()
   }
@@ -74,6 +76,8 @@ export default class ImagesGalleryModal extends HTMLElement {
   }
 
   addEventListeners() {
+
+    document.addEventListener(ImagesGalleryModal.IMAGES_PREVIEWS_RERENDERED_EVENT, (e) => this.initAgainImagePreviews())
 
     this.galleryPrevBtn.addEventListener('click', () => this.showImage(this.currentImageIndex - 1));
 
@@ -158,9 +162,16 @@ export default class ImagesGalleryModal extends HTMLElement {
     this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]')
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
 
-    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', index))
+    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', this.imagePreviews.length - (index + 1)))
 
     this.addEventListeners()
+  }
+
+  initAgainImagePreviews() {
+    this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
+    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', this.imagePreviews.length - (index + 1)))
+
+    console.log('initAgainImagePreviews()')
   }
 
   openGallery(index) {
@@ -174,7 +185,8 @@ export default class ImagesGalleryModal extends HTMLElement {
     galleryThumbnailsContainer.innerHTML = ""
 
     // Add all images to gallery
-    this.imagePreviews.forEach((imagePreview, idx) => {
+    const imagePreviewsArray = [...this.imagePreviews]
+    imagePreviewsArray.reverse().forEach((imagePreview, idx) => {
       const imageElement = document.createElement('img');
 
       imageElement.src = imagePreview.dataset.src
@@ -191,7 +203,10 @@ export default class ImagesGalleryModal extends HTMLElement {
       galleryThumbnailsContainer.append(thumbnail);
 
       // Add click event to thumbnail
-      thumbnail.addEventListener('click', () => this.showImage(idx))
+      thumbnail.addEventListener('click', () => {
+        console.log(`this.showImage(${idx + 1})`)
+        this.showImage(idx + 1)
+      })
     });
 
     // Show the modal
