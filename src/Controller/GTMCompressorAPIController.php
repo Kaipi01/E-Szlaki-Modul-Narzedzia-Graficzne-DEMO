@@ -43,8 +43,6 @@ class GTMCompressorAPIController extends AbstractController
         $imageData = [];
         $status = 200;
 
-        dump($request->request);
-
         try {
             if (!$this->getUser()) {
                 $status = 403;
