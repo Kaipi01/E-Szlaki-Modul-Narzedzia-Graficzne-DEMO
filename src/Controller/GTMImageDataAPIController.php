@@ -8,6 +8,7 @@ use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(path: '/profil')]
@@ -23,19 +24,19 @@ class GTMImageDataAPIController extends AbstractController
     #[Route(path: '/narzedzia-graficzne/api/pobierz-dane-o-grafice-json/{processHash}', name: 'gtm_api_get_operation_image_data', methods: ['GET'])]
     public function getOperationImageData(string $processHash, GTMImageRepository $imageRepository): JsonResponse
     {
-        $status = 200;
+        $status = Response::HTTP_OK;
         $jsonData = [];
 
         try {
             if (!$this->getUser()) {
-                $status = 401;
+                $status = Response::HTTP_UNAUTHORIZED;
                 throw new \Exception('Odmowa dostępu. Użytkownik nie jest zalogowany w systemie');
             }
             /** @var GTMImage */
             $image = $imageRepository->findOneBy(['operationHash' => $processHash, 'owner' => $this->getUser()]);
 
             if (!$image) {
-                $status = 404;
+                $status = Response::HTTP_NOT_FOUND;
                 throw new \Exception('Żądana grafika nie istnieje');
             }
 

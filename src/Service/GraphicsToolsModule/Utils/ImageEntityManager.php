@@ -2,9 +2,11 @@
 
 namespace App\Service\GraphicsToolsModule\Utils;
 
+use App\Event\GTMImageEvent;
 use App\Service\GraphicsToolsModule\Utils\PathResolver;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\GTMImage;
@@ -19,6 +21,7 @@ class ImageEntityManager implements ImageEntityManagerInterface
         private GTMLoggerInterface $logger, 
         private PathResolver $pathResolver,
         private MimeTypeGuesserInterface $mimeTypeGuesser,
+        private EventDispatcherInterface $eventDispatcher
     ) {}
 
     public function save(array $imageData, int $userId): void 
@@ -47,6 +50,8 @@ class ImageEntityManager implements ImageEntityManagerInterface
             ->setSrc($this->pathResolver->getRelativePath($imageSrc))
             ->setUploadedAt(new DateTime("now"))
         ;
+
+        $this->eventDispatcher->dispatch(new GTMImageEvent($userId), GTMImage::IMAGE_CREATED);
 
         $this->saveInDataBase($gtmImage);
     }

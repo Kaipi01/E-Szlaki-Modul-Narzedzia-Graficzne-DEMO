@@ -14,7 +14,7 @@ class GTMMainPanelController extends AbstractController
     public function index(GTMImageRepository $imageRepository): Response
     {
         /** @var GTMImage[] */
-        $userImages = $imageRepository->findBy(['owner' => $this->getUser()]);
+        $userImages = $imageRepository->findBy(['owner' => $this->getUser()], ['uploadedAt' => 'desc']);
         $discStorageUnit = 'MB';
         $userMaxDiscStorage = 500;
         $userCurrentDiscStorage = 0;

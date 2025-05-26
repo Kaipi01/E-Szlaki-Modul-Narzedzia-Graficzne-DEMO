@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route(path: '/profil')]
 class GTMEditorAPIController extends AbstractController
@@ -31,21 +32,21 @@ class GTMEditorAPIController extends AbstractController
         $imageBlob = $request->files->get('imageBlob');
         $toFormat = $request->request->get('toFormat');
         $imageChanges = json_decode($request->request->get('imageChanges'), true);
-        $status = 200;
+        $status = Response::HTTP_OK;
 
         try {
             if (!$this->getUser()) {
-                $status = 403;
+                $status = Response::HTTP_UNAUTHORIZED;
                 throw new Exception('Odmowa dostępu!');
             }
 
             if (!$imageBlob) {
-                $status = 400;
+                $status = Response::HTTP_BAD_REQUEST;
                 throw new Exception('Niepoprawne dane! Brakuje danych o grafice!');
             }
 
             if (!$toFormat) {
-                $status = 400;
+                $status = Response::HTTP_BAD_REQUEST;
                 throw new Exception('Niepoprawne dane! Brakuje docelowego formatu!');
             }
 
@@ -70,7 +71,7 @@ class GTMEditorAPIController extends AbstractController
             $jsonData = ['success' => true, 'errorMessage' => ''];
 
         } catch (Exception $e) {
-            $status = $status === 200 ? 500 : $status;
+            $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
             $jsonData = ['success' => false, 'errorMessage' => 'Wystąpił błąd: ' . $e->getMessage()];
 
             $this->logger->error(self::class . '::compressImage: ' . $e->getMessage());

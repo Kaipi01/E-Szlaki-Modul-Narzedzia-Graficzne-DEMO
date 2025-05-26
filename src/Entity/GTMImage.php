@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class GTMImage
 { 
+    public const IMAGE_CREATED = 'gtm_image.created';
+    public const IMAGE_UPDATED = 'gtm_image.updated';
+    public const IMAGE_DELETED = 'gtm_image.deleted';
     public const OPERATION_COMPRESSION = 'compression';
     public const OPERATION_CONVERSION = 'conversion';
     public const OPERATION_EDITION = 'edition';

@@ -2,22 +2,35 @@
 
 namespace App\Controller;
 
-use App\Repository\GTMImageRepository;
-use App\Entity\GTMImage;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
-use Doctrine\ORM\QueryBuilder;
+use App\Service\GraphicsToolsModule\UserImagesPanel\UserImagesPanelService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use App\Repository\GTMImageRepository;
+use App\Entity\GTMImage;
 use Exception;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route(path: '/profil')]
 class GTMUserImagesPanelController extends AbstractController
 {
-    public function __construct(private readonly GTMImageRepository $imageRepository, private readonly GTMLoggerInterface $logger)
-    {
+    private const CACHE_TTL = 600; // 10 minut
+
+    public function __construct(
+        private readonly GTMImageRepository $imageRepository,
+        private readonly GTMLoggerInterface $logger,
+        private readonly CacheInterface $cache,
+        private readonly Security $security,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly UserImagesPanelService $service
+    ) {
     }
 
     #[Route(path: '/narzedzia-graficzne/moje-grafiki', name: 'gtm_user_images_panel')]
@@ -26,178 +39,118 @@ class GTMUserImagesPanelController extends AbstractController
         return $this->render('graphics_tools_module/user_images_panel/index.html.twig', [
             'GET_USER_IMAGES_JSON' => '/profil/narzedzia-graficzne/moje-grafiki/pobierz-json'
         ]);
-    } 
+    }
+
+    #[Route(path: '/narzedzia-graficzne/moje-grafiki/usun-grafike-json', name: 'gtm_remove_user_image_json')]
+    public function removeImageJSON(Request $request): JsonResponse
+    {
+        $imageId = $request->request->get('imageId');
+        $jsonData = [];
+        $status = Response::HTTP_OK;
+
+        try {
+            if (!$this->getUser()) {
+                $status = Response::HTTP_UNAUTHORIZED;
+                throw new Exception('Odmowa dostępu!');
+            }
+
+            if (!$imageId) {
+                $status = Response::HTTP_BAD_REQUEST;
+                throw new Exception('Nie podano ID grafiki!');
+            }
+
+            /** @var GTMImage */
+            $image = $this->imageRepository->find($imageId);
+            $imageName = $image->getName();
+
+            $this->entityManager->remove($image);
+            $this->entityManager->flush();
+
+            $jsonData = [
+                'success' => true,
+                'error' => '',
+                'imageName' => $imageName
+            ];
+
+        } catch (Exception $e) {
+            $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
+            $jsonData = [
+                'success' => false,
+                'error' => 'Wystąpił błąd podczas usuwania grafiki: ' . $e->getMessage(),
+                'imageName' => ''
+            ];
+            $this->logger->error(__METHOD__ . ': ' . $e->getMessage());
+        }
+
+        return $this->json($jsonData, $status);
+    }
 
     #[Route(path: '/narzedzia-graficzne/moje-grafiki/pobierz-json', name: 'gtm_get_user_images_json')]
     public function getUserImagesJSON(Request $request): JsonResponse
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $perPage = max(1, min(50, (int) $request->query->get('perPage', 12)));
-        $search = $request->query->get('search', '');
-        $dateFilter = $request->query->get('date', 'all');
-        $sortBy = $request->query->get('sortBy', 'date-desc');
+        $query = $request->query;
+        $page = $this->service->validatePage($query->get('page', '1'));
+        $perPage = $this->service->validatePerPage($query->get('perPage', '12'));
+        $search = $this->service->sanitizeSearchTerm($query->get('search', ''));
+        $dateFilter = $this->service->validateDateFilter($query->get('date', 'all'));
+        $sortBy = $this->service->validateSortOption($query->get('sortBy', 'date-desc'));
 
         $user = $this->getUser();
 
         if (!$user) {
-            return $this->json([
-                'error' => 'Użytkownik nie jest zalogowany'
-            ], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['error' => 'Użytkownik nie jest zalogowany'], Response::HTTP_UNAUTHORIZED);
         }
 
         try {
-            $queryBuilder = $this->buildQueryBuilder($user, $search, $dateFilter, $sortBy);
+            $cacheKey = $this->service->generateCacheKey($user->getId(), $page, $perPage, $search, $dateFilter, $sortBy);
 
-            $total = $this->countTotalResults($queryBuilder);
+            $cacheMissCallback = function (ItemInterface $item) use ($user, $page, $perPage, $search, $dateFilter, $sortBy) {
+                $item->expiresAfter(self::CACHE_TTL);
 
-            $queryBuilder->setFirstResult(($page - 1) * $perPage)->setMaxResults($perPage);
+                $queryBuilder = $this->service->buildQueryBuilder($user, $search, $dateFilter, $sortBy);
 
-            $images = $queryBuilder->getQuery()->getResult();
+                $total = $this->service->countTotalResults($queryBuilder);
 
-            return $this->json([
-                'images' => $this->prepareImagesData($images),
-                'total' => $total,
-                'page' => $page,
-                'perPage' => $perPage,
-                'hasMore' => ($page * $perPage) < $total
-            ]);
+                $queryBuilder->setFirstResult(($page - 1) * $perPage)->setMaxResults($perPage);
+
+                $images = $queryBuilder->getQuery()->getResult();
+
+                return [
+                    'images' => $this->prepareImagesData($images),
+                    'total' => $total,
+                    'page' => $page,
+                    'perPage' => $perPage,
+                    'hasMore' => ($page * $perPage) < $total,
+                    'cached' => true,
+                    'cachedAt' => (new \DateTime())->format('Y-m-d H:i:s')
+                ];
+            };
+
+            $response = $this->cache->get($cacheKey, $cacheMissCallback);
+
+            return $this->json($response);
 
         } catch (Exception $e) {
             $this->logger->error(__METHOD__ . ': Błąd podczas pobierania listy obrazów: ' . $e->getMessage(), [
                 'exception' => $e,
-                'user' => $user?->getId()
+                'request' => [
+                    'page' => $query->get('page'),
+                    'perPage' => $query->get('perPage'),
+                    'search' => $query->get('search'),
+                    'date' => $query->get('date'),
+                    'sortBy' => $query->get('sortBy')
+                ]
             ]);
 
-            return $this->json([
-                'error' => 'Wystąpił błąd podczas pobierania danych. Spróbuj ponownie później.'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(
+                ['error' => 'Wystąpił błąd podczas pobierania danych. Spróbuj ponownie później.'],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
-    }
-
-    /**
-     * Buduje zapytanie QueryBuilder na podstawie parametrów
-     * 
-     * @param object $user - Zalogowany użytkownik
-     * @param string $search - Fraza wyszukiwania
-     * @param string $dateFilter - Filtr daty ('all', 'today', 'week', 'month', 'year')
-     * @param string $sortBy - Pole sortowania ('date-desc', 'date-asc', 'name-asc', 'name-desc', 'size-asc', 'size-desc')
-     * @return QueryBuilder
-     */
-    private function buildQueryBuilder(object $user, string $search, string $dateFilter, string $sortBy): QueryBuilder
-    { 
-        $queryBuilder = $this->imageRepository
-            ->createQueryBuilder('i')
-            ->where('i.owner = :user')
-            ->setParameter('user', $user);
-
-        if (!empty($search)) {
-            $queryBuilder
-                ->andWhere('i.name LIKE :search')
-                ->setParameter('search', '%' . $search . '%');
-        }
-
-        $this->applyDateFilter($queryBuilder, $dateFilter);
-
-        $this->applySorting($queryBuilder, $sortBy);
-
-        return $queryBuilder;
-    }
-
-    /**
-     * Stosuje filtr daty do zapytania
-     * 
-     * @param QueryBuilder $queryBuilder - QueryBuilder do modyfikacji
-     * @param string $dateFilter - Filtr daty ('all', 'today', 'week', 'month', 'year')
-     * @return void
-     */
-    private function applyDateFilter(QueryBuilder $queryBuilder, string $dateFilter): void
-    {
-        $now = new \DateTime();
-
-        switch ($dateFilter) {
-            case 'today':
-                $startDate = new \DateTime('today');
-                $queryBuilder
-                    ->andWhere('i.uploadedAt BETWEEN :startDate AND :endDate')
-                    ->setParameter('startDate', $startDate)
-                    ->setParameter('endDate', $now);
-                break;
-            case 'week':
-                $startDate = new \DateTime('monday this week');
-                $queryBuilder
-                    ->andWhere('i.uploadedAt BETWEEN :startDate AND :endDate')
-                    ->setParameter('startDate', $startDate)
-                    ->setParameter('endDate', $now);
-                break;
-            case 'month':
-                $startDate = new \DateTime('first day of this month');
-                $queryBuilder
-                    ->andWhere('i.uploadedAt BETWEEN :startDate AND :endDate')
-                    ->setParameter('startDate', $startDate)
-                    ->setParameter('endDate', $now);
-                break;
-            case 'year':
-                $startDate = new \DateTime('first day of January this year');
-                $queryBuilder
-                    ->andWhere('i.uploadedAt BETWEEN :startDate AND :endDate')
-                    ->setParameter('startDate', $startDate)
-                    ->setParameter('endDate', $now);
-                break;
-            default:
-                // 'all' - brak filtrowania po dacie
-                break;
-        }
-    }
-
-    /**
-     * Stosuje sortowanie do zapytania
-     * 
-     * @param QueryBuilder $queryBuilder - QueryBuilder do modyfikacji
-     * @param string $sortBy - Pole sortowania ('date-desc', 'date-asc', 'name-asc', 'name-desc', 'size-asc', 'size-desc')
-     * @return void
-     */
-    private function applySorting(QueryBuilder $queryBuilder, string $sortBy): void
-    {
-        switch ($sortBy) {
-            case 'date-asc':
-                $queryBuilder->orderBy('i.uploadedAt', 'ASC');
-                break;
-            case 'date-desc':
-                $queryBuilder->orderBy('i.uploadedAt', 'DESC');
-                break;
-            case 'name-asc':
-                $queryBuilder->orderBy('i.name', 'ASC');
-                break;
-            case 'name-desc':
-                $queryBuilder->orderBy('i.name', 'DESC');
-                break;
-            case 'size-asc':
-                $queryBuilder->orderBy('i.size', 'ASC');
-                break;
-            case 'size-desc':
-                $queryBuilder->orderBy('i.size', 'DESC');
-                break;
-            default:
-                $queryBuilder->orderBy('i.uploadedAt', 'DESC');
-                break;
-        }
-    }
-
-    /**
-     * Liczy całkowitą liczbę wyników
-     * 
-     * @param QueryBuilder $queryBuilder - QueryBuilder do liczenia wyników
-     * @return int - Liczba wyników
-     */
-    private function countTotalResults(QueryBuilder $queryBuilder): int
-    {
-        $countQueryBuilder = clone $queryBuilder;
-        return $countQueryBuilder->select('COUNT(i.id)')->getQuery()->getSingleScalarResult();
     }
 
     /**
      * Przygotowuje dane obrazów do formatu JSON
-     * 
      * @param array $images - Tablica obiektów GTMImage
      * @return array - Tablica danych obrazów w formacie JSON
      */
@@ -208,17 +161,33 @@ class GTMUserImagesPanelController extends AbstractController
         /** @var GTMImage $image */
         foreach ($images as $image) {
             $imageData[] = [
-                'id' => $image->getId(),
-                'name' => $image->getName(),
-                'src' => $image->getSrc(),
-                'url' => $this->generateUrl('gtm_user_images_panel', ['id' => $image->getId()]),
-                'size' => $image->getSize(),
+                'id' => (int) $image->getId(),
+                'name' => htmlspecialchars($image->getName(), ENT_QUOTES, 'UTF-8'),
+                'src' => htmlspecialchars($image->getSrc(), ENT_QUOTES, 'UTF-8'),
+                'size' => (int) $image->getSize(),
                 'date' => $image->getUploadedAt()->format('Y-m-d H:i:s'),
-                'mimeType' => $image->getMimeType(),
-                'operationType' => $image->getOperationType()
+                'mimeType' => htmlspecialchars($image->getMimeType(), ENT_QUOTES, 'UTF-8'),
+                'operationType' => htmlspecialchars($image->getOperationType(), ENT_QUOTES, 'UTF-8'),
+                'operationResults' => $image->getOperationResults()
             ];
         }
 
         return $imageData;
+    } 
+
+    /**
+     * Invaliduje cały cache obrazów dla danego użytkownika
+     * @param int $userId - ID użytkownika
+     * @return void
+     */
+    public function invalidateUserImagesCache(int $userId): void
+    {
+        // $this->cache->delete("user_images_$userId");
+
+        for ($page = 1; $page <= 5; $page++) {
+            $this->cache->delete(
+                $this->service->generateCacheKey($userId, $page, 12, '', 'all', 'date-desc')
+            );
+        }
     }
 }

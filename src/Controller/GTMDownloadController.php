@@ -37,7 +37,7 @@ class GTMDownloadController extends AbstractController
         $imagePath = $this->getParameter('gtm_uploads') . "/" . $user->getId() . "/$serverName"; 
 
         if (! $image || !file_exists($imagePath)) {
-            return new Response('Grafika nie istnieje.', 404, $plainTextHeader);
+            return new Response('Grafika nie istnieje.', Response::HTTP_NOT_FOUND, $plainTextHeader);
         }
 
         return $this->file($imagePath, $image->getName());
@@ -48,7 +48,7 @@ class GTMDownloadController extends AbstractController
     public function downloadAllImages(Request $request): Response
     {
         if (!$this->getUser()) {
-            return new Response('Odmowa dostępu. Użytkownik nie jest zalogowany w systemie', 401);
+            return new Response('Odmowa dostępu. Użytkownik nie jest zalogowany w systemie', Response::HTTP_UNAUTHORIZED);
         }
 
         $data = json_decode($request->getContent(), true);
@@ -58,7 +58,7 @@ class GTMDownloadController extends AbstractController
         $images = $this->gtmImageRepository->findByOperationHashes($imageHashes); 
 
         if (empty($images)) {
-            return new Response('Nie znaleziono plików.', 404);
+            return new Response('Nie znaleziono plików.', Response::HTTP_NOT_FOUND);
         }
  
         $zipFileName = 'skompresowane-grafiki.zip';
@@ -85,7 +85,7 @@ class GTMDownloadController extends AbstractController
             $zip->close();
 
             $zipArchiveResponse =  $this->file($zipFilePath, $zipFileName);
-            $zipArchiveResponse->setStatusCode(200);
+            $zipArchiveResponse->setStatusCode(Response::HTTP_OK);
             $zipArchiveResponse->headers->set('Content-Type', 'application/zip');
 
             register_shutdown_function(fn() => unlink($zipFilePath));
@@ -95,7 +95,7 @@ class GTMDownloadController extends AbstractController
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
 
-            return new Response($e->getMessage(), 500);
+            return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

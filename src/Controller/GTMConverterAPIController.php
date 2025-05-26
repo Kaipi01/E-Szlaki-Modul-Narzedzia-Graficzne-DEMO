@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route(path: '/profil')]
 class GTMConverterAPIController extends AbstractController
@@ -38,7 +39,7 @@ class GTMConverterAPIController extends AbstractController
         [$errorStatus, $errorMessage, $requestIsValid, $requestData] = $this->validateRequest($request); 
         $jsonData = [];
         $imageData = [];
-        $status = 200; 
+        $status = Response::HTTP_OK; 
 
         try {
             if (! $requestIsValid) {
@@ -72,7 +73,7 @@ class GTMConverterAPIController extends AbstractController
             ];
 
         } catch (Exception $e) {
-            $status = $status === 200 ? 500 : $status;
+            $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
             $jsonData = [
                 'success' => false,
                 'errorMessage' => $e->getMessage(),
@@ -117,31 +118,31 @@ class GTMConverterAPIController extends AbstractController
         ];
 
         if (!$this->getUser()) {
-            $errorStatus = 403;
+            $errorStatus = Response::HTTP_UNAUTHORIZED;
             $errorMessage = 'Odmowa dostępu!';
         }
 
         if (!$stepNumber) {
-            $errorStatus = 400;
+            $errorStatus = Response::HTTP_BAD_REQUEST;
             $errorMessage = 'Niepoprawne dane! Brakuje pola stepNumber!';
         }
 
         if ($stepNumber === 1) {
             if (!$image) {
-                $errorStatus = 400;
+                $errorStatus = Response::HTTP_BAD_REQUEST;
                 $errorMessage = 'Niepoprawne dane! Brak pliku graficznego!';
             }
             if (!$toFormat) {
-                $errorStatus = 400;
+                $errorStatus = Response::HTTP_BAD_REQUEST;
                 $errorMessage = 'Niepoprawne dane! Nie podano docelowego formatu!';
             }
             if ($quality <= 0 || $quality > 100) {
-                $errorStatus = 400;
+                $errorStatus = Response::HTTP_BAD_REQUEST;
                 $errorMessage = 'Nieprawidłowe dane! Jakość musi być od 1 do 100 !';
             } 
         }
 
-        if ($errorStatus != 200) {
+        if ($errorStatus != Response::HTTP_OK) {
             $requestIsValid = false;
         } 
 

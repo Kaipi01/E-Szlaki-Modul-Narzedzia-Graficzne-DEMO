@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Exception;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route(path: '/profil')]
 class GTMCompressorAPIController extends AbstractController
@@ -41,22 +42,22 @@ class GTMCompressorAPIController extends AbstractController
         $processHash = $request->request->get('processHash') ?? Uuid::generate();
         $jsonData = [];
         $imageData = [];
-        $status = 200;
+        $status = Response::HTTP_OK;
 
         try {
             if (!$this->getUser()) {
-                $status = 403;
+                $status = Response::HTTP_UNAUTHORIZED;
                 throw new Exception('Odmowa dostępu!');
             }
 
             if (!$stepNumber) {
-                $status = 400;
+                $status = Response::HTTP_BAD_REQUEST;
                 throw new Exception('Niepoprawne dane! Brakuje pola stepNumber!');
             }
 
             if ($stepNumber === 1) {
                 if (!$image) {
-                    $status = 400;
+                    $status = Response::HTTP_BAD_REQUEST;
                     throw new Exception('Niepoprawne dane! Brak pliku graficznego!');
                 }
 
@@ -86,7 +87,7 @@ class GTMCompressorAPIController extends AbstractController
             ];
 
         } catch (Exception $e) {
-            $status = $status === 200 ? 500 : $status;
+            $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
             $jsonData = [
                 'success' => false,
                 'errorMessage' => 'Wystąpił błąd podczas kompresji grafiki: ' . $e->getMessage(),
