@@ -1,10 +1,9 @@
 @use "../base/variables" as *;
-@use "../functions/toRem" as *;
+@use "../functions/toRem" as *; 
 
 #graphics-tools-module {
   .main-navigation {
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
     gap: 1.5rem;
     width: 100%;
@@ -13,7 +12,6 @@
     &-list {
       display: flex;
       position: relative;
-      // flex-direction: column;
       width: 100%;
       max-width: toRem(900);
       padding: 0; 
@@ -21,7 +19,11 @@
       background-color: var(--green);
       color: #fff;
       list-style: none;
-    } 
+    }
+
+    &-item {
+      width: 25%;
+    }
 
     &-link {
       display: flex;
@@ -33,7 +35,6 @@
       border-radius: 10px;
       font-weight: bold;
       text-align: center;
-      color: var(--font-color-gray);
 
       &-text {
         display: none;
@@ -46,7 +47,7 @@
       &.active,
       &:hover,
       &:focus {
-        color: var(--green);
+        background-color: var(--light-green);
       }
 
       &-icon {

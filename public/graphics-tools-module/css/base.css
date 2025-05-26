@@ -817,7 +817,6 @@ body.theme-dark::after {
 
 #graphics-tools-module .main-navigation {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
   gap: 1.5rem;
   width: 100%;
@@ -834,6 +833,9 @@ body.theme-dark::after {
   color: #fff;
   list-style: none;
 }
+#graphics-tools-module .main-navigation-item {
+  width: 25%;
+}
 #graphics-tools-module .main-navigation-link {
   display: flex;
   align-items: center;
@@ -844,7 +846,6 @@ body.theme-dark::after {
   border-radius: 10px;
   font-weight: bold;
   text-align: center;
-  color: var(--font-color-gray);
 }
 #graphics-tools-module .main-navigation-link-text {
   display: none;
@@ -855,7 +856,7 @@ body.theme-dark::after {
   }
 }
 #graphics-tools-module .main-navigation-link.active, #graphics-tools-module .main-navigation-link:hover, #graphics-tools-module .main-navigation-link:focus {
-  color: var(--green);
+  background-color: var(--light-green);
 }
 #graphics-tools-module .main-navigation-link-icon {
   font-size: 1.5rem;
