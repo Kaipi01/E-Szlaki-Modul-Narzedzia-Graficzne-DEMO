@@ -5,8 +5,9 @@ import CircularProgressBar from "../../modules/CircularProgressBar.js"
 
 
 /*
-// Czekaj, aż DOM zostanie załadowany
-document.addEventListener('DOMContentLoaded', function () {
+
+  // Czekaj, aż DOM zostanie załadowany
+  document.addEventListener('DOMContentLoaded', function () {
   // Nawigacja - obsługa aktywnych linków
   const pageLinks = document.querySelectorAll('a#pageLink');
   pageLinks.forEach(link => {

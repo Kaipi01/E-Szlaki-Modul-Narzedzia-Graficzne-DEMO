@@ -818,19 +818,12 @@
   margin: 0;
   color: var(--font-color);
 }
-#graphics-tools-module-editor .editor-top-tools {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-}
 #graphics-tools-module-editor .editor-content {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
 }
 @media (min-width: 55em) {
   #graphics-tools-module-editor .editor-content {
-    grid-template-columns: 18.75rem 1fr;
     min-height: 31.25rem;
   }
 }
@@ -844,11 +837,6 @@
   flex: 0 0 100%;
   border-right: 1px solid var(--background-gray);
   background-color: var(--background);
-}
-@media (min-width: 55em) {
-  #graphics-tools-module-editor .editor-tabs {
-    flex: 0 0 280px;
-  }
 }
 #graphics-tools-module-editor .editor-tabs .tabs-header {
   display: flex;
@@ -877,12 +865,14 @@
 }
 #graphics-tools-module-editor .editor-tabs .tab-content {
   padding: 1.5rem;
+  padding-bottom: 0;
 }
 #graphics-tools-module-editor .editor-tabs .tab-pane {
   display: none;
 }
 #graphics-tools-module-editor .editor-tabs .tab-pane.active {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
 }
 #graphics-tools-module-editor .editor-tabs .form-group {
   margin-bottom: 1.25rem;

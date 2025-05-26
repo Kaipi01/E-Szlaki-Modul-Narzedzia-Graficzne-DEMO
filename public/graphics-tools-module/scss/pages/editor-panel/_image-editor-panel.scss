@@ -12,22 +12,18 @@
       margin: 0;
       color: var(--font-color);
     }
-  }
-
-  .editor-top-tools {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    width: 100%;
-  }
+  } 
 
   .editor-content {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    // display: grid;
+    // grid-template-columns: 1fr;
 
     @media (min-width: $content-breakpoint-tablet) {
-      grid-template-columns: toRem(300) 1fr;
+      // grid-template-columns: toRem(300) 1fr;
       min-height: toRem(500);
+      //flex-direction: row;
     }
   }
 
@@ -44,7 +40,7 @@
     background-color: var(--background);
 
     @media (min-width: $content-breakpoint-tablet) {
-      flex: 0 0 280px;
+      // flex: 0 0 280px;
     }
 
     .tabs-header {
@@ -79,13 +75,15 @@
 
     .tab-content {
       padding: 1.5rem;
+      padding-bottom: 0;
     }
 
     .tab-pane {
       display: none;
 
       &.active {
-        display: block;
+        display: flex;
+        flex-wrap: wrap;
       }
     }
 

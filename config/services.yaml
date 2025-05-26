@@ -37,6 +37,10 @@ services:
 
     # Nie zapomnij o parametrach powyżej!  
 
+    App\EventListener\GTMImageCacheInvalidationListener:
+        tags:
+            - { name: kernel.event_subscriber }
+
     App\Command\GTMClearGraphicsCommand:
         arguments: 
             $uploadsDir: '%gtm_uploads%'

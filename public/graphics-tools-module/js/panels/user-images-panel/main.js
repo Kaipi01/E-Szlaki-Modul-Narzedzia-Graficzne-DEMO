@@ -1,4 +1,5 @@
 import ThemeSwitcher from "../../modules/ThemeSwitcher.js" 
+import SearchForm from "../../modules/SearchForm.js"
 import ImagesGalleryModal from "../../modules/ImagesGallery.js"
 import UserImagesPanel from "./UserImagesPanel.js";
 

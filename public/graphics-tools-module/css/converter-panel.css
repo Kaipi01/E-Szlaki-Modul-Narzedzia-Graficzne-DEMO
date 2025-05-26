@@ -812,7 +812,6 @@
 
 #graphics-tools-module .image-operation {
   margin: 0 auto;
-  padding: 1.25rem 0;
   color: var(--font-color);
 }
 #graphics-tools-module .image-operation__table-container {

@@ -1,23 +1,8 @@
-<div class="panel__alerts" data-operation-alerts></div>
-
-<div class="editor-top-tools" id="editor-top-tools">
-    <div class="effect-group">
-        <div class="effect-header">
-            <span>Przytnij</span>
-        </div>
-        <div class="effect-controls">
-            <label class="toggle-switch">
-                <input type="checkbox" id="crop-toggle-checkbox">
-                <span class="toggle-slider"></span>
-            </label>
-        </div>
-    </div>
-</div>
 
 <div class="editor-content">
 
     <!-- Sekcja z zakładkami -->
-    <div class="editor-tabs" id="editor-tabs">
+    <div hidden class="editor-tabs" id="editor-tabs">
         <div class="tabs-header">
             <button class="tab-button active" data-tab="crop">
                 <i class="fas fa-crop-alt"></i> Przytnij
@@ -35,6 +20,19 @@
         <div class="tab-content">
             <!-- Zakładka przycinania -->
             <div class="tab-pane active" id="crop-tab">
+
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Przytnij</span>
+                    </div>
+                    <div class="effect-controls">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="crop-toggle-checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="crop-width">Szerokość (px):</label>
                     <input type="number" id="crop-width" min="1" placeholder="Szerokość">
@@ -79,132 +77,133 @@
 
             <!-- Dodaj nową zawartość zakładki w tab-content -->
             <div class="tab-pane" id="effects-tab">
-                <div class="effects-container">
-                    <!-- Blur -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Blur (Rozmycie)</span>
-                            <button class="effect-reset" data-effect="blur">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-blur" min="0" max="20" value="0" step="0.5"
-                                class="effect-slider">
-                            <span class="effect-value">0px</span>
-                        </div>
-                    </div>
 
-                    <!-- Brightness -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Brightness (Jasność)</span>
-                            <button class="effect-reset" data-effect="brightness">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-brightness" min="0" max="200" value="100" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">100%</span>
-                        </div>
+                <!-- Blur -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Blur (Rozmycie)</span>
+                        <button class="effect-reset" data-effect="blur">
+                            <i class="fas fa-undo"></i>
+                        </button>
                     </div>
-
-                    <!-- Contrast -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Contrast (Kontrast)</span>
-                            <button class="effect-reset" data-effect="contrast">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-contrast" min="0" max="200" value="100" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">100%</span>
-                        </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-blur" min="0" max="20" value="0" step="0.5"
+                            class="effect-slider">
+                        <span class="effect-value">0px</span>
                     </div>
+                </div>
 
-                    <!-- Grayscale -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Grayscale (Skala szarości)</span>
-                            <button class="effect-reset" data-effect="grayscale">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-grayscale" min="0" max="100" value="0" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">0%</span>
-                        </div>
+                <!-- Brightness -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Brightness (Jasność)</span>
+                        <button class="effect-reset" data-effect="brightness">
+                            <i class="fas fa-undo"></i>
+                        </button>
                     </div>
-
-                    <!-- Saturation -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Saturation (Nasycenie)</span>
-                            <button class="effect-reset" data-effect="saturation">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-saturation" min="0" max="200" value="100" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">100%</span>
-                        </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-brightness" min="0" max="200" value="100" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">100%</span>
                     </div>
+                </div>
 
-                    <!-- Sepia -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Sepia</span>
-                            <button class="effect-reset" data-effect="sepia">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-sepia" min="0" max="100" value="0" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">0%</span>
-                        </div>
+                <!-- Contrast -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Contrast (Kontrast)</span>
+                        <button class="effect-reset" data-effect="contrast">
+                            <i class="fas fa-undo"></i>
+                        </button>
                     </div>
-
-                    <!-- Hue Rotate -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Hue Rotate (Rotacja barw)</span>
-                            <button class="effect-reset" data-effect="hueRotate">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <input type="range" id="effect-hue-rotate" min="0" max="360" value="0" step="5"
-                                class="effect-slider">
-                            <span class="effect-value">0deg</span>
-                        </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-contrast" min="0" max="200" value="100" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">100%</span>
                     </div>
+                </div>
 
-                    <!-- Invert -->
-                    <div class="effect-group">
-                        <div class="effect-header">
-                            <span>Invert (Negatyw)</span>
-                            <button class="effect-reset" data-effect="invert">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        </div>
-                        <div class="effect-controls">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="effect-invert">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
+                <!-- Grayscale -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Grayscale (Skala szarości)</span>
+                        <button class="effect-reset" data-effect="grayscale">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-grayscale" min="0" max="100" value="0" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">0%</span>
+                    </div>
+                </div>
+
+                <!-- Saturation -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Saturation (Nasycenie)</span>
+                        <button class="effect-reset" data-effect="saturation">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-saturation" min="0" max="200" value="100" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">100%</span>
+                    </div>
+                </div>
+
+                <!-- Sepia -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Sepia</span>
+                        <button class="effect-reset" data-effect="sepia">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-sepia" min="0" max="100" value="0" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">0%</span>
+                    </div>
+                </div>
+
+                <!-- Hue Rotate -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Hue Rotate (Rotacja barw)</span>
+                        <button class="effect-reset" data-effect="hueRotate">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                    <div class="effect-controls">
+                        <input type="range" id="effect-hue-rotate" min="0" max="360" value="0" step="5"
+                            class="effect-slider">
+                        <span class="effect-value">0deg</span>
+                    </div>
+                </div>
+
+                <!-- Invert -->
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Invert (Negatyw)</span>
+                        <button class="effect-reset" data-effect="invert">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                    <div class="effect-controls">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="effect-invert">
+                            <span class="toggle-slider"></span>
+                        </label>
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
+
+    <div class="panel__alerts" data-operation-alerts></div>
 
     <!-- Sekcja z podglądem obrazu -->
     <div class="editor-preview">

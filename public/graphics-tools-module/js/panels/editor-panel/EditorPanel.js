@@ -72,6 +72,8 @@ export default class EditorPanel extends AbstractPanel {
     this.tabButtons = this.container.querySelectorAll('.tab-button');
     this.tabPanes = this.container.querySelectorAll('.tab-pane');
 
+    this.editorTabs = this.container.querySelector('#editor-tabs')
+
     // Elementy formularza
     this.cropWidthInput = this.container.querySelector('#crop-width');
     this.cropHeightInput = this.container.querySelector('#crop-height');
@@ -432,6 +434,7 @@ export default class EditorPanel extends AbstractPanel {
       this.editorActionsContainer.setAttribute('hidden', '')
       this.dropZoneElement.removeAttribute('hidden')
       this.previewContainer.setAttribute('hidden', '')
+      this.editorTabs.setAttribute('hidden', '')
 
       if (this.state.cropper) {
         this.state.cropper.destroy();
@@ -912,6 +915,7 @@ export default class EditorPanel extends AbstractPanel {
       this.previewImage.onload = () => {
         this.initCropper();
         this.editorActionsContainer.removeAttribute('hidden')
+        this.editorTabs.removeAttribute('hidden')
       };
     };
 

@@ -170,8 +170,6 @@ export default class ImagesGalleryModal extends HTMLElement {
   initAgainImagePreviews() {
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
     this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', this.imagePreviews.length - (index + 1)))
-
-    console.log('initAgainImagePreviews()')
   }
 
   openGallery(index) {
@@ -204,7 +202,6 @@ export default class ImagesGalleryModal extends HTMLElement {
 
       // Add click event to thumbnail
       thumbnail.addEventListener('click', () => {
-        console.log(`this.showImage(${idx + 1})`)
         this.showImage(idx + 1)
       })
     });

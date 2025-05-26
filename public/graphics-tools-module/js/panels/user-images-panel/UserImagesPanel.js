@@ -1,8 +1,9 @@
 import Toast from "../../modules/Toast.js";
 import CustomSelect from "../../modules/CustomSelect.js";
 import { formatFileSize } from "../../utils/file-helpers.js";
-import { emitEvent} from "../../utils/events.js";
+import { emitEvent } from "../../utils/events.js";
 import ImagesGalleryModal from "../../modules/ImagesGallery.js";
+import SearchForm from "../../modules/SearchForm.js";
 
 /**
  * Klasa UserImagesPanel - zarządza panelem zdjęć użytkownika z mechanizmem infinity scroll,
@@ -48,8 +49,8 @@ export default class UserImagesPanel {
     }
 
     this.imagesContainer = this.container.querySelector('#images-container');
-    this.searchInput = this.container.querySelector('#image-search');
-    this.searchButton = this.container.querySelector('#search-button');
+    this.searchInput = this.container.querySelector('#gtm-search-input-for-images');
+    //this.searchButton = this.container.querySelector('#search-button');
     this.filterDate = new CustomSelect(this.container.querySelector('#filter-date'));
     this.sortSelect = new CustomSelect(this.container.querySelector('#sort-by'));
     this.filterResetButton = this.container.querySelector('#filter-reset');
@@ -57,6 +58,7 @@ export default class UserImagesPanel {
     this.resultsCount = this.container.querySelector('#results-count');
     this.loadingIndicator = this.container.querySelector('#loading-indicator');
     this.noResults = this.container.querySelector('#no-results');
+
   }
 
   /** Inicjalizacja nasłuchiwania zdarzeń */
@@ -65,7 +67,9 @@ export default class UserImagesPanel {
 
     this.searchInput.addEventListener('input', this.debounce(this.handleSearchInput.bind(this), 300));
 
-    this.searchButton.addEventListener('click', this.handleSearchButton.bind(this));
+    //this.searchButton.addEventListener('click', this.handleSearchButton.bind(this));
+
+    document.addEventListener(SearchForm.SEARCH_EVENT, (e) => this.handleSearchButton(e))
 
     this.searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -235,14 +239,17 @@ export default class UserImagesPanel {
    * @returns {HTMLElement} Element DOM reprezentujący zdjęcie
    */
   createImageElement(image) {
-    const wrapper = document.createElement('a');
-    // wrapper.href = image.url || '#';
-    wrapper.href = '#';
-    wrapper.className = 'image-wrapper';
-    wrapper.setAttribute('aria-current', 'page');
-    // wrapper.setAttribute('data-gallery-preview', this.imagesNumber++);
-    wrapper.setAttribute('data-gallery-preview', '');
-    wrapper.setAttribute('data-src', image.src);
+    const wrapper = document.createElement('li');
+
+    wrapper.className = 'modern-card image-card'
+
+    const link = document.createElement('a');
+
+    link.href = '#';
+    link.className = 'image-wrapper';
+    link.setAttribute('aria-current', 'page');
+    link.setAttribute('data-gallery-preview', '');
+    link.setAttribute('data-src', image.src);
 
     // Overlay z informacjami
     const overlay = document.createElement('div');
@@ -278,9 +285,47 @@ export default class UserImagesPanel {
     photoDate.textContent = this.formatDate(image.date);
 
     // Składanie elementów
-    wrapper.appendChild(overlay);
-    wrapper.appendChild(img);
-    wrapper.appendChild(photoDate);
+    link.appendChild(overlay);
+    link.appendChild(img);
+    link.appendChild(photoDate);
+
+    const imageInfo = document.createElement('span')
+
+    console.log(image)
+
+    const downloadLink = document.createElement('a')
+
+    downloadLink.href = image.src
+    downloadLink.className = "badge badge-link badge-link-blue"
+    downloadLink.setAttribute('download', '')
+
+    downloadLink.innerHTML = `
+      <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
+      <span>Pobierz</span>
+    `
+
+    console.log(image)
+
+    const operationList = document.createElement('ul')
+
+    let operationsDataString = ''
+
+    const filterOperationResultsDara = ['src', 'downloadURL', 'absoluteSrc', 'mimeType', 'originalName', 'imageName', 'newName']
+
+    for (const [key, val] of Object.entries(image.operationResults)) {
+
+      if (image.operationResults.hasOwnProperty(key) && !filterOperationResultsDara.includes(key)) {
+        operationsDataString += `<li>${key}: ${val}</li>`
+      }
+    }
+
+    operationList.innerHTML = operationsDataString
+
+    imageInfo.appendChild(operationList)
+
+    wrapper.appendChild(downloadLink)
+    wrapper.appendChild(link)
+    wrapper.appendChild(imageInfo)
 
     return wrapper;
   }
@@ -381,7 +426,6 @@ export default class UserImagesPanel {
           id: this.state.page * 100 + i,
           name: `sample-image-${this.state.page}-${i}.jpg`,
           src: `https://picsum.photos/id/${this.state.page * 10 + i}/500/300`,
-          url: `#image-${this.state.page}-\${i}`,
           size: Math.floor(Math.random() * 10000000),
           date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString()
         }));

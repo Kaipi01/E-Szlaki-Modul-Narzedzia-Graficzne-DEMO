@@ -2,14 +2,16 @@
     <h2 class="header">Moje zdjęcia</h2>
     <div class="panel-controls">
 
-        <div class="search-container">
+        <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
+
+        {# <div class="search-container">
             <div class="search-input-wrapper">
                 <input type="text" id="image-search" class="search-input" placeholder="Wyszukaj zdjęcia...">
                 <button class="search-button" id="search-button">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
-        </div>
+        </div> #}
 
         <div class="filters-container">
 
@@ -68,7 +70,7 @@
         </div>
     </div>
 
-    <div class="images-grid" id="images-container"></div>
+    <ul class="images-grid" id="images-container"></ul>
 
     <div class="no-results" id="no-results" style="display: none;">
         <div class="no-results-icon">
