@@ -36,3 +36,8 @@ notes.txt
 *.odt
 *.excalidraw
 ###< symfony/webpack-encore-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

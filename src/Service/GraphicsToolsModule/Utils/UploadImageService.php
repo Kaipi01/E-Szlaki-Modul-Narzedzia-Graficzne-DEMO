@@ -36,6 +36,7 @@ class UploadImageService implements UploadImageServiceInterface
 
             return [
                 'originalName' => $originalName,
+                'thumbnailName' => "thumbnail-$originalName",
                 'newName' => $newImageName,
                 'mimeType' => $mimeType,
                 'size' => $size,
@@ -74,12 +75,13 @@ class UploadImageService implements UploadImageServiceInterface
 
     public function getSaveImageName(string $originalName, bool $keepOriginalName = false, bool $setUniqueName = false): string
     {
-        if ($setUniqueName) {
-            return $this->generateUniqueName($originalName);
-        }
-
         $originalFilename = pathinfo($originalName, PATHINFO_FILENAME);
         $fileExtension = pathinfo($originalName, PATHINFO_EXTENSION);
+
+        if ($setUniqueName) {
+            return $this->generateUniqueName() . ".{$fileExtension}";
+        }
+        
         $safeFilename = transliterator_transliterate('Any-Latin; Latin-ASCII; [^A-Za-z0-9_] remove; Lower()', $originalFilename);
         $newFilename = $keepOriginalName ? $safeFilename : $safeFilename . '-' . uniqid();
         $newFilename .= ".{$fileExtension}";
@@ -89,15 +91,13 @@ class UploadImageService implements UploadImageServiceInterface
 
     /**
      * Generuje bezpieczną nazwę pliku na podstawie oryginalnej nazwy 
-     * @param string $imagePath Ścieżka do pliku
      * @return string Bezpieczna nazwa pliku
      */
-    private function generateUniqueName(string $imagePath): string
+    public function generateUniqueName(): string
     {
-        $extension = pathinfo($imagePath, PATHINFO_EXTENSION);
         $timestamp = time();
         $random = substr(bin2hex(random_bytes(5)), 0, 10); // 10 znaków hex = 5 bajtów
 
-        return "{$timestamp}{$random}.{$extension}";
+        return "{$timestamp}{$random}";
     }
 }

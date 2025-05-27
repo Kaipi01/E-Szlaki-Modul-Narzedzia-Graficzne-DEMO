@@ -1170,7 +1170,6 @@
   z-index: 4;
 }
 #graphics-tools-module-compressor .settings__wrapper {
-  margin: 2rem auto;
   padding: 1rem;
   border-radius: 0.5rem;
   background-color: var(--very-light-green-opacity);
@@ -1201,6 +1200,7 @@
 }
 #graphics-tools-module-compressor .settings__wrapper-top .custom-checkbox-group .custom-checkbox-label {
   font-size: 1rem;
+  white-space: nowrap;
 }
 #graphics-tools-module-compressor .settings__wrapper-bottom {
   display: flex;

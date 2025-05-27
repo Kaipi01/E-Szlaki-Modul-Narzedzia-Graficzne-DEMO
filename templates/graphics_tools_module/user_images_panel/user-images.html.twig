@@ -1,21 +1,14 @@
 <div class="panel-header">
-    <h2 class="header">Moje zdjęcia</h2>
+
+    <div class="area-header-wrapper">
+        <p class="area-header"><i class="fa-solid fa-images"></i> Moje zdjęcia</p>
+    </div>
+
     <div class="panel-controls">
 
         <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
 
-        {# <div class="search-container">
-            <div class="search-input-wrapper">
-                <input type="text" id="image-search" class="search-input" placeholder="Wyszukaj zdjęcia...">
-                <button class="search-button" id="search-button">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div> #}
-
         <div class="filters-container">
-
-
 
             <div class="filter-group">
                 <label class="sr-only" for="filter-date">Data:</label>
@@ -28,14 +21,6 @@
                     <option value="month">Ten miesiąc</option>
                     <option value="year">Ten rok</option>
                 </select>
-
-                {# <select id="filter-date" class="filter-select">
-                    <option value="all">Wszystkie</option>
-                    <option value="today">Dzisiaj</option>
-                    <option value="week">Ten tydzień</option>
-                    <option value="month">Ten miesiąc</option>
-                    <option value="year">Ten rok</option>
-                </select> #}
             </div>
 
             <div class="filter-group">
@@ -49,7 +34,7 @@
                     <option value="name-desc">Nazwa (Z-A)</option>
                     <option value="size-desc">Rozmiar (malejąco)</option>
                     <option value="size-asc">Rozmiar (rosnąco)</option>
-                </select> 
+                </select>
             </div>
 
             <button id="filter-reset" class="link small variant2">
@@ -62,12 +47,19 @@
 <div class="panel-content">
 
     <div class="status-container">
-        <div class="results-info">
+        <p class="results-info">
             Znaleziono: <span id="results-count">0</span> zdjęć
-        </div>
-        <div class="loading-indicator" id="loading-indicator">
-            <i class="fas fa-spinner fa-spin"></i> Ładowanie...
-        </div>
+        </p>
+
+        <button id="remove-all-images-btn" class="link small variant2">
+            <i class="fa-solid fa-trash"></i> Usuń wszystkie grafiki
+        </button>
+    </div>
+
+    <div class="panel__alerts" data-operation-alerts></div>
+
+    <div class="loading-indicator" id="loading-indicator">
+        <i class="fas fa-spinner fa-spin"></i> Ładowanie danych, proszę czekać...
     </div>
 
     <ul class="images-grid" id="images-container"></ul>

@@ -3,25 +3,47 @@
 {% block title %}Narzędzia Graficzne | Edytor{% endblock %}
 
 {% block panel_stylesheets %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
-        integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/editor-panel.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+    integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="{{ asset('graphics-tools-module/css/editor-panel.css') }}">
 {% endblock %}
 
 {% block panel_content %}
 
-    <div class="main-area modern-card" id="graphics-tools-module-editor">
+    <div class="main-area" id="graphics-tools-module-editor">
 
-        {# <div class="panel__header">
-            <h2 class="panel__title">Edytor Zdjęć</h2>
-        </div> #}
+        <div class="editor-top-content modern-card">
+            <div class="area-header-wrapper">
+                <p class="area-header"><i class="fa-solid fa-screwdriver-wrench"></i> Edytor</p>
+
+                <div id="editor-actions" hidden class="editor-actions">
+                    <button id="remove-image-button" class="link medium variant2">
+                        <i class="fas fa-cancel"></i> Usuń grafikę
+                    </button>
+
+                    <button id="reset-all-button" class="link medium variant2">
+                        <i class="fas fa-undo-alt"></i> Resetuj wszystko
+                    </button>
+
+                    <button id="export-button" class="link medium variant2">
+                        <i class="fas fa-download"></i> Eksportuj
+                    </button>
+                </div>
+            </div> 
+
+            <div class="panel__alerts" data-operation-alerts>
+                <custom-alert data-message="Wybranie plików automatycznie rozpocznie operacje"></custom-alert>
+            </div>
+        </div>
 
         {% include "graphics_tools_module/editor_panel/editor-module.html.twig" %}
 
+        {% include "graphics_tools_module/components/confirm-modal.html.twig" %}
+
     </div>
 
-{% endblock %} 
+{% endblock %}
 
 {% block panel_javascripts %}
 
@@ -36,4 +58,4 @@
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="module" src="{{ asset('graphics-tools-module/js/panels/editor-panel/main.js') }}"></script>
 
-{% endblock %} 
+{% endblock %}

@@ -13,6 +13,8 @@
         <images-gallery-modal></images-gallery-modal>
 
         {% include "graphics_tools_module/user_images_panel/user-images.html.twig" %}
+
+        {% include "graphics_tools_module/components/confirm-modal.html.twig" %}
         
     </div>
 
@@ -23,6 +25,8 @@
     <script> 
 
         const GET_USER_IMAGES_JSON = "{{ GET_USER_IMAGES_JSON }}"
+        const REMOVE_USER_IMAGE_JSON = "{{ REMOVE_USER_IMAGE_JSON }}"
+        const REMOVE_ALL_USER_IMAGES_JSON = "{{ REMOVE_ALL_USER_IMAGES_JSON }}"
 
     </script> 
     

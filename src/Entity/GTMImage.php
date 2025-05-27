@@ -47,6 +47,11 @@ class GTMImage
     private $src;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $thumbnailSrc;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
     private $mimeType;
@@ -130,6 +135,18 @@ class GTMImage
     public function setSrc(string $src): self
     {
         $this->src = $src;
+
+        return $this;
+    }
+
+    public function getThumbnailSrc(): ?string
+    {
+        return $this->thumbnailSrc;
+    }
+
+    public function setThumbnailSrc(string $thumbnailSrc): self
+    {
+        $this->thumbnailSrc = $thumbnailSrc;
 
         return $this;
     }

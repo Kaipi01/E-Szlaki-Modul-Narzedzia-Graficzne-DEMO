@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Service\GraphicsToolsModule\Compressor\CompressionProcessHandler;
 use App\Service\GraphicsToolsModule\Compressor\DTO\CompressionProcessState;
 use App\Service\GraphicsToolsModule\Editor\DTO\ResizeImageOptions;
+use App\Service\GraphicsToolsModule\UserImages\Contracts\UserStorageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Exception;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
 
 #[Route(path: '/profil')]
@@ -26,7 +28,8 @@ class GTMCompressorAPIController extends AbstractController
         private readonly ImageFileValidatorInterface $imageFileValidator,
         private readonly CompressionProcessHandler $compressionHandler,
         private readonly ImageProcessStateManagerInterface $processStateManager,
-        private readonly UploadImageServiceInterface $fileUploader
+        private readonly UploadImageServiceInterface $fileUploader,
+        private readonly UserStorageInterface $storageService
     ) {
     }
 
@@ -37,15 +40,17 @@ class GTMCompressorAPIController extends AbstractController
     #[Route(path: '/narzedzia-graficzne/api/kompresuj-grafike-json', name: 'gtm_compressor_api_compress_image', methods: ['POST'])]
     public function compressImage(Request $request): JsonResponse
     {
+        /**  @var UploadedFile */
         $image = $request->files->get('image');
         $stepNumber = (int) $request->request->get('stepNumber');
         $processHash = $request->request->get('processHash') ?? Uuid::generate();
         $jsonData = [];
         $imageData = [];
         $status = Response::HTTP_OK;
+        $user = $this->getUser();
 
         try {
-            if (!$this->getUser()) {
+            if (!$user) {
                 $status = Response::HTTP_UNAUTHORIZED;
                 throw new Exception('Odmowa dostępu!');
             }
@@ -61,7 +66,12 @@ class GTMCompressorAPIController extends AbstractController
                     throw new Exception('Niepoprawne dane! Brak pliku graficznego!');
                 }
 
-                $uploadDir = $this->getParameter('gtm_uploads') . "/" . $this->getUser()->getId();
+                if (!$this->storageService->isUserHaveEnoughSpace($user->getId(), $image->getSize())) {
+                    $status = Response::HTTP_BAD_REQUEST;
+                    throw new Exception('Brak wolnego miejsca na dysku!');
+                }
+
+                $uploadDir = $this->getParameter('gtm_uploads') . "/" . $user->getId();
                 $imageData = $this->fileUploader->upload($image, $uploadDir, setUniqueName: true);
                 $imageData["options"] = json_decode($request->request->get("options"), true);
             }
@@ -90,7 +100,7 @@ class GTMCompressorAPIController extends AbstractController
             $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
             $jsonData = [
                 'success' => false,
-                'errorMessage' => 'Wystąpił błąd podczas kompresji grafiki: ' . $e->getMessage(),
+                'errorMessage' => $e->getMessage(),
                 'processData' => [
                     'progress' => 0,
                     'status' => ImageOperationStatus::FAILED,

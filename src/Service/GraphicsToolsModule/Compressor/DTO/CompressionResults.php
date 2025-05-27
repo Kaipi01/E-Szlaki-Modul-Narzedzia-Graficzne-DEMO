@@ -2,9 +2,9 @@
 
 namespace App\Service\GraphicsToolsModule\Compressor\DTO;
 
-use App\Service\GraphicsToolsModule\Workflow\Abstract\OperationResults;
+use App\Service\GraphicsToolsModule\Workflow\Abstract\AbstractDTO;
 
-class CompressionResults extends OperationResults
+class CompressionResults extends AbstractDTO
 {
     public function __construct(
         public string $imageName,

@@ -1,5 +1,4 @@
-
-<div class="editor-content">
+<div id="editor-content" class="editor-content editor-content--no-image">
 
     <!-- Sekcja z zakładkami -->
     <div hidden class="editor-tabs" id="editor-tabs">
@@ -82,7 +81,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Blur (Rozmycie)</span>
-                        <button class="effect-reset" data-effect="blur">
+                        <button class="effect-reset link variant2 small" data-effect="blur">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -97,7 +96,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Brightness (Jasność)</span>
-                        <button class="effect-reset" data-effect="brightness">
+                        <button class="effect-reset link variant2 small" data-effect="brightness">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -112,7 +111,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Contrast (Kontrast)</span>
-                        <button class="effect-reset" data-effect="contrast">
+                        <button class="effect-reset link variant2 small" data-effect="contrast">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -127,7 +126,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Grayscale (Skala szarości)</span>
-                        <button class="effect-reset" data-effect="grayscale">
+                        <button class="effect-reset link variant2 small" data-effect="grayscale">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -142,7 +141,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Saturation (Nasycenie)</span>
-                        <button class="effect-reset" data-effect="saturation">
+                        <button class="effect-reset link variant2 small" data-effect="saturation">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -157,7 +156,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Sepia</span>
-                        <button class="effect-reset" data-effect="sepia">
+                        <button class="effect-reset link variant2 small" data-effect="sepia">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -172,7 +171,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Hue Rotate (Rotacja barw)</span>
-                        <button class="effect-reset" data-effect="hueRotate">
+                        <button class="effect-reset link variant2 small" data-effect="hue-rotate">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -187,7 +186,7 @@
                 <div class="effect-group">
                     <div class="effect-header">
                         <span>Invert (Negatyw)</span>
-                        <button class="effect-reset" data-effect="invert">
+                        <button class="effect-reset link variant2 small" data-effect="invert">
                             <i class="fas fa-undo"></i>
                         </button>
                     </div>
@@ -203,8 +202,6 @@
         </div>
     </div>
 
-    <div class="panel__alerts" data-operation-alerts></div>
-
     <!-- Sekcja z podglądem obrazu -->
     <div class="editor-preview">
 
@@ -218,29 +215,5 @@
             <img id="preview-image" src="" alt="Podgląd zdjęcia">
         </div>
     </div>
-</div>
-
-<div id="editor-actions" hidden class="editor-footer">
-    <button id="remove-image-button" class="link variant2">
-        <i class="fas fa-cancel"></i> Usuń grafikę
-    </button>
-
-    <button id="reset-all-button" class="link variant2">
-        <i class="fas fa-undo-alt"></i> Resetuj wszystko
-    </button>
-
-    <button id="export-button" class="link variant2">
-        <i class="fas fa-download"></i> Eksportuj
-    </button>
-</div>
-
-<custom-modal data-modal-id="graphics-tools-module-confirm-modal" data-modal-content-class="confirm-modal">
-    <template slot="modal-title">Potwierdź operacje</template>
-    <template slot="modal-content">
-        <p class="confirm-modal-message" data-message></p>
-        <div class="confirm-modal-actions">
-            <button data-confirm-btn class="link variant2 small">Tak</button>
-            <button data-deny-btn class="link variant1 small">Nie</button>
-        </div>
-    </template>
-</custom-modal>
+    
+</div>  

@@ -4,21 +4,33 @@ import { formatFileSize } from "../../utils/file-helpers.js";
 import { emitEvent } from "../../utils/events.js";
 import ImagesGalleryModal from "../../modules/ImagesGallery.js";
 import SearchForm from "../../modules/SearchForm.js";
+import Modal from "../../modules/Modal.js";
+import { GRAPHICS_TOOLS_MODULE } from "../../utils/constants.js"
+import AbstractPanel from "../../modules/AbstractPanel.js";
+import { debounce } from "../../utils/time-utils.js";
 
 /**
  * Klasa UserImagesPanel - zarządza panelem zdjęć użytkownika z mechanizmem infinity scroll,
  * wyszukiwaniem, filtrowaniem i sortowaniem.
  */
-export default class UserImagesPanel {
+export default class UserImagesPanel extends AbstractPanel {
+
+  CONFIRM_MODAL_ID = GRAPHICS_TOOLS_MODULE.CONFIRM_MODAL_ID
+
   /**
    * Konstruktor klasy UserImagesPanel
+   * @param {HTMLElement} container
    * @param {Object} options - Opcje konfiguracyjne
    * @param {string} options.containerSelector - Selektor kontenera panelu
-   * @param {string} options.apiUrl - URL API do pobierania zdjęć
+   * @param {string} options.getUserImagesUrl - URL API do pobierania zdjęć
+   * @param {string} options.removeUserImageUrl - URL API do usunięcia zdjęcia
+   * @param {string} options.removeAllUserImagesUrl - URL API do usunięcia wszystkich zdjęć
    * @param {number} options.perPage - Liczba zdjęć na stronę
    * @param {number} options.scrollThreshold - Próg przewijania dla ładowania kolejnych zdjęć (w pikselach)
    */
-  constructor(options = {}) {
+  constructor(container, options = {}) {
+    super(container)
+
     this.options = options;
 
     this.state = {
@@ -30,7 +42,8 @@ export default class UserImagesPanel {
       filters: {
         date: 'all'
       },
-      sortBy: 'date-desc'
+      sortBy: 'date-desc',
+      currentImageIdToRemove: null
     };
 
     this.imagesNumber = 0
@@ -42,32 +55,56 @@ export default class UserImagesPanel {
 
   /** Inicjalizacja referencji do elementów DOM */
   initElements() {
-    this.container = document.querySelector(this.options.containerSelector);
+
     if (!this.container) {
-      console.error(`Nie znaleziono elementu o selektorze ${this.options.containerSelector}`);
+      this.showError(`Nie znaleziono elementu o selektorze ${this.options.containerSelector}`)
       return;
     }
 
     this.imagesContainer = this.container.querySelector('#images-container');
     this.searchInput = this.container.querySelector('#gtm-search-input-for-images');
-    //this.searchButton = this.container.querySelector('#search-button');
     this.filterDate = new CustomSelect(this.container.querySelector('#filter-date'));
     this.sortSelect = new CustomSelect(this.container.querySelector('#sort-by'));
     this.filterResetButton = this.container.querySelector('#filter-reset');
     this.clearFiltersButton = this.container.querySelector('#clear-filters');
+    this.removeAllImagesButton = this.container.querySelector('#remove-all-images-btn');
     this.resultsCount = this.container.querySelector('#results-count');
     this.loadingIndicator = this.container.querySelector('#loading-indicator');
     this.noResults = this.container.querySelector('#no-results');
+    this.containerAlerts = this.getByAttribute("data-operation-alerts")
 
+  }
+
+  /** @param {Event} e  */
+  handleRemoveAllImages(e) {
+    e.preventDefault()
+
+    Modal.show(this.CONFIRM_MODAL_ID);
+
+    const modal = Modal.get(this.CONFIRM_MODAL_ID);
+    const modalMessage = modal.querySelector('[data-message]');
+    const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    const denyBtn = modal.querySelector('[data-deny-btn]');
+
+    modalMessage.textContent = "Czy na pewno usunąć wszystkie swoje grafiki? Tej operacji nie da się cofnąć"
+
+    confirmBtn.addEventListener('click', async (e) => {
+      await this.removeAllImages(e);
+
+      Modal.hide(this.CONFIRM_MODAL_ID)
+
+    }, { once: true });
+
+    denyBtn.addEventListener('click', (e) => Modal.hide(this.CONFIRM_MODAL_ID), { once: true });
   }
 
   /** Inicjalizacja nasłuchiwania zdarzeń */
   initEventListeners() {
     window.addEventListener('scroll', this.handleScroll.bind(this));
 
-    this.searchInput.addEventListener('input', this.debounce(this.handleSearchInput.bind(this), 300));
+    this.searchInput.addEventListener('input', debounce(this.handleSearchInput.bind(this), 300));
 
-    //this.searchButton.addEventListener('click', this.handleSearchButton.bind(this));
+    this.removeAllImagesButton.addEventListener('click', (e) => this.handleRemoveAllImages(e))
 
     document.addEventListener(SearchForm.SEARCH_EVENT, (e) => this.handleSearchButton(e))
 
@@ -77,16 +114,104 @@ export default class UserImagesPanel {
       }
     });
 
-    // this.filterDate.addEventListener('change', this.handleFilterChange.bind(this));
-
     this.filterDate.onChangeSelect((e) => this.handleFilterChange(e))
 
-    // this.sortSelect.addEventListener('change', this.handleSortChange.bind(this));
     this.sortSelect.onChangeSelect((e) => this.handleSortChange(e))
 
     this.filterResetButton.addEventListener('click', this.resetFilters.bind(this));
 
     this.clearFiltersButton.addEventListener('click', this.resetFilters.bind(this));
+
+    this.container.addEventListener('click', async (e) => {
+      const target = e.target
+
+      if (target.hasAttribute('data-print-link')) {
+        e.preventDefault()
+      }
+
+      if (target.hasAttribute('data-remove-link')) {
+        this.showRemoveImageConfirmModal(e)
+      }
+
+      if (target.hasAttribute('data-confirm-btn')) {
+
+        await this.removeImage(e);
+
+        Modal.hide(this.CONFIRM_MODAL_ID)
+      }
+
+      if (target.hasAttribute('data-deny-btn')) {
+        Modal.hide(this.CONFIRM_MODAL_ID)
+      }
+
+    })
+  }
+
+  /** @param {Event} e  */
+  async removeAllImages(e) {
+    e.target.textContent = "Proszę czekać ..."
+    e.target.classList.add('loading-btn-icon')
+
+    const response = await fetch(this.options.removeAllUserImagesUrl, { method: "DELETE" })
+    const { success, error, deletedCount } = await response.json()
+
+    if (success) {
+      Toast.show(Toast.SUCCESS, `Pomyślnie usunięto wszystkie grafiki w liczbie: ${deletedCount}`)
+    } else {
+      this.showError(error)
+    }
+
+    e.target.textContent = "Tak"
+    e.target.classList.remove('loading-btn-icon')
+  }
+
+  /** @param {Event} e  */
+  async removeImage(e) {
+    const imageId = this.state.currentImageIdToRemove
+
+    if (!imageId || isNaN(imageId)) {
+      this.showError("Podano błędną wartość ID !")
+      return
+    }
+
+    e.target.textContent = "Proszę czekać ..."
+    e.target.classList.add('loading-btn-icon')
+
+    const response = await fetch(this.options.removeUserImageUrl + imageId, { method: "DELETE" })
+    const { success, error, imageName } = await response.json()
+
+    if (success) {
+      Toast.show(Toast.SUCCESS, `Grafika "${imageName}" została pomyślnie usunięta`)
+
+      this.container.querySelector(`[data-image-card="${imageId}"]`)?.remove()
+
+      this.state.currentImageIdToRemove = null
+
+    } else {
+      this.showError(error)
+    }
+
+    e.target.textContent = "Tak"
+    e.target.classList.remove('loading-btn-icon')
+  }
+
+  /** @param {Event} e */
+  showRemoveImageConfirmModal(e) {
+    e.preventDefault()
+
+    Modal.show(this.CONFIRM_MODAL_ID);
+
+    const imageId = e.target.dataset.imageId
+    const imageName = e.target.dataset.imageName
+    const modal = Modal.get(this.CONFIRM_MODAL_ID);
+    const modalMessage = modal.querySelector('[data-message]');
+
+    this.state.currentImageIdToRemove = imageId
+
+    //const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    //const denyBtn = modal.querySelector('[data-deny-btn]');
+
+    modalMessage.textContent = `Czy na pewno chcesz usunąć "${imageName}" ?`
   }
 
   /** Obsługa zdarzenia przewijania strony */
@@ -178,7 +303,7 @@ export default class UserImagesPanel {
         sortBy: this.state.sortBy
       });
 
-      const response = await fetch(`${this.options.apiUrl}?${params}`);
+      const response = await fetch(`${this.options.getUserImagesUrl}?${params}`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -242,6 +367,7 @@ export default class UserImagesPanel {
     const wrapper = document.createElement('li');
 
     wrapper.className = 'modern-card image-card'
+    wrapper.setAttribute('data-image-card', image.id)
 
     const link = document.createElement('a');
 
@@ -249,7 +375,7 @@ export default class UserImagesPanel {
     link.className = 'image-wrapper';
     link.setAttribute('aria-current', 'page');
     link.setAttribute('data-gallery-preview', '');
-    link.setAttribute('data-src', image.src);
+    link.setAttribute('data-src', image.thumbnailSrc ?? image.src);
 
     // Overlay z informacjami
     const overlay = document.createElement('div');
@@ -263,7 +389,12 @@ export default class UserImagesPanel {
 
     const photoName = document.createElement('p');
     photoName.className = 'photo-name medium';
-    photoName.textContent = image.name;
+    photoName.textContent = " " + image.name;
+
+    const photoNameIcon = document.createElement('i')
+    photoNameIcon.className ="fa-regular fa-image"  
+
+    photoName.prepend(photoNameIcon)
 
     const photoSubtext = document.createElement('p');
     photoSubtext.className = 'photo-subtext medium';
@@ -274,9 +405,8 @@ export default class UserImagesPanel {
     photoInfo.appendChild(photoInfoText);
     overlay.appendChild(photoInfo);
 
-    // Obraz
     const img = document.createElement('img');
-    img.src = image.src;
+    img.src = image.thumbnailSrc ?? image.src;
     img.alt = image.name;
 
     // Data
@@ -291,7 +421,7 @@ export default class UserImagesPanel {
 
     const imageInfo = document.createElement('span')
 
-    console.log(image)
+    imageInfo.className = "image-info"
 
     const downloadLink = document.createElement('a')
 
@@ -300,30 +430,37 @@ export default class UserImagesPanel {
     downloadLink.setAttribute('download', '')
 
     downloadLink.innerHTML = `
-      <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
+      <i class="fa-solid fa-circle-down badge-link-icon"></i>
       <span>Pobierz</span>
     `
 
-    console.log(image)
+    const printLink = document.createElement('a')
 
-    const operationList = document.createElement('ul')
+    printLink.href = '#'
+    printLink.className = "badge badge-link"
+    printLink.setAttribute('data-print-link', '')
 
-    let operationsDataString = ''
+    printLink.innerHTML = `
+      <i class="fa-solid fa-print badge-link-icon"></i>
+      <span>Drukuj</span>
+    `
+    const removeLink = document.createElement('a')
 
-    const filterOperationResultsDara = ['src', 'downloadURL', 'absoluteSrc', 'mimeType', 'originalName', 'imageName', 'newName']
+    removeLink.href = '#'
+    removeLink.className = "badge badge-link badge-link-red"
+    removeLink.setAttribute('data-remove-link', '')
+    removeLink.setAttribute('data-image-id', image.id)
+    removeLink.setAttribute('data-image-name', image.name)
 
-    for (const [key, val] of Object.entries(image.operationResults)) {
+    removeLink.innerHTML = `
+      <i class="fa-solid fa-trash badge-link-icon"></i>
+      <span>Usuń</span>
+    `  
 
-      if (image.operationResults.hasOwnProperty(key) && !filterOperationResultsDara.includes(key)) {
-        operationsDataString += `<li>${key}: ${val}</li>`
-      }
-    }
+    imageInfo.appendChild(downloadLink)
+    imageInfo.appendChild(printLink)
+    imageInfo.appendChild(removeLink)
 
-    operationList.innerHTML = operationsDataString
-
-    imageInfo.appendChild(operationList)
-
-    wrapper.appendChild(downloadLink)
     wrapper.appendChild(link)
     wrapper.appendChild(imageInfo)
 
@@ -361,18 +498,17 @@ export default class UserImagesPanel {
   setLoading(isLoading) {
     this.state.loading = isLoading;
 
+    // this.loadingIndicator.classList.add('visible');
+
     if (this.loadingIndicator) {
       this.loadingIndicator.classList.toggle('visible', isLoading);
     }
   }
 
-  /**
-   * Wyświetlanie komunikatu o błędzie
-   * @param {string} message - Treść komunikatu
-   */
+  /** @param {string} message - Treść komunikatu */
   showError(message) {
-    console.error(message);
-    Toast.show(Toast.ERROR, message)
+    this.containerAlerts.innerHTML = ''
+    super.showError(message, this.containerAlerts);
   }
 
   /**
@@ -394,48 +530,5 @@ export default class UserImagesPanel {
     });
   }
 
-  /**
-   * Funkcja debounce do ograniczenia częstotliwości wykonywania funkcji
-   * @param {Function} func - Funkcja do wykonania
-   * @param {number} wait - Czas oczekiwania w ms
-   * @returns {Function} Funkcja z debounce
-   */
-  debounce(func, wait) {
-    let timeout;
-
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  /**
-   * Symulacja odpowiedzi API dla celów testowych
-   * @returns {Promise<Object>} Symulowana odpowiedź API
-   */
-  async mockApiResponse() {
-    // Ta metoda może być używana do testowania bez rzeczywistego API
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const images = Array.from({ length: 10 }, (_, i) => ({
-          id: this.state.page * 100 + i,
-          name: `sample-image-${this.state.page}-${i}.jpg`,
-          src: `https://picsum.photos/id/${this.state.page * 10 + i}/500/300`,
-          size: Math.floor(Math.random() * 10000000),
-          date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString()
-        }));
-
-        resolve({
-          images,
-          total: 100,
-          hasMore: this.state.page < 5
-        });
-      }, 800);
-    });
-  }
+  
 }

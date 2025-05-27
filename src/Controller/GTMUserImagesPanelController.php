@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
-use App\Service\GraphicsToolsModule\UserImagesPanel\UserImagesPanelService;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\GraphicsToolsModule\UserImages\UserImagesPanelService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,9 +14,9 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use App\Repository\GTMImageRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\GTMImage;
 use Exception;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route(path: '/profil')]
 class GTMUserImagesPanelController extends AbstractController
@@ -29,7 +29,8 @@ class GTMUserImagesPanelController extends AbstractController
         private readonly CacheInterface $cache,
         private readonly Security $security,
         private readonly EntityManagerInterface $entityManager,
-        private readonly UserImagesPanelService $service
+        private readonly UserImagesPanelService $service,
+        private readonly ImageEntityManagerInterface $imageManager
     ) {
     }
 
@@ -37,34 +38,77 @@ class GTMUserImagesPanelController extends AbstractController
     public function index(): Response
     {
         return $this->render('graphics_tools_module/user_images_panel/index.html.twig', [
-            'GET_USER_IMAGES_JSON' => '/profil/narzedzia-graficzne/moje-grafiki/pobierz-json'
+            'GET_USER_IMAGES_JSON' => '/profil/narzedzia-graficzne/moje-grafiki/pobierz-json',
+            'REMOVE_USER_IMAGE_JSON' => '/profil/narzedzia-graficzne/moje-grafiki/usun-grafike-json/',
+            'REMOVE_ALL_USER_IMAGES_JSON' => '/profil/narzedzia-graficzne/moje-grafiki/usun-wszystkie-json',
         ]);
     }
 
-    #[Route(path: '/narzedzia-graficzne/moje-grafiki/usun-grafike-json', name: 'gtm_remove_user_image_json')]
-    public function removeImageJSON(Request $request): JsonResponse
+    #[Route(path: '/narzedzia-graficzne/moje-grafiki/usun-wszystkie-json', name: 'gtm_remove_all_user_images_json', methods: [Request::METHOD_DELETE])]
+    public function removeAllUserImagesJSON(): JsonResponse
     {
-        $imageId = $request->request->get('imageId');
         $jsonData = [];
         $status = Response::HTTP_OK;
+        $user = $this->getUser();
 
         try {
-            if (!$this->getUser()) {
+            if (!$user) {
                 $status = Response::HTTP_UNAUTHORIZED;
                 throw new Exception('Odmowa dostępu!');
             }
 
-            if (!$imageId) {
-                $status = Response::HTTP_BAD_REQUEST;
-                throw new Exception('Nie podano ID grafiki!');
+            $images = $this->imageRepository->findBy(['owner' => $user]);
+
+            if (empty($images)) {
+                return $this->json(['success' => true, 'error' => '', 'deletedCount' => 0], $status);
+            }
+
+            $this->imageManager->removeAll($images, $user->getId());
+
+            $jsonData = [
+                'success' => true,
+                'error' => '',
+                'deletedCount' => count($images)
+            ];
+        } catch (Exception $e) {
+            $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
+            $jsonData = [
+                'success' => false,
+                'error' => 'Wystąpił błąd podczas usuwania grafik: ' . $e->getMessage(),
+                'deletedCount' => 0
+            ];
+            $this->logger->error(__METHOD__ . ': ' . $e->getMessage());
+        }
+
+        return $this->json($jsonData, $status);
+    }
+
+    #[Route(path: '/narzedzia-graficzne/moje-grafiki/usun-grafike-json/{id}', name: 'gtm_remove_user_image_json', methods: [Request::METHOD_DELETE])]
+    public function removeImageJSON(string $id): JsonResponse
+    {
+        $jsonData = [];
+        $status = Response::HTTP_OK;
+        $user = $this->getUser();
+
+        try {
+            $imageId = $this->service->validateInt($id);
+
+            if (!$user) {
+                $status = Response::HTTP_UNAUTHORIZED;
+                throw new Exception('Odmowa dostępu!');
             }
 
             /** @var GTMImage */
-            $image = $this->imageRepository->find($imageId);
+            $image = $this->imageRepository->findOneBy(['owner' => $user, 'id' => $imageId]);
+
+            if (!$image) {
+                $status = Response::HTTP_NOT_FOUND;
+                throw new Exception('Nie znaleziono takiej grafiki!');
+            }
+
             $imageName = $image->getName();
 
-            $this->entityManager->remove($image);
-            $this->entityManager->flush();
+            $this->imageManager->remove($image, $user->getId());
 
             $jsonData = [
                 'success' => true,
@@ -76,7 +120,7 @@ class GTMUserImagesPanelController extends AbstractController
             $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
             $jsonData = [
                 'success' => false,
-                'error' => 'Wystąpił błąd podczas usuwania grafiki: ' . $e->getMessage(),
+                'error' => 'Wystąpił błąd podczas usuwania: ' . $e->getMessage(),
                 'imageName' => ''
             ];
             $this->logger->error(__METHOD__ . ': ' . $e->getMessage());
@@ -85,7 +129,7 @@ class GTMUserImagesPanelController extends AbstractController
         return $this->json($jsonData, $status);
     }
 
-    #[Route(path: '/narzedzia-graficzne/moje-grafiki/pobierz-json', name: 'gtm_get_user_images_json')]
+    #[Route(path: '/narzedzia-graficzne/moje-grafiki/pobierz-json', name: 'gtm_get_user_images_json', methods: [Request::METHOD_GET])]
     public function getUserImagesJSON(Request $request): JsonResponse
     {
         $query = $request->query;
@@ -157,23 +201,22 @@ class GTMUserImagesPanelController extends AbstractController
     private function prepareImagesData(array $images): array
     {
         $imageData = [];
+        $escapeHTML = fn(string|null $s) => $s ? htmlspecialchars($s, ENT_QUOTES, 'UTF-8') : null;
 
         /** @var GTMImage $image */
         foreach ($images as $image) {
             $imageData[] = [
                 'id' => (int) $image->getId(),
-                'name' => htmlspecialchars($image->getName(), ENT_QUOTES, 'UTF-8'),
-                'src' => htmlspecialchars($image->getSrc(), ENT_QUOTES, 'UTF-8'),
+                'name' => $escapeHTML($image->getName()),
+                'src' => $escapeHTML($image->getSrc()),
+                'thumbnailSrc' => $escapeHTML($image->getThumbnailSrc()),
                 'size' => (int) $image->getSize(),
-                'date' => $image->getUploadedAt()->format('Y-m-d H:i:s'),
-                'mimeType' => htmlspecialchars($image->getMimeType(), ENT_QUOTES, 'UTF-8'),
-                'operationType' => htmlspecialchars($image->getOperationType(), ENT_QUOTES, 'UTF-8'),
-                'operationResults' => $image->getOperationResults()
+                'date' => $image->getUploadedAt()->format('Y-m-d H:i:s')
             ];
         }
 
         return $imageData;
-    } 
+    }
 
     /**
      * Invaliduje cały cache obrazów dla danego użytkownika
@@ -182,8 +225,6 @@ class GTMUserImagesPanelController extends AbstractController
      */
     public function invalidateUserImagesCache(int $userId): void
     {
-        // $this->cache->delete("user_images_$userId");
-
         for ($page = 1; $page <= 5; $page++) {
             $this->cache->delete(
                 $this->service->generateCacheKey($userId, $page, 12, '', 'all', 'date-desc')

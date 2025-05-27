@@ -2,9 +2,9 @@
 
 namespace App\Service\GraphicsToolsModule\Converter\DTO;
 
-use App\Service\GraphicsToolsModule\Workflow\Abstract\OperationResults; 
+use App\Service\GraphicsToolsModule\Workflow\Abstract\AbstractDTO; 
 
-class ConversionResults extends OperationResults
+class ConversionResults extends AbstractDTO
 {
     public function __construct(
         public string $imageName,

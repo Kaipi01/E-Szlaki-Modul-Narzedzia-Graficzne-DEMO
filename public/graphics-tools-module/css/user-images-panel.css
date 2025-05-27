@@ -688,6 +688,174 @@
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
 }
 
+@-webkit-keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+#graphics-tools-module .loading-btn-icon::after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  -webkit-animation: var(--loading-animation-for-icon);
+  animation: var(--loading-animation-for-icon);
+  background-image: var(--loading-icon-white);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+#graphics-tools-module .loading {
+  position: relative;
+}
+#graphics-tools-module .loading::after {
+  content: "";
+  position: absolute;
+  z-index: 29;
+  top: 50%;
+  left: 50%;
+  width: min(40%, 12.5rem);
+  height: min(40%, 12.5rem);
+  transform: translate(-50%, -50%);
+  -webkit-animation: var(--loading-animation);
+  animation: var(--loading-animation);
+  background-image: var(--loading-icon);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+#graphics-tools-module .loading--with-bg::before {
+  content: "";
+  position: absolute;
+  z-index: 28;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: 20px;
+  background-color: var(--background-50);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+}
+
+#graphics-tools-module {
+  --modal-transition-duration: 0.3s;
+}
+#graphics-tools-module .modal {
+  z-index: 800;
+  width: 100%;
+  max-width: none;
+  min-height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--font-color);
+}
+#graphics-tools-module .modal[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+  animation: fade-in var(--modal-transition-duration) forwards;
+}
+#graphics-tools-module .modal[open]::-webkit-backdrop {
+  -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+  animation: fade-in var(--modal-transition-duration) forwards;
+}
+#graphics-tools-module .modal[open]::backdrop {
+  -webkit-animation: fade-in var(--modal-transition-duration) forwards;
+  animation: fade-in var(--modal-transition-duration) forwards;
+}
+#graphics-tools-module .modal__header-title {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+#graphics-tools-module .modal__content {
+  position: relative;
+  width: 97.5% !important;
+  max-width: 50rem;
+  max-height: 95vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 20px;
+  background: var(--background);
+}
+#graphics-tools-module .modal__close-btn {
+  position: absolute;
+  z-index: 3;
+  top: 0.3rem;
+  right: 0.3rem;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+@media (min-width: 45em) {
+  #graphics-tools-module .modal__close-btn {
+    top: 1rem;
+    right: 1rem;
+  }
+}
+#graphics-tools-module .modal__close-btn-icon {
+  display: block;
+  width: 100% !important;
+}
+#graphics-tools-module .modal__close-btn--inner {
+  width: 2.5rem;
+  height: 2.5rem;
+  transition: 0.3s;
+  box-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.075), 0 0.3px 0.4px rgba(0, 0, 0, 0.025), 0 0.9px 1.5px rgba(0, 0, 0, 0.05), 0 3.5px 6px rgba(0, 0, 0, 0.1);
+}
+#graphics-tools-module .modal__close-btn--inner:hover, #graphics-tools-module .modal__close-btn--inner:focus {
+  transform: rotate(180deg) scale(1.05);
+}
+#graphics-tools-module .modal::-webkit-backdrop {
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+#graphics-tools-module .modal::backdrop {
+  opacity: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+#graphics-tools-module .modal[closing] {
+  -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+  animation: fade-out var(--modal-transition-duration) forwards;
+  pointer-events: none;
+}
+#graphics-tools-module .modal[closing]::-webkit-backdrop {
+  -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+  animation: fade-out var(--modal-transition-duration) forwards;
+}
+#graphics-tools-module .modal[closing]::backdrop {
+  -webkit-animation: fade-out var(--modal-transition-duration) forwards;
+  animation: fade-out var(--modal-transition-duration) forwards;
+}
+
 #graphics-tools-module-user-images-panel {
   width: 100%;
 }
@@ -710,9 +878,9 @@
 }
 #graphics-tools-module-user-images-panel #filter-reset {
   padding: 0.9rem 1.5rem;
-  font-size: 1rem;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  font-size: 1rem;
 }
 #graphics-tools-module-user-images-panel .panel-controls {
   display: flex;
@@ -720,7 +888,7 @@
   gap: 1rem;
   margin-bottom: 1.25rem;
 }
-@media (min-width: 55em) {
+@media (min-width: 76.5625rem) {
   #graphics-tools-module-user-images-panel .panel-controls {
     flex-direction: row;
     align-items: center;
@@ -745,6 +913,23 @@
 #graphics-tools-module-user-images-panel .filters-container .filter-group .custom-select-green {
   min-width: 14.0625rem;
 }
+#graphics-tools-module-user-images-panel .loading-indicator {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  color: var(--blue);
+  font-size: 1.5rem;
+  font-weight: bold;
+  gap: 1rem;
+}
+#graphics-tools-module-user-images-panel .loading-indicator.visible {
+  display: flex;
+  margin-bottom: 2rem;
+}
+#graphics-tools-module-user-images-panel .loading-indicator i {
+  font-size: 1.5em;
+}
 #graphics-tools-module-user-images-panel .status-container {
   display: flex;
   align-items: center;
@@ -752,44 +937,33 @@
   margin-bottom: 1rem;
 }
 #graphics-tools-module-user-images-panel .status-container .results-info {
-  color: var(--font-color);
-  font-size: 0.9rem;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   background-color: var(--background-gray);
+  color: var(--font-color);
   color: var(--green);
-  font-weight: bold;
-}
-#graphics-tools-module-user-images-panel .status-container .loading-indicator {
-  display: none;
-  color: var(--blue);
   font-size: 0.9rem;
-}
-#graphics-tools-module-user-images-panel .status-container .loading-indicator.visible {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-#graphics-tools-module-user-images-panel .status-container .loading-indicator i {
-  margin-right: 0.375rem;
+  font-weight: bold;
 }
 #graphics-tools-module-user-images-panel .images-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
-  gap: 1rem;
-  list-style: none;
+  grid-template-columns: repeat(auto-fill, minmax(20.9375rem, 1fr));
   width: 100%;
+  list-style: none;
+  gap: 1rem;
+}
+#graphics-tools-module-user-images-panel .images-grid .image-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
 }
 #graphics-tools-module-user-images-panel .images-grid .image-card {
-  position: relative;
   padding: 0;
 }
-#graphics-tools-module-user-images-panel .images-grid .image-card .badge {
-  position: absolute;
-  left: 0.75rem;
-  top: 0.75rem;
-  z-index: 2;
-  background-color: rgba(0, 0, 0, 0.737254902);
+#graphics-tools-module-user-images-panel .images-grid .image-card .badge-link {
+  width: 100%;
 }
 @media (min-width: 103.125em) {
   #graphics-tools-module-user-images-panel .images-grid {
@@ -825,7 +999,7 @@
   justify-content: flex-end;
   width: 100%;
   height: 100%;
-  padding: 1rem;
+  padding: 0.85rem 1rem;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(255, 255, 255, 0) 90%);
 }
 #graphics-tools-module-user-images-panel .photo-info {
@@ -864,9 +1038,25 @@
   right: 0.75rem;
   padding: 0.25rem 0.75rem;
   border-radius: 0.625rem;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.75);
   color: #fff;
   font-size: 0.85rem;
+  font-weight: bold;
+}
+#graphics-tools-module-user-images-panel .confirm-modal {
+  max-width: 31.25rem;
+}
+#graphics-tools-module-user-images-panel .confirm-modal-message {
+  max-width: 30ch;
+  padding-bottom: 1.5rem;
+  font-size: 1.35rem;
+  font-weight: bold;
+}
+#graphics-tools-module-user-images-panel .confirm-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
 }
 #graphics-tools-module-user-images-panel .no-results {
   display: flex;

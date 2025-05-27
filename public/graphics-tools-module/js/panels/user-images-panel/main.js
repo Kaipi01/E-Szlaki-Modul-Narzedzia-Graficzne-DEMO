@@ -5,9 +5,10 @@ import UserImagesPanel from "./UserImagesPanel.js";
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  new UserImagesPanel({
-    containerSelector: '#graphics-tools-module-user-images-panel',
-    apiUrl: GET_USER_IMAGES_JSON,
+  new UserImagesPanel(document.querySelector('#graphics-tools-module-user-images-panel'), {
+    getUserImagesUrl: GET_USER_IMAGES_JSON,
+    removeUserImageUrl: REMOVE_USER_IMAGE_JSON,
+    removeAllUserImagesUrl: REMOVE_ALL_USER_IMAGES_JSON,
     perPage: 12,
     scrollThreshold: 200
   });

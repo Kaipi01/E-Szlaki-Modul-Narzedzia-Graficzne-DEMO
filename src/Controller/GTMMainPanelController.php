@@ -2,34 +2,29 @@
 
 namespace App\Controller;
 
-use App\Entity\GTMImage;
 use App\Repository\GTMImageRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Service\GraphicsToolsModule\UserImages\Contracts\UserStorageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class GTMMainPanelController extends AbstractController
 {
     #[Route(path: '/profil/narzedzia-graficzne', name: 'gtm_main_panel')]
-    public function index(GTMImageRepository $imageRepository): Response
+    public function index(GTMImageRepository $imageRepository, UserStorageInterface $storageService): Response
     {
-        /** @var GTMImage[] */
-        $userImages = $imageRepository->findBy(['owner' => $this->getUser()], ['uploadedAt' => 'desc']);
-        $discStorageUnit = 'MB';
-        $userMaxDiscStorage = 500;
-        $userCurrentDiscStorage = 0;
+        $user = $this->getUser();
 
-        foreach ($userImages as $img) {
-            // $userCurrentDiscStorage += $img->getSize() / 1_000_000_000;
-            $userCurrentDiscStorage += $img->getSize() / 1_000_000; // jeśli GB to 
-        }
+        $userImages = $imageRepository->findBy(['owner' => $user], ['uploadedAt' => 'desc']); 
+
+        $userStorageData = $storageService->getUserStorageData($user->getId());
 
         return $this->render('graphics_tools_module/main_panel/index.html.twig', [
             'userImages' => $userImages,
-            'userMaxDiscStorage' => $userMaxDiscStorage,
-            'discStorageUnit' => $discStorageUnit,
-            'userCurrentDiscStorage' => round($userCurrentDiscStorage, 2),
-            'userCurrentDiscStoragePercent' => ($userCurrentDiscStorage / $userMaxDiscStorage) * 100
+            'userMaxDiscStorage' => $userStorageData->maxDiscStorage,
+            'discStorageUnit' => $userStorageData->discStorageUnit,
+            'userCurrentDiscStorage' => $userStorageData->currentDiscStorage,
+            'userCurrentDiscStoragePercent' => $userStorageData->currentDiscStoragePercent
         ]);
     }
 }

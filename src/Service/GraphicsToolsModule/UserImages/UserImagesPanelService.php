@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Service\GraphicsToolsModule\UserImagesPanel;
+namespace App\Service\GraphicsToolsModule\UserImages;
 
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Symfony\Component\String\UnicodeString;
 use Symfony\Contracts\Cache\CacheInterface;
 use App\Repository\GTMImageRepository;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 
 class UserImagesPanelService
 {
@@ -170,6 +171,22 @@ class UserImagesPanelService
         $pageInt = filter_var($page, FILTER_VALIDATE_INT);
 
         return $pageInt !== false && $pageInt > 0 ? $pageInt : 1;
+    }
+
+    /**
+     * @param mixed $value
+     * @throws \InvalidArgumentException
+     * @return int
+     */
+    public function validateInt(mixed $value): int
+    {
+        $intValue = filter_var($value, FILTER_VALIDATE_INT);
+
+        if ($intValue === false) {
+            throw new InvalidArgumentException('Podana wartość nie jest liczbą !');
+        }
+
+        return $intValue;
     }
 
     /**

@@ -12,13 +12,14 @@
 
         <div class="image-operation"> 
 
-            <div class="modern-card">
+            <div class="modern-card"> 
 
-                <div class="panel__header">
-                    <h2 class="panel__title">Kompresja obrazów</h2>
-                </div> 
+                <div class="area-header-wrapper">
+                    <p class="area-header"><i class="fa-solid fa-minimize"></i> Kompresja obrazów</p>
 
-                {% include "graphics_tools_module/compressor_panel/settings-box.html.twig" %}
+                    {% include "graphics_tools_module/compressor_panel/settings-box.html.twig" %}
+                </div>
+
 
                 <div class="panel__alerts" data-operation-alerts>
                     <custom-alert data-message="Wybranie plików automatycznie rozpocznie operacje"></custom-alert>

@@ -1,31 +1,33 @@
-<div class="search-area modern-card">
+{# <div class="search-area">
     <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
-</div>
+</div> #}
 
 <div class="quick-access-area">
-    {# <p class="section-header">Szybki dostęp</p> modern-card #}
+    {# <p class="area-header">Szybki dostęp</p> modern-card #}
+
+    <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
 
     <ul class="access-links">
         <li>
-            <a class="access-link-wrapper access-link-wrapper-1 modern-card" href="{{ path('gtm_user_images_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--light-green modern-card" href="{{ path('gtm_user_images_panel') }}">
                 <i class="fa-solid fa-image access-icon"></i>
                 <span class="access-text">Moje grafiki</span>
             </a>
         </li>
         <li>
-            <a class="access-link-wrapper access-link-wrapper-2 modern-card" href="{{ path('gtm_compressor_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--light-green modern-card" href="{{ path('gtm_compressor_panel') }}">
                 <i class="fa-solid fa-minimize access-icon"></i>
                 <span class="access-text">Kompresor</span>
             </a>
         </li>
         <li>
-            <a class="access-link-wrapper access-link-wrapper-3 modern-card" href="{{ path('gtm_converter_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--green modern-card" href="{{ path('gtm_converter_panel') }}">
                 <i class="fa-solid fa-icons access-icon"></i>
                 <span class="access-text">Konwerter</span>
             </a>
         </li>
         <li>
-            <a class="access-link-wrapper access-link-wrapper-3 modern-card" href="{{ path('gtm_editor_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--green modern-card" href="{{ path('gtm_editor_panel') }}">
                 <i class="fa-solid fa-screwdriver-wrench access-icon"></i>
                 <span class="access-text">Edytor</span>
             </a>
@@ -35,21 +37,19 @@
 
 <div class="stats-area modern-card">
 
-    {# <p class="area-header">Statystyki</p> #}
+    {# <div class="stats-chart-container"></div> #}
 
-    <div class="stats-chart-container">
+    <p class="area-header"><i class="fa-regular fa-hard-drive"></i> Miejsce na dysku</p>
 
-        <circular-progress-bar data-size="125"
-            data-label="{{ userCurrentDiscStorage }} {{ discStorageUnit }} z {{ userMaxDiscStorage }} {{ discStorageUnit }} wykorzystane"
-            data-pie='{
+    <circular-progress-bar data-size="160"
+        data-label="{{ userCurrentDiscStorage }} {{ discStorageUnit }} z {{ userMaxDiscStorage }} {{ discStorageUnit }} wykorzystane"
+        data-pie='{
                 "lineargradient": ["#14a5ff", "#008be2"],
                 "round": true,
                 "percent": {{ userCurrentDiscStoragePercent }},
                 "colorCircle": "rgba(63, 98, 74, 0.25)"
-                }'>
-        </circular-progress-bar>
-
-    </div>
+        }'>
+    </circular-progress-bar>
 
 </div>
 
@@ -58,14 +58,14 @@
     {% if userImages | length > 0 %}
 
     <section class="content-section">
-        <div class="section-header-wrapper">
-            <p class="section-header">Ostatnie zdjęcia</p>
-            <a href="#" class="section-header-link">Zobacz wszystkie</a>
+        <div class="area-header-wrapper">
+            <p class="area-header"><i class="fa-regular fa-image"></i> Ostatnie zdjęcia</p>
+            <a href="{{ path('gtm_user_images_panel') }}" class="link small variant2">Zobacz wszystkie</a>
         </div>
 
         <images-gallery-modal></images-gallery-modal>
 
-        <div class="content-section-line">
+        <div class="last-images-preview">
 
             {% for image in userImages | slice(0, 3) %}
 
@@ -73,13 +73,19 @@
                 <div class="image-overlay">
                     <div class="photo-info">
                         <div class="photo-info-text">
-                            <p class="photo-name medium">{{ image.name }}</p>
+                            <p class="photo-name medium"><i class="fa-regular fa-image"></i> {{ image.name }}</p>
                             <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
                         </div>
                     </div>
                 </div>
 
-                <img src="{{ image.src }}" />
+                {% if image.thumbnailSrc %}
+                {% set thumbnail = image.thumbnailSrc %}
+                {% else %}
+                {% set thumbnail = image.src %}
+                {% endif %}
+
+                <img src="{{ thumbnail }}" />
 
                 <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
             </a>
@@ -96,7 +102,6 @@
                         <th>Nazwa pliku</th>
                         <th>Rozmiar</th>
                         <th>Data Modyfikacji</th>
-                        {# <th>Typ Operacji</th> #}
                         <th>Akcje</th>
                     </thead>
                     <tbody>
@@ -107,22 +112,9 @@
                             <td>
                                 <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
                             </td>
-                            <td>{{ image.name }}</td>
+                            <td><i class="fa-regular fa-image"></i> {{ image.name }}</td>
                             <td>{{ image.size | formatBytes }}</td>
-                            <td>{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</td>
-                            {# <td>
-                                {% set operationType = 'Inny' %}
-
-                                {% if image.operationType == 'compression' %}
-                                {% set operationType = 'Kompresja' %}
-                                {% elseif image.operationType == 'conversion' %}
-                                {% set operationType = 'Konwersja' %}
-                                {% elseif image.operationType == 'edition' %}
-                                {% set operationType = 'Edycja' %}
-                                {% endif %}
-
-                                {{ operationType }}
-                            </td> #}
+                            <td><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</td>
                             <td>
                                 <span class="image-operation__table-actions">
                                     <a href="{{ image.src }}" download

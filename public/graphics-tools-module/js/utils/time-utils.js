@@ -3,10 +3,10 @@
  * @param {() => {}} callback
  */
 export async function wait(ms, callback = () => {}) {
-    return new Promise(resolve => setTimeout(() => {
-        callback()
-        resolve()
-    }, ms));
+  return new Promise(resolve => setTimeout(() => {
+    callback()
+    resolve()
+  }, ms));
 }
 
 /**
@@ -16,30 +16,36 @@ export async function wait(ms, callback = () => {}) {
  * @param {number} delay
  */
 export function throttle(callback, delay) {
-    let shouldWait = false;
+  let shouldWait = false;
 
-    return (...args) => {
-        if (shouldWait) return;
+  return (...args) => {
+    if (shouldWait) return;
 
-        callback(...args);
-        shouldWait = true;
+    callback(...args);
+    shouldWait = true;
 
-        setTimeout(() => {
-            shouldWait = false;
-        }, delay);
-    };
-};
+    setTimeout(() => {
+      shouldWait = false;
+    }, delay);
+  };
+}; 
 
 /**
- * Mechanizm debounce do zabezpieczenia animacji
- * @returns {(...args: any[]) => void}
- * @param {Function} func
- * @param {number} wait
+ * Funkcja debounce do ograniczenia częstotliwości wykonywania funkcji
+ * @param {Function} func - Funkcja do wykonania
+ * @param {number} wait - Czas oczekiwania w ms
+ * @returns {Function} Funkcja z debounce
  */
 export function debounce(func, wait) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+  let timeout;
+
+  return (...args) => {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
     };
-};
+
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}

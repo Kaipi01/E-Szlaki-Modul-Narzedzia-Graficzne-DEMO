@@ -1,5 +1,5 @@
 @use "../base/variables" as *;
-@use "../functions/toRem" as *; 
+@use "../functions/toRem" as *;
 
 #graphics-tools-module {
   .main-navigation {
@@ -7,16 +7,18 @@
     justify-content: space-between;
     gap: 1.5rem;
     width: 100%;
-    margin-bottom: var(--panels-gap); 
+    margin-bottom: var(--panels-gap);
 
     &-list {
       display: flex;
       position: relative;
+      align-items: center;
       width: 100%;
-      max-width: toRem(900);
-      padding: 0; 
+      max-width: toRem(1000);
+      padding: 0;
       border-radius: 10px;
       background-color: var(--green);
+      box-shadow: rgba(0, 0, 0, 0.55) 0px 5px 15px;
       color: #fff;
       list-style: none;
     }
@@ -30,7 +32,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      padding: 1.5rem 0 !important;
+      padding: 1.5rem 1rem !important;
       transition: 0.3s;
       border-radius: 10px;
       font-weight: bold;
@@ -39,7 +41,7 @@
       &-text {
         display: none;
 
-        @media (min-width: $content-breakpoint-tablet) {
+        @media (min-width: $content-breakpoint-tablet-large) {
           display: inline;
         }
       }

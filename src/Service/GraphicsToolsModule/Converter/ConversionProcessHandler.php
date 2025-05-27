@@ -36,9 +36,7 @@ class ConversionProcessHandler extends ImageProcessHandler implements ImageProce
         }  
 
         if ($addCompress) {
-            $afterOperationCallback = function (string $outPath) {
-                $this->compressor->compress($outPath);
-            };
+            $afterOperationCallback = fn (string $outPath) => $this->compressor->compress($outPath);
         }
 
         $this->state->conversionResults = $this->converter->convert(
@@ -46,7 +44,7 @@ class ConversionProcessHandler extends ImageProcessHandler implements ImageProce
             $toFormat, 
             $quality, 
             $afterOperationCallback
-        );  
+        );   
 
         $this->state->conversionResults->originalName = $imageOriginalName;
 

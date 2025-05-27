@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\GTMImage;
+use App\Service\GraphicsToolsModule\UserImages\Contracts\UserStorageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageEntityManagerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
@@ -22,6 +23,7 @@ class GTMEditorAPIController extends AbstractController
         private readonly GTMLoggerInterface $logger,
         private readonly UploadImageServiceInterface $uploader,
         private readonly ImageEntityManagerInterface $imageEntityManager,
+        private readonly UserStorageInterface $storageService
     ) {
     }
 
@@ -33,9 +35,10 @@ class GTMEditorAPIController extends AbstractController
         $toFormat = $request->request->get('toFormat');
         $imageChanges = json_decode($request->request->get('imageChanges'), true);
         $status = Response::HTTP_OK;
+        $user = $this->getUser();
 
         try {
-            if (!$this->getUser()) {
+            if (!$user) {
                 $status = Response::HTTP_UNAUTHORIZED;
                 throw new Exception('Odmowa dostępu!');
             }
@@ -50,33 +53,51 @@ class GTMEditorAPIController extends AbstractController
                 throw new Exception('Niepoprawne dane! Brakuje docelowego formatu!');
             }
 
-            $uploadDir = $this->getParameter('gtm_uploads') . "/" . $this->getUser()->getId();
-            $imageData = $this->uploader->upload($imageBlob, $uploadDir, setUniqueName: true);
-
-            $this->imageEntityManager->save(
-                [
-                    'src' => $imageData['path'],
-                    'originalName' => $imageData['originalName'],
-                    'operationHash' => Uuid::generate(),
-                    'operationResults' => $imageChanges ?? [],
-                    'operationType' => GTMImage::OPERATION_EDITION
-                ],
-                $this->getUser()->getId()
-            );
-
-            if (!file_exists($imageData['path'])) {
-                throw new Exception('Plik nie istnieje.');
+            if (!$this->storageService->isUserHaveEnoughSpace($user->getId(), $imageBlob->getSize())) {
+                $status = Response::HTTP_BAD_REQUEST;
+                throw new Exception('Brak wolnego miejsca na dysku!');
             }
+
+            $this->saveExportedImage($user->getId(), $imageBlob, $imageChanges);
 
             $jsonData = ['success' => true, 'errorMessage' => ''];
 
         } catch (Exception $e) {
             $status = $status === Response::HTTP_OK ? Response::HTTP_INTERNAL_SERVER_ERROR : $status;
-            $jsonData = ['success' => false, 'errorMessage' => 'Wystąpił błąd: ' . $e->getMessage()];
+            $jsonData = ['success' => false, 'errorMessage' => $e->getMessage()];
 
             $this->logger->error(self::class . '::compressImage: ' . $e->getMessage());
         }
 
         return $this->json($jsonData, $status);
+    } 
+
+    private function uploadExportedImage(int $userId, UploadedFile $imageBlob): array
+    {
+        $uploadDir = $this->getParameter('gtm_uploads') . "/" . $userId;
+
+        $imageData = $this->uploader->upload($imageBlob, $uploadDir, setUniqueName: true);
+
+        // if (!file_exists($imageData['path'])) {
+        //     throw new Exception('Plik nie istnieje.');
+        // }
+
+        return $imageData;
+    }
+
+    private function saveExportedImage(int $userId, UploadedFile $imageBlob, array $imageOperations = [])
+    {
+        $imageData = $this->uploadExportedImage($userId, $imageBlob);
+
+        $this->imageEntityManager->save(
+            [
+                'src' => $imageData['path'],
+                'originalName' => $imageData['originalName'],
+                'operationHash' => Uuid::generate(),
+                'operationResults' => $imageOperations,
+                'operationType' => GTMImage::OPERATION_EDITION
+            ],
+            $userId
+        );
     }
 }

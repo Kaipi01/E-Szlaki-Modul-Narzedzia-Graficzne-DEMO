@@ -9,7 +9,7 @@ export default class EditorPanel extends AbstractPanel {
 
   CONFIRM_MODAL_ID = GRAPHICS_TOOLS_MODULE.CONFIRM_MODAL_ID
 
-  EFFECTS_VALUES_DEFAULT = {
+  static EFFECTS_VALUES_DEFAULT = {
     blur: 0,
     brightness: 100,
     contrast: 100,
@@ -59,8 +59,8 @@ export default class EditorPanel extends AbstractPanel {
       originalImageData: null,
       currentTab: 'crop',
       isCropperActive: true,
-      effectsValues: this.EFFECTS_VALUES_DEFAULT,
-      currentChanges: {} // dodajemy to
+      effectsValues: EditorPanel.EFFECTS_VALUES_DEFAULT,
+      currentChanges: {}
     };
 
     // Elementy DOM
@@ -71,8 +71,9 @@ export default class EditorPanel extends AbstractPanel {
     this.removeImageButton = this.container.querySelector('#remove-image-button')
     this.tabButtons = this.container.querySelectorAll('.tab-button');
     this.tabPanes = this.container.querySelectorAll('.tab-pane');
-
+    this.editorContent = this.container.querySelector('#editor-content')
     this.editorTabs = this.container.querySelector('#editor-tabs')
+    this.containerAlerts = this.getByAttribute("data-operation-alerts")
 
     // Elementy formularza
     this.cropWidthInput = this.container.querySelector('#crop-width');
@@ -112,7 +113,7 @@ export default class EditorPanel extends AbstractPanel {
     this.englishEffectsNameToPolish.set('blur', 'rozmycie');
     this.englishEffectsNameToPolish.set('grayscale', 'skala szarości');
     this.englishEffectsNameToPolish.set('sepia', 'sepia');
-    this.englishEffectsNameToPolish.set('hueRotate', 'rotacja barw');
+    this.englishEffectsNameToPolish.set('hue-rotate', 'rotacja barw');
     this.englishEffectsNameToPolish.set('invert', 'negatyw');
 
     // Parametry przycinania
@@ -153,7 +154,7 @@ export default class EditorPanel extends AbstractPanel {
         }
 
         if (name === 'blur') return `${value}px`;
-        if (name === 'rotate' || name === 'hueRotate') return `${value}°`;
+        if (name === 'rotate' || name === 'hue-rotate') return `${value}°`;
         if (['brightness', 'contrast', 'saturation', 'grayscale', 'sepia'].includes(name)) return `${value}%`;
 
         return value;
@@ -255,16 +256,7 @@ export default class EditorPanel extends AbstractPanel {
 
     this.removeImageButton.addEventListener('click', () => this.removeImageButtonHandler())
 
-    this.exportButton.addEventListener('click', () => {
-      try {
-        this.exportImage()
-
-        Toast.show(Toast.SUCCESS, "Obraz został pomyślnie wyeksportowany!")
-
-      } catch (error) {
-        this.showError(error)
-      }
-    })
+    this.exportButton.addEventListener('click', () => this.exportImage())
 
     this.cropToggleCheckbox.addEventListener('change', (e) => {
       const { cropper, isCropperActive } = this.state
@@ -340,6 +332,11 @@ export default class EditorPanel extends AbstractPanel {
         }
 
         cropper.setAspectRatio(aspectRatio);
+
+        if (isNaN(aspectRatio)) {
+          this.centerCrop()
+        } 
+
         this.updateCropBoxInputs();
 
         this.updateCurrentChanges('aspectRatio', value);
@@ -435,13 +432,14 @@ export default class EditorPanel extends AbstractPanel {
       this.dropZoneElement.removeAttribute('hidden')
       this.previewContainer.setAttribute('hidden', '')
       this.editorTabs.setAttribute('hidden', '')
+      this.editorContent.classList.add('editor-content--no-image')
 
       if (this.state.cropper) {
         this.state.cropper.destroy();
       }
 
       this.state.image = null
-      this.state.effectsValues = this.EFFECTS_VALUES_DEFAULT
+      this.state.effectsValues = EditorPanel.EFFECTS_VALUES_DEFAULT
       this.state.cropper = null
       this.state.originalImageData = null
       this.state.isCropperActive = true;
@@ -461,7 +459,7 @@ export default class EditorPanel extends AbstractPanel {
   }
 
   resetSettingsButtonHandler() {
-    Modal.show(this.CONFIRM_MODAL_ID, "Test");
+    Modal.show(this.CONFIRM_MODAL_ID);
 
     const modal = Modal.get(this.CONFIRM_MODAL_ID);
     const modalMessage = modal.querySelector('[data-message]');
@@ -510,17 +508,21 @@ export default class EditorPanel extends AbstractPanel {
   setupEffectsHandlers() {
     this.effectSliders.forEach(slider => {
       const effectId = slider.id;
-      const effectName = effectId.replace('effect-', '').replace('-', '');
       const valueDisplay = slider.parentElement.querySelector('.effect-value');
+      let effectName = effectId.replace('effect-', '');
+
+      if (effectName !== 'hue-rotate') {
+        effectName = effectName.replace('-', '');
+      }
 
       // Ustaw początkowe wartości
       this.updateEffectValueDisplay(slider, valueDisplay);
 
       slider.addEventListener('input', (e) => {
         // Aktualizuj wartość w obiekcie efektów
-        if (effectName === 'hue-rotate' || effectName === 'hueRotate') {
+        if (effectName === 'hue-rotate') {
           this.state.effectsValues.hueRotate = parseInt(e.target.value);
-          this.updateCurrentChanges('hueRotate', parseInt(e.target.value));
+          this.updateCurrentChanges('hue-rotate', parseInt(e.target.value));
         } else {
           this.state.effectsValues[effectName] = parseInt(e.target.value);
           this.updateCurrentChanges(effectName, parseInt(e.target.value));
@@ -562,7 +564,7 @@ export default class EditorPanel extends AbstractPanel {
             effectsValues[effectName] = 0;
             slider.value = 0;
             break;
-          case 'hueRotate':
+          case 'hue-rotate':
             effectsValues.hueRotate = 0;
             slider.value = 0;
             break;
@@ -709,11 +711,11 @@ export default class EditorPanel extends AbstractPanel {
     const formData = new FormData()
     const imageBlob = await this.getImageBlob(mimeType)
 
-    console.log(this.state.currentChanges)
+    console.info(this.state.currentChanges)
 
     formData.append('imageBlob', imageBlob, imageName)
     formData.append('imageChanges', this.getCurrentChangesJSON())
-    formData.append('toFormat', mimeType) // TODO: Dodaj opcje wybrania docelowego formatu w którym użytkownik będzie chciał wyeksportować
+    formData.append('toFormat', mimeType)
 
     try {
       const response = await fetch(this.options.exportImageUrl, {
@@ -723,10 +725,10 @@ export default class EditorPanel extends AbstractPanel {
       const responseData = await response.json()
 
       if (!response.ok) {
-        throw new Error("Wystąpił błąd podczas zapisywania grafiki: " + responseData.errorMessage)
+        this.showError("Wystąpił błąd podczas zapisywania grafiki: " + responseData.errorMessage)
       }
     } catch (error) {
-      throw new Error(message)
+      this.showError(error.message)
 
     } finally {
       const link = document.createElement('a');
@@ -735,6 +737,8 @@ export default class EditorPanel extends AbstractPanel {
       link.download = imageName;
       link.click();
       URL.revokeObjectURL(link.href);
+
+      Toast.show(Toast.SUCCESS, "Obraz został pomyślnie wyeksportowany!")
     }
   }
 
@@ -748,9 +752,6 @@ export default class EditorPanel extends AbstractPanel {
 
   /** Funkcja resetująca wszystkie filtry */
   resetAllFilters() {
-    // Resetuj stan edytora
-    this.state.effectsValues = this.EFFECTS_VALUES_DEFAULT
-
     // Resetuj wartości wszystkich suwaków
     const effectSliders = document.querySelectorAll('.effect-slider');
 
@@ -779,16 +780,19 @@ export default class EditorPanel extends AbstractPanel {
       invertCheckbox.checked = false;
     }
 
-    // Zastosuj zresetowane filtry
-    if (typeof this.applyEffects === 'function') {
-      this.applyEffects();
-    } else {
-      // Alternatywne podejście, jeśli metoda applyEffects nie istnieje
-      const imgElement = document.querySelector('.cropper-container img');
-      if (imgElement) {
-        imgElement.style.filter = '';
-      }
-    }
+    // Resetuj stan edytora
+    this.state.effectsValues = {
+      blur: 0,
+      brightness: 100,
+      contrast: 100,
+      grayscale: 0,
+      saturation: 100,
+      sepia: 0,
+      hueRotate: 0,
+      invert: false
+    };
+
+    this.applyEffects();
   }
 
   showCropper() {
@@ -804,6 +808,55 @@ export default class EditorPanel extends AbstractPanel {
     if (cropperViewBox) {
       cropperViewBox.style.overflow = 'hidden'
     }
+
+    this.centerCrop()
+
+    // // Pobierz aktualny rozmiar obrazu
+    // const imageData = cropper.getImageData();
+
+    // // Ustaw crop box na pełny rozmiar obrazu
+    // cropper.setCropBoxData({
+    //   left: imageData.left / 1.5,
+    //   top: imageData.top / 1.5,
+    //   width: imageData.width / 1.5,
+    //   height: imageData.height / 1.5
+    // });
+
+  }
+
+  centerCrop() {
+    const cropper = this.state.cropper
+    // const imageData = cropper.getImageData();
+    // const cropWidth = imageData.width * 0.8;
+    // const cropHeight = imageData.height * 0.8;
+    // const cropLeft = imageData.left + (imageData.width - cropWidth) / 2;
+    // const cropTop = imageData.top + (imageData.height - cropHeight) / 2;
+
+    // cropper.setCropBoxData({
+    //   left: cropLeft,
+    //   top: cropTop,
+    //   width: cropWidth,
+    //   height: cropHeight
+    // });
+
+    // Pobierz dane canvasu (widoczny obszar obrazu)
+    const canvasData = cropper.getCanvasData();
+
+    // Oblicz 80% wymiarów
+    const cropWidth = canvasData.width * 0.8;
+    const cropHeight = canvasData.height * 0.8;
+
+    // Oblicz przesunięcie, aby wycentrować
+    const cropLeft = canvasData.left + (canvasData.width - cropWidth) / 2;
+    const cropTop = canvasData.top + (canvasData.height - cropHeight) / 2;
+
+    // Ustaw crop box
+    cropper.setCropBoxData({
+      left: cropLeft,
+      top: cropTop,
+      width: cropWidth,
+      height: cropHeight,
+    });
   }
 
   hideCropper() {
@@ -847,10 +900,17 @@ export default class EditorPanel extends AbstractPanel {
 
     if (cropper) {
       // Resetuj obrót
-      cropper.rotateTo(0); //FIXME: dla grafik pionowych powinno być cropper.rotateTo(-90)
+      const canvasData = cropper.getCanvasData()
+      const rotationAngleInput = document.getElementById('rotation-angle');
+      const data = cropper.getData();
+
+      if (canvasData.width >= canvasData.height) {
+        cropper.rotateTo(0)
+      } else {
+        cropper.rotateTo(-90) // dla grafik pionowych
+      }
 
       // Resetuj skalowanie (odbicie)
-      const data = cropper.getData();
       if (data.scaleX < 0) {
         cropper.scaleX(1);
       }
@@ -859,7 +919,6 @@ export default class EditorPanel extends AbstractPanel {
       }
 
       // Aktualizuj input z kątem obrotu
-      const rotationAngleInput = document.getElementById('rotation-angle');
       if (rotationAngleInput) {
         rotationAngleInput.value = 0;
       }
@@ -916,6 +975,7 @@ export default class EditorPanel extends AbstractPanel {
         this.initCropper();
         this.editorActionsContainer.removeAttribute('hidden')
         this.editorTabs.removeAttribute('hidden')
+        this.editorContent.classList.remove('editor-content--no-image')
       };
     };
 

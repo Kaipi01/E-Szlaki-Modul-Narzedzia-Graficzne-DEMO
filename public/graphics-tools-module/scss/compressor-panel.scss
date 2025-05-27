@@ -58,7 +58,7 @@
     z-index: 4;
 
     &__wrapper {
-      margin: 2rem auto;
+      // margin: 2rem auto;
       padding: 1rem;
       border-radius: 0.5rem;
       background-color: var(--very-light-green-opacity);
@@ -87,6 +87,7 @@
 
           .custom-checkbox-label {
             font-size: 1rem;
+            white-space: nowrap;
           }
         }
       }

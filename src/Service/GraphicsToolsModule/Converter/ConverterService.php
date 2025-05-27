@@ -20,7 +20,7 @@ class ConverterService implements ConverterInterface
     ) {}
 
     /** @inheritDoc */
-    public function convert(string $imagePath, string $convertToType, int $quality = 100, ?\Closure $afterOperationCallback = null): ConversionResults
+    public function convert(string $imagePath, string $convertToType, int $quality = 100, ?\Closure $afterOperationCallback = null, ?string $outputPath = null): ConversionResults
     {
         $formatName = $this->getFormatName($convertToType);
 
@@ -29,7 +29,7 @@ class ConverterService implements ConverterInterface
             $imageName = basename($imagePath);
             $destDir = dirname($imagePath);
             $filename = pathinfo($imagePath, PATHINFO_FILENAME);
-            $outputPath = "$destDir/$filename.$formatName";
+            $outputPath ??= "$destDir/$filename.$formatName";
 
             if (!file_exists($destDir)) {
                 mkdir($destDir, 0777, true);

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\GraphicsToolsModule\Converter\ConversionProcessHandler;
 use App\Service\GraphicsToolsModule\Converter\DTO\ConversionProcessState;
+use App\Service\GraphicsToolsModule\UserImages\Contracts\UserStorageInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
@@ -25,7 +26,8 @@ class GTMConverterAPIController extends AbstractController
         private readonly ImageFileValidatorInterface $imageFileValidator,
         private readonly ConversionProcessHandler $conversionHandler,
         private readonly ImageProcessStateManagerInterface $processStateManager,
-        private readonly UploadImageServiceInterface $fileUploader
+        private readonly UploadImageServiceInterface $fileUploader,
+        private readonly UserStorageInterface $storageService
     ) {
     }
 
@@ -36,13 +38,13 @@ class GTMConverterAPIController extends AbstractController
     #[Route(path: '/narzedzia-graficzne/api/konwertuj-grafike-json', name: 'gtm_converter_api_convert_image', methods: ['POST'])]
     public function convertImage(Request $request): JsonResponse
     {
-        [$errorStatus, $errorMessage, $requestIsValid, $requestData] = $this->validateRequest($request); 
+        [$errorStatus, $errorMessage, $requestIsValid, $requestData] = $this->validateRequest($request);
         $jsonData = [];
         $imageData = [];
-        $status = Response::HTTP_OK; 
+        $status = Response::HTTP_OK;
 
         try {
-            if (! $requestIsValid) {
+            if (!$requestIsValid) {
                 $status = $errorStatus;
                 throw new Exception($errorMessage);
             }
@@ -107,6 +109,7 @@ class GTMConverterAPIController extends AbstractController
         $errorStatus = 200;
         $errorMessage = '';
         $requestIsValid = true;
+        $user = $this->getUser();
 
         $requestData = [
             'image' => $image,
@@ -117,7 +120,7 @@ class GTMConverterAPIController extends AbstractController
             'processHash' => $processHash
         ];
 
-        if (!$this->getUser()) {
+        if (!$user) {
             $errorStatus = Response::HTTP_UNAUTHORIZED;
             $errorMessage = 'Odmowa dostępu!';
         }
@@ -139,19 +142,24 @@ class GTMConverterAPIController extends AbstractController
             if ($quality <= 0 || $quality > 100) {
                 $errorStatus = Response::HTTP_BAD_REQUEST;
                 $errorMessage = 'Nieprawidłowe dane! Jakość musi być od 1 do 100 !';
-            } 
+            }
+
+            if (!$this->storageService->isUserHaveEnoughSpace($user->getId(), $image->getSize())) {
+                $errorStatus = Response::HTTP_BAD_REQUEST;
+                $errorMessage = 'Brak wolnego miejsca na dysku!';
+            }
         }
 
         if ($errorStatus != Response::HTTP_OK) {
             $requestIsValid = false;
-        } 
+        }
 
         return [$errorStatus, $errorMessage, $requestIsValid, $requestData];
     }
 
     private function getCurrentState(array $requestData, array $imageData = []): ConversionProcessState
     {
-        $state = $this->processStateManager->get($requestData['processHash']); 
+        $state = $this->processStateManager->get($requestData['processHash']);
 
         if ($state === null) {
 
@@ -160,7 +168,7 @@ class GTMConverterAPIController extends AbstractController
                 $this->getUser()->getId(),
                 $requestData['toFormat'],
                 $requestData['quality'],
-                $requestData['addCompress'], 
+                $requestData['addCompress'],
                 $imageData['originalName'],
                 $imageData['path']
             );

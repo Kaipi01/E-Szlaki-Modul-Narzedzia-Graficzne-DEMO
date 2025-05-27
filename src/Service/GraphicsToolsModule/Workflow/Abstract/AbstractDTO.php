@@ -7,7 +7,7 @@ use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionUnionType;
 
-abstract class OperationResults
+abstract class AbstractDTO
 {
     /**
      * Waliduje tablicę wejściową zgodnie z sygnaturą konstruktora klasy potomnej.

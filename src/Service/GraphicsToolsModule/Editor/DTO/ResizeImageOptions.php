@@ -2,9 +2,9 @@
 
 namespace App\Service\GraphicsToolsModule\Editor\DTO;
 
-use App\Service\GraphicsToolsModule\Workflow\Abstract\OperationResults;
+use App\Service\GraphicsToolsModule\Workflow\Abstract\AbstractDTO;
 
-class ResizeImageOptions extends OperationResults
+class ResizeImageOptions extends AbstractDTO
 {
     public const RESIZE_BY_PERCENT = "percent";
     public const RESIZE_BY_WIDTH = "width";

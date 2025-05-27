@@ -5,7 +5,6 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     gtm_uploads: '%kernel.project_dir%/public/graphics-tools-module/uploads'
-    gtm_uploads_short: 'graphics-tools-module/uploads/compressed'
 
 services:
     # default configuration for services in *this* file
@@ -45,12 +44,6 @@ services:
         arguments: 
             $uploadsDir: '%gtm_uploads%'
             $projectDir: '%kernel.project_dir%'
-        tags:
-            - { name: 'console.command' }
-
-    App\Command\GTMCompressImageCommand:
-        arguments: 
-            $uploadsDir: '%gtm_uploads%'
         tags:
             - { name: 'console.command' } 
 

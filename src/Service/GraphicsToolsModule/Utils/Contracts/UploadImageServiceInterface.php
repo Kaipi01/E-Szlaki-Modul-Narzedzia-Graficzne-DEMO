@@ -14,4 +14,6 @@ interface UploadImageServiceInterface
     public function getSaveImageName(string $originalName, bool $keepOriginalName = false, bool $setUniqueName = false): string;
     
     public function ensureDirectoryExists(string $directory): void;
+
+    public function generateUniqueName(): string;
 }
