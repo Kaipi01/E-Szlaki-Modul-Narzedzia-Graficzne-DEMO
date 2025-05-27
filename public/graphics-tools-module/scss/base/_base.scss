@@ -114,10 +114,14 @@ body {
     display: none !important;
   }  
 
+  input[disabled] {
+    opacity: 0.5;
+  }
+
   .area-header {
     display: inline-flex;
     align-items: center;
-    width: 100%;
+    // width: 100%;
     margin: 0;
     font-size: 1.35rem;
     font-weight: 600;
@@ -131,6 +135,8 @@ body {
     &-wrapper {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
       justify-content: space-between;
       margin-bottom: var(--current-gap); 
     }

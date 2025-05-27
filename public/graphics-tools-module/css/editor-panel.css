@@ -876,7 +876,11 @@
 }
 #graphics-tools-module-editor .editor-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: calc(var(--current-gap) / 2);
+}
+#graphics-tools-module-editor .editor-actions > button {
+  flex: 1;
 }
 #graphics-tools-module-editor .editor-tabs {
   flex: 0 0 100%;

@@ -9,19 +9,22 @@
 
     <ul class="access-links">
         <li>
-            <a class="access-link-wrapper access-link-wrapper--light-green modern-card" href="{{ path('gtm_user_images_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--light-green modern-card"
+                href="{{ path('gtm_user_images_panel') }}">
                 <i class="fa-solid fa-image access-icon"></i>
                 <span class="access-text">Moje grafiki</span>
             </a>
         </li>
         <li>
-            <a class="access-link-wrapper access-link-wrapper--light-green modern-card" href="{{ path('gtm_compressor_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--light-green modern-card"
+                href="{{ path('gtm_compressor_panel') }}">
                 <i class="fa-solid fa-minimize access-icon"></i>
                 <span class="access-text">Kompresor</span>
             </a>
         </li>
         <li>
-            <a class="access-link-wrapper access-link-wrapper--green modern-card" href="{{ path('gtm_converter_panel') }}">
+            <a class="access-link-wrapper access-link-wrapper--green modern-card"
+                href="{{ path('gtm_converter_panel') }}">
                 <i class="fa-solid fa-icons access-icon"></i>
                 <span class="access-text">Konwerter</span>
             </a>
@@ -37,8 +40,6 @@
 
 <div class="stats-area modern-card">
 
-    {# <div class="stats-chart-container"></div> #}
-
     <p class="area-header"><i class="fa-regular fa-hard-drive"></i> Miejsce na dysku</p>
 
     <circular-progress-bar data-size="160"
@@ -51,17 +52,21 @@
         }'>
     </circular-progress-bar>
 
+    {% if userCurrentDiscStoragePercent > 0 %}
+        <p>Zbliżasz się do limitu dostępnego miejsca na dysku. Usuń starsze pliki, by zwolnić miejsce.</p>
+    {% endif %}
+
 </div>
 
 <div class="content-area modern-card">
-
-    {% if userImages | length > 0 %}
 
     <section class="content-section">
         <div class="area-header-wrapper">
             <p class="area-header"><i class="fa-regular fa-image"></i> Ostatnie zdjęcia</p>
             <a href="{{ path('gtm_user_images_panel') }}" class="link small variant2">Zobacz wszystkie</a>
         </div>
+
+        {% if userImages | length > 0 %}
 
         <images-gallery-modal></images-gallery-modal>
 
@@ -114,7 +119,8 @@
                             </td>
                             <td><i class="fa-regular fa-image"></i> {{ image.name }}</td>
                             <td>{{ image.size | formatBytes }}</td>
-                            <td><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</td>
+                            <td><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y",
+                                "Europe/Warsaw") }}</td>
                             <td>
                                 <span class="image-operation__table-actions">
                                     <a href="{{ image.src }}" download
@@ -140,8 +146,14 @@
             </div>
         </div>
 
+        {% else %}
+
+        <custom-alert data-message="Obecnie nie posiadasz żadnych grafik"></custom-alert>
+
+        {% endif %}
+
     </section>
 
-    {% endif %}
+
 
 </div>

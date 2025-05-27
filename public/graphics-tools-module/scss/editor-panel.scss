@@ -10,6 +10,7 @@
 @use "./components/custom-select-green";
 @use "./components/animated-progress";
 @use "./components/modal";
+@use "./components/loading";
 
 #graphics-tools-module-editor {
   --editor-max-height: 37.5rem;
@@ -79,7 +80,12 @@
 
   .editor-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: calc(var(--current-gap) / 2);
+
+    & > button {
+      flex: 1;
+    }
   }
 
   .editor-tabs {

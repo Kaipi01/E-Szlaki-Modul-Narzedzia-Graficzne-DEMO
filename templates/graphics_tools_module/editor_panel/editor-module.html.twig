@@ -3,79 +3,22 @@
     <!-- Sekcja z zakładkami -->
     <div hidden class="editor-tabs" id="editor-tabs">
         <div class="tabs-header">
-            <button class="tab-button active" data-tab="crop">
+            <!-- Dodaj nowy przycisk zakładki w tabs-header -->
+            <button class="tab-button active" data-tab="effects">
+                <i class="fas fa-magic"></i> Efekty
+            </button>
+            <button class="tab-button" data-tab="crop">
                 <i class="fas fa-crop-alt"></i> Przytnij
             </button>
             <button class="tab-button" data-tab="rotate">
                 <i class="fas fa-sync"></i> Obróć
             </button>
-            <!-- Dodaj nowy przycisk zakładki w tabs-header -->
-            <button class="tab-button" data-tab="effects">
-                <i class="fas fa-magic"></i> Efekty
-            </button>
         </div>
 
         <!-- Zawartość zakładek -->
         <div class="tab-content">
-            <!-- Zakładka przycinania -->
-            <div class="tab-pane active" id="crop-tab">
-
-                <div class="effect-group">
-                    <div class="effect-header">
-                        <span>Przytnij</span>
-                    </div>
-                    <div class="effect-controls">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="crop-toggle-checkbox">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="crop-width">Szerokość (px):</label>
-                    <input type="number" id="crop-width" min="1" placeholder="Szerokość">
-                </div>
-                <div class="form-group">
-                    <label for="crop-height">Wysokość (px):</label>
-                    <input type="number" id="crop-height" min="1" placeholder="Wysokość">
-                </div>
-                <div class="form-group">
-                    <label for="aspect-ratio">Proporcje:</label>
-                    <select id="aspect-ratio">
-                        <option value="free">Dowolne</option>
-                        <option value="1:1">1:1 (Kwadrat)</option>
-                        <option value="4:3">4:3</option>
-                        <option value="16:9">16:9</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Zakładka obracania -->
-            <div class="tab-pane" id="rotate-tab">
-                <div class="form-group">
-                    <label for="rotation-angle">Kąt obrotu (°):</label>
-                    <input type="number" id="rotation-angle" value="0" min="-180" max="180" step="1">
-                </div>
-
-                <div class="rotation-buttons">
-                    <button id="rotate-left" class="link variant2 small">
-                        <i class="fas fa-undo"></i> -90°
-                    </button>
-                    <button id="rotate-right" class="link variant2 small">
-                        <i class="fas fa-redo"></i> +90°
-                    </button>
-                    <button id="flip-horizontal" class="link variant2 small">
-                        <i class="fas fa-arrows-left-right"></i> Odbij poziomo
-                    </button>
-                    <button id="flip-vertical" class="link variant2 small">
-                        <i class="fas fa-arrows-up-down"></i> Odbij pionowo
-                    </button>
-                </div>
-            </div>
-
-            <!-- Dodaj nową zawartość zakładki w tab-content -->
-            <div class="tab-pane" id="effects-tab">
+              <!-- Dodaj nową zawartość zakładki w tab-content -->
+            <div class="tab-pane active" id="effects-tab">
 
                 <!-- Blur -->
                 <div class="effect-group">
@@ -196,6 +139,63 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                </div>
+            </div>
+
+            <!-- Zakładka przycinania -->
+            <div class="tab-pane" id="crop-tab">
+
+                <div class="effect-group">
+                    <div class="effect-header">
+                        <span>Przytnij</span>
+                    </div>
+                    <div class="effect-controls">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="crop-toggle-checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="crop-width">Szerokość (px):</label>
+                    <input type="number" id="crop-width" min="1" disabled placeholder="Szerokość">
+                </div>
+                <div class="form-group">
+                    <label for="crop-height">Wysokość (px):</label>
+                    <input type="number" id="crop-height" min="1" disabled placeholder="Wysokość">
+                </div>
+                <div class="form-group">
+                    <label for="aspect-ratio">Proporcje:</label>
+                    <select id="aspect-ratio" disabled>
+                        <option value="free">Dowolne</option>
+                        <option value="1:1">1:1 (Kwadrat)</option>
+                        <option value="4:3">4:3</option>
+                        <option value="16:9">16:9</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Zakładka obracania -->
+            <div class="tab-pane" id="rotate-tab">
+                <div class="form-group">
+                    <label for="rotation-angle">Kąt obrotu (°):</label>
+                    <input type="number" id="rotation-angle" value="0" min="-180" max="180" step="1">
+                </div>
+
+                <div class="rotation-buttons">
+                    <button id="rotate-left" class="link variant2 small">
+                        <i class="fas fa-undo"></i> -90°
+                    </button>
+                    <button id="rotate-right" class="link variant2 small">
+                        <i class="fas fa-redo"></i> +90°
+                    </button>
+                    <button id="flip-horizontal" class="link variant2 small">
+                        <i class="fas fa-arrows-left-right"></i> Odbij poziomo
+                    </button>
+                    <button id="flip-vertical" class="link variant2 small">
+                        <i class="fas fa-arrows-up-down"></i> Odbij pionowo
+                    </button>
                 </div>
             </div>
 

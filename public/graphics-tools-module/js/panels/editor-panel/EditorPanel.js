@@ -272,8 +272,16 @@ export default class EditorPanel extends AbstractPanel {
       }
 
       if (e.target.checked) {
+        this.cropHeightInput.removeAttribute('disabled')
+        this.cropWidthInput.removeAttribute('disabled')
+        this.aspectRatioSelect.removeAttribute('disabled')
+
         this.showCropper();
       } else {
+        this.cropHeightInput.setAttribute('disabled', 'true')
+        this.cropWidthInput.setAttribute('disabled', 'true')
+        this.aspectRatioSelect.setAttribute('disabled', 'true')
+
         this.hideCropper();
       }
     });
@@ -711,6 +719,9 @@ export default class EditorPanel extends AbstractPanel {
     const formData = new FormData()
     const imageBlob = await this.getImageBlob(mimeType)
 
+    this.exportButton.innerHTML = '<i class="fas fa-download"></i> Trwa Eksportowanie. Proszę czekać ...'
+    this.exportButton.classList.add('loading-btn-icon')  
+
     console.info(this.state.currentChanges)
 
     formData.append('imageBlob', imageBlob, imageName)
@@ -739,6 +750,9 @@ export default class EditorPanel extends AbstractPanel {
       URL.revokeObjectURL(link.href);
 
       Toast.show(Toast.SUCCESS, "Obraz został pomyślnie wyeksportowany!")
+
+      this.exportButton.innerHTML = '<i class="fas fa-download"></i> Eksportuj'
+      this.exportButton.classList.remove('loading-btn-icon')
     }
   }
 
@@ -976,6 +990,8 @@ export default class EditorPanel extends AbstractPanel {
         this.editorActionsContainer.removeAttribute('hidden')
         this.editorTabs.removeAttribute('hidden')
         this.editorContent.classList.remove('editor-content--no-image')
+        this.containerAlerts.innerHTML = ''
+        this.containerAlerts.setAttribute('hidden', '')
       };
     };
 
@@ -986,6 +1002,7 @@ export default class EditorPanel extends AbstractPanel {
   /** @param {string} message - Treść komunikatu */
   showError(message) {
     this.containerAlerts.innerHTML = ''
+    this.containerAlerts.removeAttribute('hidden')
     super.showError(message, this.containerAlerts);
   }
 }

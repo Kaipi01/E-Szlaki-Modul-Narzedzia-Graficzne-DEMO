@@ -14,7 +14,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 class UserStorageService implements UserStorageInterface
 {
     public const DISC_STORAGE_UNIT = 'MB';
-    public const MAX_DISC_STORAGE = 500;
+    public const MAX_DISC_STORAGE = 40;
 
     public function __construct(
         private readonly GTMImageRepository $imageRepository,

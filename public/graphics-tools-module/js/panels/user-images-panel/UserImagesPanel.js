@@ -88,14 +88,14 @@ export default class UserImagesPanel extends AbstractPanel {
 
     modalMessage.textContent = "Czy na pewno usunąć wszystkie swoje grafiki? Tej operacji nie da się cofnąć"
 
-    confirmBtn.addEventListener('click', async (e) => {
+    confirmBtn.onclick = async (e) => {
       await this.removeAllImages(e);
 
       Modal.hide(this.CONFIRM_MODAL_ID)
 
-    }, { once: true });
+    }
 
-    denyBtn.addEventListener('click', (e) => Modal.hide(this.CONFIRM_MODAL_ID), { once: true });
+    denyBtn.onclick = (e) => Modal.hide(this.CONFIRM_MODAL_ID) 
   }
 
   /** Inicjalizacja nasłuchiwania zdarzeń */
@@ -127,22 +127,23 @@ export default class UserImagesPanel extends AbstractPanel {
 
       if (target.hasAttribute('data-print-link')) {
         e.preventDefault()
+        console.log('print') // TODO: Zaimplementuj
       }
 
       if (target.hasAttribute('data-remove-link')) {
         this.showRemoveImageConfirmModal(e)
       }
 
-      if (target.hasAttribute('data-confirm-btn')) {
+      // if (target.hasAttribute('data-confirm-btn')) {
 
-        await this.removeImage(e);
+      //   await this.removeImage(e);
 
-        Modal.hide(this.CONFIRM_MODAL_ID)
-      }
+      //   Modal.hide(this.CONFIRM_MODAL_ID)
+      // }
 
-      if (target.hasAttribute('data-deny-btn')) {
-        Modal.hide(this.CONFIRM_MODAL_ID)
-      }
+      // if (target.hasAttribute('data-deny-btn')) {
+      //   Modal.hide(this.CONFIRM_MODAL_ID)
+      // }
 
     })
   }
@@ -157,6 +158,10 @@ export default class UserImagesPanel extends AbstractPanel {
 
     if (success) {
       Toast.show(Toast.SUCCESS, `Pomyślnie usunięto wszystkie grafiki w liczbie: ${deletedCount}`)
+
+      this.resultsCount.textContent = "0"
+      this.imagesContainer.innerHTML = ''
+      this.noResults.style.removeProperty('display')
     } else {
       this.showError(error)
     }
@@ -165,11 +170,16 @@ export default class UserImagesPanel extends AbstractPanel {
     e.target.classList.remove('loading-btn-icon')
   }
 
-  /** @param {Event} e  */
-  async removeImage(e) {
-    const imageId = this.state.currentImageIdToRemove
+  /** 
+   * @param {number|null} imageId  
+   * @param {Event} e
+   */
+  async removeImage(imageId, e) {
+    //const imageId = this.state.currentImageIdToRemove
 
-    if (!imageId || isNaN(imageId)) {
+    if (! imageId) return
+
+    if (isNaN(imageId)) {
       this.showError("Podano błędną wartość ID !")
       return
     }
@@ -206,10 +216,27 @@ export default class UserImagesPanel extends AbstractPanel {
     const modal = Modal.get(this.CONFIRM_MODAL_ID);
     const modalMessage = modal.querySelector('[data-message]');
 
-    this.state.currentImageIdToRemove = imageId
+    //this.state.currentImageIdToRemove = imageId
 
-    //const confirmBtn = modal.querySelector('[data-confirm-btn]');
-    //const denyBtn = modal.querySelector('[data-deny-btn]');
+    const confirmBtn = modal.querySelector('[data-confirm-btn]');
+    const denyBtn = modal.querySelector('[data-deny-btn]');
+
+    confirmBtn.onclick = async (e) => {
+        await this.removeImage(imageId, e);
+
+        Modal.hide(this.CONFIRM_MODAL_ID)
+    }
+
+    denyBtn.onclick = () => Modal.hide(this.CONFIRM_MODAL_ID)
+
+      // if (target.hasAttribute('data-confirm-btn')) {
+      //   await this.removeImage(e);
+      //   Modal.hide(this.CONFIRM_MODAL_ID)
+      // }
+
+      // if (target.hasAttribute('data-deny-btn')) {
+      //   Modal.hide(this.CONFIRM_MODAL_ID)
+      // }
 
     modalMessage.textContent = `Czy na pewno chcesz usunąć "${imageName}" ?`
   }

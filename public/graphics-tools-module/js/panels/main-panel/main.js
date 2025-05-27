@@ -1,6 +1,7 @@
 import ThemeSwitcher from "../../modules/ThemeSwitcher.js"
 import SearchForm from "../../modules/SearchForm.js"
 import ImagesGalleryModal from "../../modules/ImagesGallery.js"
+import Alert from "../../modules/Alert.js"
 import CircularProgressBar from "../../modules/CircularProgressBar.js"
 
 
