@@ -286,6 +286,7 @@
   --text-dark: #2c3e50;
   --shadow-color: rgba(0, 0, 0, 0.3);
   --card-bg: rgba(255, 255, 255, 0.9);
+  --elements-edge-gap: 1.25rem;
 }
 @media (max-width: 55em) {
   #graphics-tools-module .images-gallery [data-gallery-maximize-btn] {
@@ -365,16 +366,16 @@
   background-color: var(--green);
 }
 #graphics-tools-module .images-gallery .gallery-prev {
-  left: 1.25rem;
+  left: var(--elements-edge-gap);
 }
 #graphics-tools-module .images-gallery .gallery-next {
-  right: 1.25rem;
+  right: var(--elements-edge-gap);
 }
 #graphics-tools-module .images-gallery .gallery-options {
   display: flex;
   position: absolute;
-  top: 1.25rem;
-  left: 1.25rem;
+  top: var(--elements-edge-gap);
+  left: var(--elements-edge-gap);
   align-items: center;
   justify-content: center;
   gap: 2rem;
@@ -402,8 +403,8 @@
 #graphics-tools-module .images-gallery .gallery-others {
   display: flex;
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
+  top: var(--elements-edge-gap);
+  right: var(--elements-edge-gap);
   align-items: center;
   justify-content: center;
   gap: 2rem;
@@ -436,7 +437,7 @@
 #graphics-tools-module .images-gallery .gallery-thumbnails {
   display: flex;
   position: absolute;
-  bottom: 1.25rem;
+  bottom: var(--elements-edge-gap);
   left: 50%;
   max-width: 80%;
   padding: 0.625rem;
@@ -466,13 +467,16 @@
   transform: scale(1.1);
 }
 @media (max-width: 48rem) {
+  #graphics-tools-module .images-gallery {
+    --elements-edge-gap: 0.5rem;
+  }
   #graphics-tools-module .images-gallery .gallery-nav {
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1.5rem;
   }
   #graphics-tools-module .images-gallery .gallery-thumbnails {
-    bottom: 3.125rem;
+    bottom: 0;
   }
 }
 @keyframes float-around {

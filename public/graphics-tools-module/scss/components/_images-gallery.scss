@@ -7,6 +7,7 @@
     --text-dark: #2c3e50;
     --shadow-color: rgba(0, 0, 0, 0.3);
     --card-bg: rgba(255, 255, 255, 0.9); 
+    --elements-edge-gap: 1.25rem;
 
     @media (max-width: $content-breakpoint-tablet) {
       [data-gallery-maximize-btn] {
@@ -93,18 +94,18 @@
     }
 
     .gallery-prev {
-      left: toRem(20);
+      left: var(--elements-edge-gap);
     }
 
     .gallery-next {
-      right: toRem(20);
+      right: var(--elements-edge-gap);
     }
 
     .gallery-options {
       display: flex;
       position: absolute;
-      top: toRem(20);
-      left: toRem(20);
+      top: var(--elements-edge-gap);
+      left: var(--elements-edge-gap);
       align-items: center;
       justify-content: center;
       gap: 2rem;
@@ -136,8 +137,8 @@
     .gallery-others {
       display: flex;
       position: absolute;
-      top: toRem(20);
-      right: toRem(20);
+      top: var(--elements-edge-gap);
+      right: var(--elements-edge-gap);
       align-items: center;
       justify-content: center;
       gap: 2rem;
@@ -174,7 +175,7 @@
     .gallery-thumbnails {
       display: flex;
       position: absolute;
-      bottom: toRem(20);
+      bottom: var(--elements-edge-gap);
       left: 50%;
       max-width: 80%;
       padding: toRem(10);
@@ -210,6 +211,8 @@
 
     @media (max-width: toRem(768)) { 
 
+      --elements-edge-gap: 0.5rem;
+
       .gallery-nav {
         width: toRem(40);
         height: toRem(40);
@@ -217,7 +220,7 @@
       }
 
       .gallery-thumbnails {
-        bottom: toRem(50);
+        bottom: 0;
       }
     }
 

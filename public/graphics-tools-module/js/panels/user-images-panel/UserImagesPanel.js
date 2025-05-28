@@ -385,6 +385,7 @@ export default class UserImagesPanel extends AbstractPanel {
     link.setAttribute('aria-current', 'page');
     link.setAttribute('data-gallery-preview', '');
     link.setAttribute('data-src', image.thumbnailSrc ?? image.src);
+    link.setAttribute('data-download-src', image.src);
 
     // Overlay z informacjami
     const overlay = document.createElement('div');

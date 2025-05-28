@@ -20,7 +20,7 @@ export default class ImagesGalleryModal extends HTMLElement {
 
   render() {
     this.className = "images-gallery";
-    this.innerHTML = `
+    this.innerHTML = /*html*/`
             <div class="gallery-modal" id="galleryModal">
                 <div class="gallery-content">
                     <div class="gallery-options">
@@ -43,7 +43,7 @@ export default class ImagesGalleryModal extends HTMLElement {
                       <a download data-gallery-download-btn class="gallery-option-btn">
                         <span class="sr-only">Pobierz zdjęcie</span>
                         <i class="fa-solid fa-download"></i>
-                      </a>
+                      </a> 
 
                     </div>
 
@@ -81,7 +81,7 @@ export default class ImagesGalleryModal extends HTMLElement {
 
     this.galleryPrevBtn.addEventListener('click', () => this.showImage(this.currentImageIndex - 1));
 
-    this.galleryNextBtn.addEventListener('click', () => this.showImage(this.currentImageIndex + 1));
+    this.galleryNextBtn.addEventListener('click', () => this.showImage(this.currentImageIndex + 1)); 
 
     this.galleryCloseBtn.addEventListener('click', () => {
 
@@ -158,7 +158,7 @@ export default class ImagesGalleryModal extends HTMLElement {
     this.galleryPrintBtn = this.querySelector('[data-gallery-print-btn]')
     this.galleryDownloadBtn = this.querySelector('[data-gallery-download-btn]')
     this.galleryMaximizeBtn = this.querySelector('[data-gallery-maximize-btn]')
-    this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]')
+    this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]') 
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
 
     this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', index))
@@ -196,9 +196,7 @@ export default class ImagesGalleryModal extends HTMLElement {
       thumbnail.src = imagePreview.dataset.src
       thumbnail.className = "gallery-thumbnail"
 
-      galleryThumbnailsContainer.append(thumbnail);
-
-      console.log(thumbnail)
+      galleryThumbnailsContainer.append(thumbnail); 
 
       thumbnail.addEventListener('click', () => this.showImage(this.imagePreviews.length - (idx + 1)))
     });
@@ -226,12 +224,14 @@ export default class ImagesGalleryModal extends HTMLElement {
     const galleryImages = this.querySelectorAll('.gallery-image') 
 
     galleryImages.forEach(image => image.classList.remove('fullscreen'))
-  }
+  } 
 
   showImage(index) {
     const galleryImages = this.querySelectorAll('.gallery-image')
     const galleryThumbnails = this.querySelectorAll('.gallery-thumbnail')
     const galleryCounter = this.querySelector('#galleryCounter')
+    const currentGalleryImage = galleryImages[index]
+    const currentGalleryImageLink = document.querySelector(`[data-gallery-preview="${index}"]`)
 
     if (index < 0) index = this.imagePreviews.length - 1;
     if (index >= this.imagePreviews.length) index = 0;
@@ -250,13 +250,10 @@ export default class ImagesGalleryModal extends HTMLElement {
       }
     })
 
-    galleryImages[index]?.classList.add('active');
-    // galleryThumbnails[index]?.classList.add('active');
+    currentGalleryImage?.classList.add('active');   
 
-    console.log(galleryImages[index], "TODO: Popraw to dodając nowy atrybut, który zapisze orginalną grafikę do pobrania i drukowania")
-
-    this.galleryPrintBtn.setAttribute('data-src', galleryImages[index]?.src)
-    this.galleryDownloadBtn.href = galleryImages[index]?.src
+    this.galleryPrintBtn.setAttribute('data-src', currentGalleryImageLink?.getAttribute('data-download-src'))
+    this.galleryDownloadBtn.href = currentGalleryImageLink?.getAttribute('data-download-src')
 
     galleryCounter.textContent = `${index + 1} / ${this.imagePreviews.length}`
   }

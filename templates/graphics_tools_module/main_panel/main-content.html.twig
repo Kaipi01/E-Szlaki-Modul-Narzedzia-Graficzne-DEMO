@@ -71,26 +71,26 @@
 
             {% for image in userImages | slice(0, 3) %}
 
-            <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ image.src }}">
-                <div class="image-overlay">
-                    <div class="photo-info">
-                        <div class="photo-info-text">
-                            <p class="photo-name medium"><i class="fa-regular fa-image"></i> {{ image.name }}</p>
-                            <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
-                        </div>
-                    </div>
-                </div>
-
                 {% if image.thumbnailSrc %}
-                {% set thumbnail = image.thumbnailSrc %}
+                    {% set thumbnail = image.thumbnailSrc %}
                 {% else %}
-                {% set thumbnail = image.src %}
+                    {% set thumbnail = image.src %}
                 {% endif %}
 
-                <img src="{{ thumbnail }}" />
+                <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}">
+                    <div class="image-overlay">
+                        <div class="photo-info">
+                            <div class="photo-info-text">
+                                <p class="photo-name medium"><i class="fa-regular fa-image"></i> {{ image.name }}</p>
+                                <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
-            </a>
+                    <img src="{{ thumbnail }}" />
+
+                    <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+                </a>
 
             {% endfor %}
 
@@ -108,7 +108,7 @@
                     </thead>
                     <tbody>
 
-                        {% for image in userImages | slice(0, 8) %}
+                      {% for image in userImages | slice(0, 8) %}
 
                         <tr>
                             <td data-title="Format">
@@ -127,8 +127,13 @@
                                         <span>Pobierz</span>
                                     </a>
 
-                                    <a href="#" aria-current="page" class="mx-auto badge image-operation__item"
-                                        data-gallery-preview data-src="{{ image.src }}">
+                                    {% if image.thumbnailSrc %}
+                                        {% set thumbnail = image.thumbnailSrc %}
+                                    {% else %}
+                                        {% set thumbnail = image.src %}
+                                    {% endif %}
+
+                                    <a href="#" aria-current="page" class="mx-auto badge image-operation__item" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}">
                                         <i class="fa-solid fa-eye image-operation__item-icon"></i>
                                         <span>Podgląd</span>
                                     </a>
@@ -136,7 +141,7 @@
                             </td>
                         </tr>
 
-                        {% endfor %}
+                      {% endfor %}
 
                     </tbody>
                 </table>
