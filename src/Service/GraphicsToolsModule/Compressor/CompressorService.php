@@ -21,7 +21,7 @@ class CompressorService implements CompressorInterface
     ) {} 
  
     /** @inheritDoc */
-    public function compress(string $imagePath, int $strength = 80, ?\Closure $afterOperationCallback = null): CompressionResults
+    public function compress(string $imagePath, int $quality = 80, ?\Closure $afterOperationCallback = null): CompressionResults
     {  
         if (!file_exists($imagePath)) {
             throw new \Exception("Plik nie istnieje: {$imagePath}");
@@ -32,7 +32,7 @@ class CompressorService implements CompressorInterface
         $downloadUrl = $this->urlGenerator->generate('gtm_download_image', ['serverName' => $imageName], UrlGeneratorInterface::ABSOLUTE_URL);
 
         try { 
-            $this->optimizer->optimize($imagePath, $strength); 
+            $this->optimizer->optimize($imagePath, $quality); 
 
             if (is_callable($afterOperationCallback)) {
                 $afterOperationCallback($imagePath);
@@ -54,7 +54,7 @@ class CompressorService implements CompressorInterface
             'imageName' => $imageName,
             'originalSize' => $originalSize,
             'compressedSize' => $compressedSize,
-            'compressionStrength' => $strength,
+            'compressionQuality' => $quality,
             'compressionRatio' => $compressionRatio,
             'src' => $this->pathResolver->getRelativePath($imagePath),  
             'downloadURL' => $downloadUrl,

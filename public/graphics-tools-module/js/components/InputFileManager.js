@@ -31,7 +31,7 @@ export default class InputFileManager {
     /**
      * Dodaje pliki do managera
      * @param {FileList|Array<File>} fileList - Lista plików do dodania
-     * @returns {Array<File>} - Lista pomyślnie dodanych plików
+     * @returns {Array<File>} - Tablica pomyślnie dodanych plików
      */
     addFiles(fileList) {
         if (!fileList || fileList.length === 0) return [];

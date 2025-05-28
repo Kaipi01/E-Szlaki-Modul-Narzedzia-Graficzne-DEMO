@@ -7,7 +7,7 @@ interface ImageOptimizerInterface
     /**
      * Optymalizuje obraz 
      * @param string $imagePath Ścieżka do pliku 
-     * @param int $strength Siła optymalizacji 
+     * @param int $quality Siła optymalizacji 
      */
-    public function optimize(string $imagePath, int $strength = 80): void;
+    public function optimize(string $imagePath, int $quality = 80): void;
 }

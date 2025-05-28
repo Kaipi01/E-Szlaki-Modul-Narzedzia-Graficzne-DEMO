@@ -33,7 +33,7 @@ export default class CompressorPanel extends OperationPanel {
     this.customValueInput = this.getByAttribute('data-custom-value-input')
     this.resizeSelectElement = this.getByAttribute('data-resize-percent')
     this.resizePercentCustomInput = this.getByAttribute('data-resize-percent-custom-input')
-    this.strengthInput = this.getByAttribute('data-strength-input')
+    this.qualityInput = this.getByAttribute('data-quality-input')
 
     this.resizeSelect = new CustomSelect(this.resizeSelectElement)
 
@@ -45,7 +45,7 @@ export default class CompressorPanel extends OperationPanel {
       changeBy: this.RESIZE_BY_PERCENT
     }
 
-    this.state.compressStrength = parseInt(this.strengthInput.value)
+    this.state.compressQuality = parseInt(this.qualityInput.value)
 
     this.initComponents();
     this.initCompressorEvents()
@@ -66,7 +66,7 @@ export default class CompressorPanel extends OperationPanel {
 
     document.addEventListener(CustomTabs.TAB_CHANGE_EVENT, (e) => this.handleSettingsTabsChanged(e))
 
-    this.strengthInput.addEventListener('input', (e) => this.state.compressStrength = parseInt(this.strengthInput.value))
+    this.qualityInput.addEventListener('input', (e) => this.state.compressQuality = parseInt(this.qualityInput.value))
 
     this.resizePercentCustomInput.addEventListener('input', (e) => {
       this.state.resize.percent = parseInt(e.target.value)
@@ -144,7 +144,7 @@ export default class CompressorPanel extends OperationPanel {
     })
   }
 
-  getCompressStrength = () => this.state.compressStrength
+  getCompressQuality = () => this.state.compressQuality
 
   getImageResize = () => this.state.resize
 
@@ -167,7 +167,7 @@ export default class CompressorPanel extends OperationPanel {
     this.uploadService = new CompressorUploadService({
         ...this.options,
         getImageResize: this.getImageResize.bind(this),
-        getCompressStrength: this.getCompressStrength.bind(this)
+        getCompressQuality: this.getCompressQuality.bind(this)
       },
       this.uiManager, this.InputFileManager
     );
@@ -211,12 +211,12 @@ export default class CompressorPanel extends OperationPanel {
   }
 
   validateState() {
-    const compressStrength = this.state.compressStrength
+    const compressQuality = this.state.compressQuality
 
     console.log(this.state)
 
-    if (!compressStrength || compressStrength < 1 || compressStrength > 100) {
-      throw new Error(`Podano nie poprawną wartość dla siły kompresji: ${compressStrength}%`);
+    if (!compressQuality || compressQuality < 1 || compressQuality > 100) {
+      throw new Error(`Podano nie poprawną wartość dla siły kompresji: ${compressQuality}%`);
     } 
 
     const { width, height, percent, changeBy, isChange } = this.state.resize

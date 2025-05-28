@@ -8,6 +8,7 @@ import Modal from "../../modules/Modal.js";
 import { GRAPHICS_TOOLS_MODULE } from "../../utils/constants.js"
 import AbstractPanel from "../../modules/AbstractPanel.js";
 import { debounce } from "../../utils/time-utils.js";
+import printImage from "../../utils/printImage.js";
 
 /**
  * Klasa UserImagesPanel - zarządza panelem zdjęć użytkownika z mechanizmem infinity scroll,
@@ -39,11 +40,11 @@ export default class UserImagesPanel extends AbstractPanel {
       loading: false,
       hasMore: true,
       searchTerm: '',
+      searchTermFromURL: new URL(window.location).searchParams.get('szukaj') ?? '',
       filters: {
         date: 'all'
       },
-      sortBy: 'date-desc',
-      currentImageIdToRemove: null
+      sortBy: 'date-desc'
     };
 
     this.imagesNumber = 0
@@ -127,24 +128,12 @@ export default class UserImagesPanel extends AbstractPanel {
 
       if (target.hasAttribute('data-print-link')) {
         e.preventDefault()
-        console.log('print') // TODO: Zaimplementuj
+        printImage(e.target.dataset.src)
       }
 
       if (target.hasAttribute('data-remove-link')) {
         this.showRemoveImageConfirmModal(e)
       }
-
-      // if (target.hasAttribute('data-confirm-btn')) {
-
-      //   await this.removeImage(e);
-
-      //   Modal.hide(this.CONFIRM_MODAL_ID)
-      // }
-
-      // if (target.hasAttribute('data-deny-btn')) {
-      //   Modal.hide(this.CONFIRM_MODAL_ID)
-      // }
-
     })
   }
 
@@ -175,8 +164,6 @@ export default class UserImagesPanel extends AbstractPanel {
    * @param {Event} e
    */
   async removeImage(imageId, e) {
-    //const imageId = this.state.currentImageIdToRemove
-
     if (! imageId) return
 
     if (isNaN(imageId)) {
@@ -194,9 +181,6 @@ export default class UserImagesPanel extends AbstractPanel {
       Toast.show(Toast.SUCCESS, `Grafika "${imageName}" została pomyślnie usunięta`)
 
       this.container.querySelector(`[data-image-card="${imageId}"]`)?.remove()
-
-      this.state.currentImageIdToRemove = null
-
     } else {
       this.showError(error)
     }
@@ -215,9 +199,6 @@ export default class UserImagesPanel extends AbstractPanel {
     const imageName = e.target.dataset.imageName
     const modal = Modal.get(this.CONFIRM_MODAL_ID);
     const modalMessage = modal.querySelector('[data-message]');
-
-    //this.state.currentImageIdToRemove = imageId
-
     const confirmBtn = modal.querySelector('[data-confirm-btn]');
     const denyBtn = modal.querySelector('[data-deny-btn]');
 
@@ -322,13 +303,14 @@ export default class UserImagesPanel extends AbstractPanel {
     this.setLoading(true);
 
     try {
+
       const params = new URLSearchParams({
         page: this.state.page,
         perPage: this.options.perPage,
-        search: this.state.searchTerm,
+        search: this.state.searchTerm !== '' ? this.state.searchTerm : this.state.searchTermFromURL,
         date: this.state.filters.date,
         sortBy: this.state.sortBy
-      });
+      }); 
 
       const response = await fetch(`${this.options.getUserImagesUrl}?${params}`);
 
@@ -466,6 +448,7 @@ export default class UserImagesPanel extends AbstractPanel {
     printLink.href = '#'
     printLink.className = "badge badge-link"
     printLink.setAttribute('data-print-link', '')
+    printLink.setAttribute('data-src', image.src)
 
     printLink.innerHTML = `
       <i class="fa-solid fa-print badge-link-icon"></i>
@@ -525,8 +508,6 @@ export default class UserImagesPanel extends AbstractPanel {
   setLoading(isLoading) {
     this.state.loading = isLoading;
 
-    // this.loadingIndicator.classList.add('visible');
-
     if (this.loadingIndicator) {
       this.loadingIndicator.classList.toggle('visible', isLoading);
     }
@@ -556,6 +537,4 @@ export default class UserImagesPanel extends AbstractPanel {
       year: 'numeric'
     });
   }
-
-  
 }

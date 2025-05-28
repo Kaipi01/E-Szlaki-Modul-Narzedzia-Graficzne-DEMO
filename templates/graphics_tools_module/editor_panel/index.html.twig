@@ -2,11 +2,9 @@
 
 {% block title %}Narzędzia Graficzne | Edytor{% endblock %}
 
-{% block panel_stylesheets %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
-    integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="{{ asset('graphics-tools-module/css/editor-panel.css') }}">
+{% block panel_stylesheets %} 
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/libs/cropper.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('graphics-tools-module/css/editor-panel.css') }}">
 {% endblock %}
 
 {% block panel_content %}
@@ -18,7 +16,7 @@
                 <p class="area-header"><i class="fa-solid fa-screwdriver-wrench"></i> Edytor</p>
 
                 <div id="editor-actions" hidden class="editor-actions">
-                    <button id="remove-image-button" class="link medium variant2">
+                    <button id="remove-image-button" class="link medium variant-red">
                         <i class="fas fa-cancel"></i> Usuń grafikę
                     </button>
 
@@ -52,10 +50,7 @@
     const EXPORT_IMAGE_URL = "{{ path('gtm_editor_api_export_image') }}"
     const GET_IMAGE_DATA_URL = "{{ GET_IMAGE_DATA_URL }}"
 
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
-    integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="module" src="{{ asset('graphics-tools-module/js/panels/editor-panel/main.js') }}"></script>
-
+</script> 
+    <script src="{{ asset('graphics-tools-module/libs/cropper.min.js') }}"></script>
+    <script type="module" src="{{ asset('graphics-tools-module/js/panels/editor-panel/main.js') }}"></script>
 {% endblock %}

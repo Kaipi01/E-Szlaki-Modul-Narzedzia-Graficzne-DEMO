@@ -29,6 +29,11 @@
       }
     }
 
+    &__info {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+    }
+
     &__fields {
       display: flex;
       align-items: center;
@@ -43,11 +48,10 @@
     }
 
     &__control {
-      width: auto;
       border-radius: 5px;
       font-weight: bold;
 
-      &[name="strength"] {
+      &[name="quality"] {
         color: #fff;
       }
     } 

@@ -10,15 +10,16 @@ use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use App\Service\GraphicsToolsModule\Workflow\DTO\ImageOperationStatus;
-use App\Service\GraphicsToolsModule\Utils\Uuid;
 use App\Service\GraphicsToolsModule\Workflow\Contracts\ImageProcessStateManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Exception;
+use App\Service\GraphicsToolsModule\Utils\Uuid;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Response;
+use Exception;
+
 
 #[Route(path: '/profil')]
 class GTMCompressorAPIController extends AbstractController
@@ -138,7 +139,7 @@ class GTMCompressorAPIController extends AbstractController
             $state = new CompressionProcessState(
                 $processHash,
                 $this->getUser()->getId(),
-                $options["strength"],
+                $options["quality"],
                 $imageData['originalName'],
                 $imageData['path'],
                 $resizeOptions
@@ -156,7 +157,7 @@ class GTMCompressorAPIController extends AbstractController
     private function validateOptions(array $options): void
     {
         $changeByTypes = [ResizeImageOptions::RESIZE_BY_PERCENT, ResizeImageOptions::RESIZE_BY_HEIGHT, ResizeImageOptions::RESIZE_BY_WIDTH];
-        $requiredKeys = array_merge(['strength', 'isChange', 'changeBy'], $changeByTypes);
+        $requiredKeys = array_merge(['quality', 'isChange', 'changeBy'], $changeByTypes);
 
         foreach ($requiredKeys as $key) {
             if (!array_key_exists($key, $options)) {
@@ -164,8 +165,8 @@ class GTMCompressorAPIController extends AbstractController
             }
         }
 
-        if (!is_int($options['strength']) || $options['strength'] < 0 || $options['strength'] > 100) {
-            throw new \InvalidArgumentException("Wartość 'strength' musi być liczbą całkowitą z zakresu 0–100.");
+        if (!is_int($options['quality']) || $options['quality'] < 0 || $options['quality'] > 100) {
+            throw new \InvalidArgumentException("Wartość 'quality' musi być liczbą całkowitą z zakresu 0–100.");
         }
 
         if (!is_bool($options['isChange'])) {

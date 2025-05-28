@@ -1,11 +1,8 @@
-{# <div class="search-area">
-    <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
-</div> #}
-
+ 
 <div class="quick-access-area">
     {# <p class="area-header">Szybki dostęp</p> modern-card #}
 
-    <custom-search-form data-id="gtm-search-input-for-images" data-for-panel="main"></custom-search-form>
+    <custom-search-form data-input-name="szukaj" data-action="{{ path('gtm_user_images_panel') }}"></custom-search-form>
 
     <ul class="access-links">
         <li>
@@ -52,7 +49,7 @@
         }'>
     </circular-progress-bar>
 
-    {% if userCurrentDiscStoragePercent > 0 %}
+    {% if userCurrentDiscStoragePercent > 90 %}
         <p>Zbliżasz się do limitu dostępnego miejsca na dysku. Usuń starsze pliki, by zwolnić miejsce.</p>
     {% endif %}
 
@@ -114,14 +111,15 @@
                         {% for image in userImages | slice(0, 8) %}
 
                         <tr>
-                            <td>
+                            <td data-title="Format">
                                 <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
                             </td>
-                            <td><i class="fa-regular fa-image"></i> {{ image.name }}</td>
-                            <td>{{ image.size | formatBytes }}</td>
-                            <td><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y",
-                                "Europe/Warsaw") }}</td>
-                            <td>
+                            <td data-title="Nazwa pliku"><span><i class="fa-regular fa-image"></i> {{ image.name }}</span></td>
+                            <td data-title="Rozmiar">{{ image.size | formatBytes }}</td>
+                            <td data-title="Data Modyfikacji">
+                                <span><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+                            </td>
+                            <td data-title="Akcje">
                                 <span class="image-operation__table-actions">
                                     <a href="{{ image.src }}" download
                                         class="mx-auto badge image-operation__item-download">

@@ -2,8 +2,8 @@
 
     <!-- Sekcja z zakładkami -->
     <div hidden class="editor-tabs" id="editor-tabs">
+
         <div class="tabs-header">
-            <!-- Dodaj nowy przycisk zakładki w tabs-header -->
             <button class="tab-button active" data-tab="effects">
                 <i class="fas fa-magic"></i> Efekty
             </button>
@@ -15,15 +15,15 @@
             </button>
         </div>
 
-        <!-- Zawartość zakładek -->
         <div class="tab-content">
-              <!-- Dodaj nową zawartość zakładki w tab-content -->
+
+            <!-- Zakładka Efekty -->
             <div class="tab-pane active" id="effects-tab">
 
                 <!-- Blur -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Blur (Rozmycie)</span>
+                        <span>Rozmycie</span>
                         <button class="effect-reset link variant2 small" data-effect="blur">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -38,7 +38,7 @@
                 <!-- Brightness -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Brightness (Jasność)</span>
+                        <span>Jasność</span>
                         <button class="effect-reset link variant2 small" data-effect="brightness">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -53,7 +53,7 @@
                 <!-- Contrast -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Contrast (Kontrast)</span>
+                        <span>Kontrast</span>
                         <button class="effect-reset link variant2 small" data-effect="contrast">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -68,7 +68,7 @@
                 <!-- Grayscale -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Grayscale (Skala szarości)</span>
+                        <span>Skala szarości</span>
                         <button class="effect-reset link variant2 small" data-effect="grayscale">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -83,7 +83,7 @@
                 <!-- Saturation -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Saturation (Nasycenie)</span>
+                        <span>Nasycenie</span>
                         <button class="effect-reset link variant2 small" data-effect="saturation">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -113,7 +113,7 @@
                 <!-- Hue Rotate -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Hue Rotate (Rotacja barw)</span>
+                        <span>Rotacja barw</span>
                         <button class="effect-reset link variant2 small" data-effect="hue-rotate">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -128,7 +128,7 @@
                 <!-- Invert -->
                 <div class="effect-group">
                     <div class="effect-header">
-                        <span>Invert (Negatyw)</span>
+                        <span>Negatyw</span>
                         <button class="effect-reset link variant2 small" data-effect="invert">
                             <i class="fas fa-undo"></i>
                         </button>
@@ -155,32 +155,42 @@
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
+                </div> 
+
+                <div class="form-field">
+                    <input class="floating-label-control form-control" type="number" id="crop-width" disabled
+                        placeholder="Szerokość (px):">
+                    <label class="floating-label" for="crop-width">Szerokość (px):</label>
+
+                    <i class="icon fa-solid fa-left-right"></i>
+                </div>  
+
+                <div class="form-field">
+                    <input class="floating-label-control form-control" type="number" id="crop-height" disabled
+                        placeholder="Wysokość (px):">
+                    <label class="floating-label" for="crop-height">Wysokość (px):</label>
+
+                    <i class="icon fa-solid fa-arrows-up-down"></i> 
                 </div>
 
-                <div class="form-group">
-                    <label for="crop-width">Szerokość (px):</label>
-                    <input type="number" id="crop-width" min="1" disabled placeholder="Szerokość">
-                </div>
-                <div class="form-group">
-                    <label for="crop-height">Wysokość (px):</label>
-                    <input type="number" id="crop-height" min="1" disabled placeholder="Wysokość">
-                </div>
-                <div class="form-group">
-                    <label for="aspect-ratio">Proporcje:</label>
-                    <select id="aspect-ratio" disabled>
-                        <option value="free">Dowolne</option>
-                        <option value="1:1">1:1 (Kwadrat)</option>
-                        <option value="4:3">4:3</option>
-                        <option value="16:9">16:9</option>
-                    </select>
-                </div>
+                <select class="change-format__select" data-format-select data-custom-select data-class-name="custom-select-green" id="aspect-ratio">
+                    <option value="hide">Proporcje:</option>
+                    <option value="free">Dowolne</option>
+                    <option value="1:1">1:1 (Kwadrat)</option>
+                    <option value="4:3">4:3</option>
+                    <option value="16:9">16:9</option>
+                </select> 
             </div>
 
             <!-- Zakładka obracania -->
-            <div class="tab-pane" id="rotate-tab">
-                <div class="form-group">
-                    <label for="rotation-angle">Kąt obrotu (°):</label>
-                    <input type="number" id="rotation-angle" value="0" min="-180" max="180" step="1">
+            <div class="tab-pane" id="rotate-tab"> 
+
+                <div class="form-field">
+                    <input class="floating-label-control form-control" type="number" id="rotation-angle" value="0"
+                        min="-180" max="180" step="1" placeholder="Kąt obrotu (°):">
+                    <label class="floating-label" for="rotation-angle">Kąt obrotu (°):</label>
+
+                    <i class="icon fa-solid fa-rotate"></i>
                 </div>
 
                 <div class="rotation-buttons">
@@ -206,14 +216,14 @@
     <div class="editor-preview">
 
         {{ include('graphics_tools_module/components/drop-zone.html.twig', {
-        textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
-        textInfoBottom: 'Maksymalny rozmiar pliku:',
-        isTypeMultiple: false
+            textInfoTop: 'Przeciągnij i upuść obraz lub kliknij, aby wybrać',
+            textInfoBottom: 'Maksymalny rozmiar pliku:',
+            isTypeMultiple: false
         }, with_context: false) }}
 
         <div class="image-preview-container" hidden id="preview-container">
             <img id="preview-image" src="" alt="Podgląd zdjęcia">
         </div>
     </div>
-    
-</div>  
+
+</div>

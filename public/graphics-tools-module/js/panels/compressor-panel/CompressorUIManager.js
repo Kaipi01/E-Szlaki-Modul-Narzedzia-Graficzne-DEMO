@@ -33,7 +33,7 @@ export default class CompressorUIManager extends UIManager {
         const row = document.createElement('tr');
         const maxFileNameLength = 20
         const fileNameToDisplay = file.name.length > maxFileNameLength ? (file.name.slice(0, maxFileNameLength) + "...") : file.name
-        row.dataset.fileName = file.name;
+        row.dataset.fileName = file.name; 
 
         const previewCell = this.createTableCell(`<img src="${event.target.result}" alt="${file.name}" class="preview-image">`, {
           'data-title': 'Podgląd',
@@ -112,7 +112,7 @@ export default class CompressorUIManager extends UIManager {
         resolve(row);
       };
 
-      reader.onerror = (error) => reject(error);
+      reader.onerror = (error) => reject(new Error(error));
 
       reader.readAsDataURL(file);
     });

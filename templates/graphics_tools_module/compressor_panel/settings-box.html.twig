@@ -17,11 +17,13 @@
             <template data-class="custom-select-green-styled" slot="button-text">Ustawienia</template>
             <template data-class="custom-select-green-options" slot="content"> 
 
-                <label class="change-params__label" for="graphics-tools-module-compressor-operation-strength">
-                    Siła Kompresji
+                <label class="change-params__label" for="graphics-tools-module-compressor-operation-quality">
+                    Jakość Grafiki
                 </label>
                 
-                <input class="change-params__control form-control" type="number" max="100" min="1" step="1" value="80" name="strength" data-strength-input id="graphics-tools-module-compressor-operation-strength" placeholder="Siła Kompresji">   
+                <input class="change-params__control form-control" type="number" max="100" min="1" step="1" value="80" name="quality" data-quality-input id="graphics-tools-module-compressor-operation-quality" placeholder="Jakość Grafiki">   
+
+                <p class="change-params__info">Mniejsza jakość daje mniejszy rozmiar po kompresji</p>
 
             </template>
         </custom-popover> 

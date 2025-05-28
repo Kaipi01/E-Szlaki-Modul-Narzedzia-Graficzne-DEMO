@@ -11,7 +11,7 @@ class CompressionResults extends AbstractDTO
         public int $originalSize,
         public int $compressedSize,
         public int|float $compressionRatio,
-        public int $compressionStrength,
+        public int $compressionQuality,
         public string $downloadURL,
         public string $src,
         public string $mimeType,

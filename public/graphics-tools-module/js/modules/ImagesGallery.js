@@ -125,7 +125,6 @@ export default class ImagesGalleryModal extends HTMLElement {
       } 
     })
 
-    // Close gallery with escape key
     document.addEventListener('keydown', (e) => {
       const isVisible = galleryModal && window.getComputedStyle(galleryModal).display !== 'none';
 
@@ -142,9 +141,9 @@ export default class ImagesGalleryModal extends HTMLElement {
 
       if (isVisible) {
         if (e.key === 'ArrowLeft') {
-          this.showImage(this.currentImageIndex - 1);
-        } else if (e.key === 'ArrowRight') {
           this.showImage(this.currentImageIndex + 1);
+        } else if (e.key === 'ArrowRight') {
+          this.showImage(this.currentImageIndex - 1);
         }
       }
     });
@@ -162,14 +161,14 @@ export default class ImagesGalleryModal extends HTMLElement {
     this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]')
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
 
-    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', this.imagePreviews.length - (index + 1)))
+    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', index))
 
     this.addEventListeners()
   }
 
   initAgainImagePreviews() {
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
-    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', this.imagePreviews.length - (index + 1)))
+    this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', index))
   }
 
   openGallery(index) {
@@ -177,14 +176,14 @@ export default class ImagesGalleryModal extends HTMLElement {
     const galleryContent = this.querySelector('#galleryModal .gallery-content');
     const galleryThumbnailsContainer = this.querySelector('#galleryThumbnails')
 
-    // Clear existing images
     galleryContent.querySelectorAll('.gallery-image').forEach(img => img.remove())
 
     galleryThumbnailsContainer.innerHTML = ""
 
-    // Add all images to gallery
     const imagePreviewsArray = [...this.imagePreviews]
+
     imagePreviewsArray.reverse().forEach((imagePreview, idx) => {
+    // imagePreviewsArray.forEach((imagePreview, idx) => {
       const imageElement = document.createElement('img');
 
       imageElement.src = imagePreview.dataset.src
@@ -192,7 +191,6 @@ export default class ImagesGalleryModal extends HTMLElement {
 
       galleryContent.prepend(imageElement);
 
-      // Add thumbnail
       const thumbnail = document.createElement('img');
 
       thumbnail.src = imagePreview.dataset.src
@@ -200,13 +198,11 @@ export default class ImagesGalleryModal extends HTMLElement {
 
       galleryThumbnailsContainer.append(thumbnail);
 
-      // Add click event to thumbnail
-      thumbnail.addEventListener('click', () => {
-        this.showImage(idx + 1)
-      })
+      console.log(thumbnail)
+
+      thumbnail.addEventListener('click', () => this.showImage(this.imagePreviews.length - (idx + 1)))
     });
 
-    // Show the modal
     const modal = this.querySelector('#galleryModal');
 
     modal.style.opacity = '0';
@@ -215,10 +211,8 @@ export default class ImagesGalleryModal extends HTMLElement {
 
     requestAnimationFrame(() => modal.style.opacity = '1');
 
-    // Show the current image
     this.showImage(this.currentImageIndex);
 
-    // Prevent scrolling of body
     document.body.style.overflow = "hidden"
   }
 
@@ -257,7 +251,9 @@ export default class ImagesGalleryModal extends HTMLElement {
     })
 
     galleryImages[index]?.classList.add('active');
-    galleryThumbnails[index]?.classList.add('active');
+    // galleryThumbnails[index]?.classList.add('active');
+
+    console.log(galleryImages[index], "TODO: Popraw to dodając nowy atrybut, który zapisze orginalną grafikę do pobrania i drukowania")
 
     this.galleryPrintBtn.setAttribute('data-src', galleryImages[index]?.src)
     this.galleryDownloadBtn.href = galleryImages[index]?.src

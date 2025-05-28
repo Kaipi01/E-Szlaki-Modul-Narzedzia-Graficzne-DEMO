@@ -10,6 +10,10 @@ export default class OperationPanel extends AbstractPanel {
   EVENT_ON_ALL_IMAGES_COMPLETED = "gtm:event-on-all-images-completed";
   EVENT_ON_FILE_INPUT_SELECT = "gtm:event-on-file-input-select";
 
+  EVENT_ON_IMAGE_PROCESSED = "gtm:event-on-image-processed";
+
+  EVENT_BATCH_QUEUE_IMAGES_PROCESSED = "gtm:event-batch-queue-images-processed";
+
   /**
    * @param {HTMLElement | string} container
    * @param {Object} options - Opcje konfiguracyjne
@@ -33,6 +37,7 @@ export default class OperationPanel extends AbstractPanel {
    * @property {File[]} uploadsQueue - Kolejka grafik do przesłania.
    * @property {boolean} uploading - Czy trwa przesyła2nie.
    * @property {boolean} allOperationsCompleted - Czy wszystkie operacje są zakończone?.
+   * @property {number} processedImagesNumber - Ile grafik już zostało przetworzonych
    * @property {number | null} checkResultInterval - ID interwała obługującego koniec operacji
    */
   constructor(container, options = {}) {
@@ -45,11 +50,18 @@ export default class OperationPanel extends AbstractPanel {
       images: [],
       uploading: false,
       uploadsQueue: [],
+      processedImagesNumber: 0,
       allOperationsCompleted: false,
       checkResultInterval: null
     };
 
     this.initElements();
+
+    document.addEventListener(this.EVENT_ON_IMAGE_PROCESSED, () => {
+      if (this.state.processedImagesNumber % this.options.maxConcurrentUploads === 0) {{
+        this.uploadFilesFromQueue()
+      }}
+    })
   }
 
   /** 
@@ -59,6 +71,13 @@ export default class OperationPanel extends AbstractPanel {
    * @param {string} fileName 
    */
   async onCompleteOperationHandler(operationHash, progressNameElement, fileName) {}
+
+  /** 
+   * waliduje obecny stan danych wejściowych w panelu 
+   * @abstract 
+   * @throws {Error}
+   */
+  validateState() {}
 
   initElements() {
     this.elements = {
@@ -77,6 +96,105 @@ export default class OperationPanel extends AbstractPanel {
       tableHeadRow: this.getByAttribute("data-table-head-row"),
       resultTable: document.querySelector('#graphics-tools-module-result-table')
     };
+  }
+
+  /**
+   * Obsługa wyboru plików przez użytkownika
+   * @param {FileList} fileList - Lista wybranych plików
+   */
+  async handleFileSelect(fileList) {
+
+    try {
+      this.validateState()
+    } catch (error) {
+      this.showError(error, "WARNING")
+
+      return
+    }
+
+    const newFiles = this.InputFileManager.addFiles(fileList);
+
+    emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, { files: newFiles })
+
+    await this.updateImagesTableUI(newFiles)
+
+    this.loadFilesToUploadingQueue(newFiles)
+
+    this.updateUI();
+
+    this.uploadFilesFromQueue()
+  }
+
+  /**
+   * Ładuje grafiki do kolejki
+   * @param {Array<File>} files - Tablica z grafikami
+   */
+  loadFilesToUploadingQueue(files) {
+
+    this.state.uploadsQueue.push(...files);
+  }
+
+  /** Wywołyje proces wysyłania grafik do przetworzenia z kolejki */
+  uploadFilesFromQueue() {
+    const test1 = { ...this.state.uploadsQueue }
+
+    for (let i = 0; i < this.options.maxConcurrentUploads; i++) {
+      const file = this.state.uploadsQueue.shift()
+
+      if (!file) {
+        emitEvent(this.EVENT_ON_ALL_IMAGES_COMPLETED)
+        break;
+      }
+
+      this.uploadFile(file)
+    }
+  } 
+
+  /** 
+   * Sprawdza czy wszystkie grafiki są przetworzone jeśli tak to wyświetla komunikat 
+   * @param {string} message
+   */
+  handleAllImagesCompleted(message = "") {
+    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete); 
+
+    if (allOperationsCompleted) {
+      this.state.allOperationsCompleted = allOperationsCompleted;
+      this.state.uploading = false;
+      this.elements.downloadButton.removeAttribute("disabled");
+      this.elements.clearButton.removeAttribute("disabled");
+
+      Toast.show(Toast.SUCCESS, message);
+      this.elements.containerAlerts.innerHTML = ''
+      Alert.show(Alert.SUCCESS, message, this.elements.containerAlerts)
+    }
+  }
+
+  /**
+   * Aktualizuje wygląd tabeli na podstawie wrzuconych grafik
+   * @param {Array<File>} files - Tablica z grafikami
+   */
+  async updateImagesTableUI(files) {
+
+    const filesNumber = files.length
+
+    if (filesNumber > 0) {
+      this.uiManager.displayCurrentResultMessage("Trwa operacja, proszę czekać", "...")
+      this.elements.resultTableElements.forEach(el => el.removeAttribute('hidden'))
+      this.elements.resultTable.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }
+
+    for (let i = 0; i < filesNumber; i++) {
+      const file = files[i]
+      const fileDetails = this.InputFileManager.getFileDetails(file);
+
+      try {
+        await this.uiManager.renderImagesInfoTable(file, fileDetails.formattedSize)
+      } catch (error) {
+        this.showError(error)
+
+        continue
+      }
+    }
   }
 
   /** 
@@ -112,70 +230,6 @@ export default class OperationPanel extends AbstractPanel {
       this.showError(e.message);
     }
   }
-
-  /** 
-   * waliduje obecny stan danych wejściowych w panelu 
-   * @abstract 
-   * @throws {Error}
-   */
-  validateState() { }
-
-  /**
-   * Obsługa wyboru plików przez użytkownika
-   * @param {FileList} fileList - Lista wybranych plików
-   */
-  handleFileSelect(fileList) { 
-
-    // console.log('handleFileSelect(fileList)')
-
-    try {
-      this.validateState()
-    } catch (error) {
-      this.showError(error, "WARNING")
-
-      return
-    }
-
-    const newFiles = this.InputFileManager.addFiles(fileList);
-
-    emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, {files: newFiles})
-
-    if (newFiles.length > 0) {
-      this.uiManager.displayCurrentResultMessage("Trwa operacja, proszę czekać", "...")
-      this.elements.resultTableElements.forEach(el => el.removeAttribute('hidden'))
-      this.elements.resultTable.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-    } 
-
-    newFiles.reverse().forEach(async (file, index) => {
-
-      const fileDetails = this.InputFileManager.getFileDetails(file);
-
-      await this.uiManager.renderImagesInfoTable(file, fileDetails.formattedSize)
-        // .then(() => )
-        // .catch((error) => {
-        //   this.showError(`Błąd podczas wczytywania pliku "${file.name}".`);
-        //   this.showError(error.message);
-        // });
-      this.uploadFile(file)
-        // this.state.uploadsQueue.push(file)
-    }); 
-
-    this.updateUI();
-    // this.startUploadingFromQueue()
-  }
-
-  // startUploadingFromQueue() {
-  //   console.log(this.state.uploadsQueue) 
-
-  //   const test1 = this.state.uploadsQueue.shift()
-  //   const test2 = this.state.uploadsQueue.shift()
-
-  //   console.log(test1)
-  //   console.log(test2)
-
-  //   this.uploadFile(test1)
-  //   this.uploadFile(test2)
-  // }
 
   getProgressElementsForFile(fileName) {
     const safeFileName = fileName.replace(/[^a-zA-Z0-9]/g, "_");
@@ -221,7 +275,14 @@ export default class OperationPanel extends AbstractPanel {
     this.uploadService.uploadFile(file, {
       onProgress: (percentValue) => this.onProgresOperationHandler(percentValue, progressNameElement, file.name),
       onError: (message) => this.onErrorOperationHandler(message, file.name),
-      onComplete: async (operationHash) => await this.onCompleteOperationHandler(operationHash, progressNameElement, file.name),
+      onComplete: async (operationHash) => {
+
+        await this.onCompleteOperationHandler(operationHash, progressNameElement, file.name)
+
+        this.state.processedImagesNumber++;
+
+        emitEvent(this.EVENT_ON_IMAGE_PROCESSED)
+      },
     });
   }
 
@@ -270,6 +331,7 @@ export default class OperationPanel extends AbstractPanel {
     this.updateUI();
 
     this.state.images = this.state.images.filter(img => img.name != fileName)
+    this.state.uploadsQueue = this.state.uploadsQueue.filter(img => img.name != fileName)
   }
 
   handleClear() {
@@ -280,8 +342,8 @@ export default class OperationPanel extends AbstractPanel {
 
     this.state.images = [];
     this.state.uploading = false;
-    this.state.allOperationsCompleted = false; 
-    
+    this.state.allOperationsCompleted = false;
+
     emitEvent(this.EVENT_ON_CLEAR_TABLE)
 
     this.elements.downloadButton.disabled = true
@@ -301,40 +363,10 @@ export default class OperationPanel extends AbstractPanel {
 
     super.showError(message, this.elements.containerAlerts, type);
   }
-    
+
   updateUI() {
     const hasFiles = this.InputFileManager.hasFiles();
 
     this.uiManager.updateUI(hasFiles, this.state.uploading);
   }
-
-  /** 
-   * Sprawdza czy wszystkie grafiki są przetworzone jeśli tak to wyświetla komunikat 
-   * @param {string} message
-   */
-  handleAllImagesCompleted(message = "") {
-    const allOperationsCompleted = this.state.images.every((i) => i.isOperationComplete);
-
-    this.state.checkResultInterval = setInterval(() => {
-
-      if (this.state.uploading) {
-        this.handleAllImagesCompleted(message)
-      } else {
-        clearTimeout(this.state.checkResultInterval)
-      }
-    }, 1000)
-
-    if (allOperationsCompleted) { 
-      this.state.allOperationsCompleted = allOperationsCompleted;
-      this.state.uploading = false; 
-      this.elements.downloadButton.removeAttribute("disabled");
-      this.elements.clearButton.removeAttribute("disabled");
-
-      emitEvent(this.EVENT_ON_ALL_IMAGES_COMPLETED)
-
-      Toast.show(Toast.SUCCESS, message);
-      this.elements.containerAlerts.innerHTML = ''
-      Alert.show(Alert.SUCCESS, message, this.elements.containerAlerts)
-    }
-  } 
 }

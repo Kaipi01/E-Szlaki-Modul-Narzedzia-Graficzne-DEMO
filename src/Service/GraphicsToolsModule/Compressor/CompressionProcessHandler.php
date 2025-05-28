@@ -25,7 +25,7 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
     public function process(): ImageProcessData
     {
         $imagePath = $this->state->imagePath;
-        $compressionStrength = $this->state->compressionStrength;
+        $compressionQuality = $this->state->compressionQuality;
         $resizeOptions = $this->state->resizeOptions;
         $afterOperationCallback = null;
 
@@ -37,7 +37,7 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
             $afterOperationCallback = $this->getResizeImageCallback($resizeOptions);
         }
 
-        $this->state->compressionResults = $this->compressor->compress($imagePath, $compressionStrength, $afterOperationCallback);
+        $this->state->compressionResults = $this->compressor->compress($imagePath, $compressionQuality, $afterOperationCallback);
         $this->state->compressionResults->originalName = $this->state->imageOriginalName;
 
         return ImageProcessData::fromArray([

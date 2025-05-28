@@ -1,6 +1,7 @@
 import DropZoneManager from "../../components/DropZoneManager.js";
 import InputFileManager from "../../components/InputFileManager.js";
 import AbstractPanel from "../../modules/AbstractPanel.js"
+import CustomSelect from "../../modules/CustomSelect.js";
 import Modal from "../../modules/Modal.js";
 import Toast from "../../modules/Toast.js";
 import { GRAPHICS_TOOLS_MODULE } from "../../utils/constants.js"
@@ -78,7 +79,10 @@ export default class EditorPanel extends AbstractPanel {
     // Elementy formularza
     this.cropWidthInput = this.container.querySelector('#crop-width');
     this.cropHeightInput = this.container.querySelector('#crop-height');
-    this.aspectRatioSelect = this.container.querySelector('#aspect-ratio');
+    this.aspectRatioSelect = new CustomSelect(this.container.querySelector('#aspect-ratio'))
+
+    this.aspectRatioSelect.disabled()
+
     this.rotationAngleInput = this.container.querySelector('#rotation-angle');
     this.rotateLeftBtn = this.container.querySelector('#rotate-left');
     this.rotateRightBtn = this.container.querySelector('#rotate-right');
@@ -274,13 +278,13 @@ export default class EditorPanel extends AbstractPanel {
       if (e.target.checked) {
         this.cropHeightInput.removeAttribute('disabled')
         this.cropWidthInput.removeAttribute('disabled')
-        this.aspectRatioSelect.removeAttribute('disabled')
+        this.aspectRatioSelect.enabled()
 
         this.showCropper();
       } else {
         this.cropHeightInput.setAttribute('disabled', 'true')
         this.cropWidthInput.setAttribute('disabled', 'true')
-        this.aspectRatioSelect.setAttribute('disabled', 'true')
+        this.aspectRatioSelect.disabled()
 
         this.hideCropper();
       }
@@ -317,12 +321,12 @@ export default class EditorPanel extends AbstractPanel {
           cropper.setData(data);
         }
       }
-    });
+    }); 
 
-    this.aspectRatioSelect.addEventListener('change', (e) => {
+    this.aspectRatioSelect.onChangeSelect((e) => {
       const cropper = this.state.cropper;
       if (cropper) {
-        const value = e.target.value;
+        const value = e.detail.value;
         let aspectRatio;
 
         switch (value) {
@@ -823,48 +827,17 @@ export default class EditorPanel extends AbstractPanel {
       cropperViewBox.style.overflow = 'hidden'
     }
 
-    this.centerCrop()
-
-    // // Pobierz aktualny rozmiar obrazu
-    // const imageData = cropper.getImageData();
-
-    // // Ustaw crop box na pełny rozmiar obrazu
-    // cropper.setCropBoxData({
-    //   left: imageData.left / 1.5,
-    //   top: imageData.top / 1.5,
-    //   width: imageData.width / 1.5,
-    //   height: imageData.height / 1.5
-    // });
-
+    this.centerCrop() 
   }
 
   centerCrop() {
     const cropper = this.state.cropper
-    // const imageData = cropper.getImageData();
-    // const cropWidth = imageData.width * 0.8;
-    // const cropHeight = imageData.height * 0.8;
-    // const cropLeft = imageData.left + (imageData.width - cropWidth) / 2;
-    // const cropTop = imageData.top + (imageData.height - cropHeight) / 2;
-
-    // cropper.setCropBoxData({
-    //   left: cropLeft,
-    //   top: cropTop,
-    //   width: cropWidth,
-    //   height: cropHeight
-    // });
-
-    // Pobierz dane canvasu (widoczny obszar obrazu)
     const canvasData = cropper.getCanvasData();
-
-    // Oblicz 80% wymiarów
     const cropWidth = canvasData.width * 0.8;
     const cropHeight = canvasData.height * 0.8;
-
-    // Oblicz przesunięcie, aby wycentrować
     const cropLeft = canvasData.left + (canvasData.width - cropWidth) / 2;
     const cropTop = canvasData.top + (canvasData.height - cropHeight) / 2;
 
-    // Ustaw crop box
     cropper.setCropBoxData({
       left: cropLeft,
       top: cropTop,

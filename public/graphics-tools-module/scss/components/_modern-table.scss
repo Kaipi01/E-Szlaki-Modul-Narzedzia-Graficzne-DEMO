@@ -20,6 +20,11 @@
       box-shadow: $box-shadow;
     }
 
+    .td-title {
+      display: none;
+      font-weight: bold;
+    }
+
     .table {
       width: 100%;
       max-width: 100%;
@@ -38,10 +43,6 @@
 
       & > tbody {
         background-color: var(--background);
-
-        * {
-          border-color: red;
-        }
       }
     }
     .table > thead > tr,
@@ -109,10 +110,10 @@
     .table .no-border {
       border: 0;
     }
- 
+
     & .table-striped > tbody > tr:nth-child(odd) {
       background-color: var(--very-light-gray);
-    } 
+    }
     & .table-hover > tbody > tr:hover > td,
     & .table-hover > tbody > tr:hover {
       background-color: var(--green-opacity-10) !important;
@@ -128,30 +129,43 @@
     @media screen and (max-width: 70rem) {
       box-shadow: none;
 
-      & > .table { 
+      .table > thead > tr > th,
+      .table > tfoot > tr > th {
+        color: #fff;
+      }
+
+      .table-footer {
+        color: #fff;
+      }
+
+      .td-title {
+        display: inline;
+      }
+
+      & > .table {
         margin-bottom: 0;
         background-color: transparent;
 
         .mx-auto {
           margin: 0;
           margin-left: auto;
-        } 
+        }
       }
       & > .table > thead,
       & > .table > tfoot {
         display: none;
       }
-      & > .table > tbody { 
+      & > .table > tbody {
         display: flex;
         flex-flow: row wrap;
         width: 100%;
-        border-radius: var(--table-border-radius); 
-        gap: 1rem;   
+        border-radius: var(--table-border-radius);
+        gap: 1rem;
       }
       & > .table > tbody > tr {
-        display: block; 
+        display: block;
         flex-basis: 1;
-        flex-grow: 1; 
+        flex-grow: 1;
         min-width: toRem(300);
         overflow: hidden;
         border-radius: var(--table-border-radius);
@@ -162,11 +176,11 @@
         align-items: center;
         justify-content: space-between;
         gap: 1.25rem;
-        padding: 0.75rem 1.1rem;
+        padding: 0.75rem 1.1rem !important;
         text-align: right;
       }
       & > .table > tbody > tr > td[data-title]:before {
-        content: attr(data-title); 
+        content: attr(data-title);
         color: var(--font-color);
         font-size: 1rem;
         font-weight: bold;

@@ -1,0 +1,123 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .form-control {
+    position: relative;
+    width: 100%;
+    padding: 0.5rem;
+    transition: 0.2s;
+    border: none;
+    background-color: transparent;
+    color: var(--font-color);
+    font-family: inherit;
+    font-size: 1em;
+    line-height: 1.2; 
+
+    &::placeholder {
+      opacity: 1;
+      color: hsl(0, 0%, 50%);
+    }
+
+    &:focus,
+    &:focus-within {
+      outline: none;
+    }
+  }
+
+  .icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    fill: currentColor;
+    color: inherit;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .floating-label {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    padding: 0.25rem 0.75rem;
+    transform: translateY(-50%);
+    transition: transform 0.2s cubic-bezier(0.215, 0.61, 0.355, 1), color 0.2s;
+    border-radius: 0.375em;
+    color: hsl(0, 0%, 50%);
+    font-size: 0.9375rem;
+    line-height: 1;
+    -webkit-clip-path: none;
+    clip-path: none;
+
+    &--for-select {
+      transform: translateY(-100%);
+      background-color: transparent;
+    }
+  }
+
+  .floating-label-control {
+    padding: 0.75rem;
+    padding-right: 3.5rem;
+  }
+
+  .floating-label-control:placeholder-shown + .floating-label {
+    -webkit-clip-path: inset(50%);
+    clip-path: inset(50%);
+    transform: translateY(-25%);
+  }
+
+  .floating-label-control ~ .icon {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    color: hsl(225, 4%, 47%);
+    pointer-events: none;
+  }
+  .floating-label-control:focus ~ .icon {
+    color: var(--green);
+  }
+  .floating-label-control:focus + .floating-label {
+    color: var(--green);
+  }
+
+  .form-field {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: toRem(3);
+      border-radius: 100vw;
+      background-color: var(--green-opacity);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: 4;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: toRem(3);
+      transition: 0.3s ease-in-out;
+      border-radius: 100vw;
+      background-color: var(--green);
+    }
+
+    &:focus-within {
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}

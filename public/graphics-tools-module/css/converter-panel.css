@@ -311,6 +311,10 @@
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+#graphics-tools-module .table-responsive-vertical .td-title {
+  display: none;
+  font-weight: bold;
+}
 #graphics-tools-module .table-responsive-vertical .table {
   width: 100%;
   max-width: 100%;
@@ -327,9 +331,6 @@
 }
 #graphics-tools-module .table-responsive-vertical .table > tbody {
   background-color: var(--background);
-}
-#graphics-tools-module .table-responsive-vertical .table > tbody * {
-  border-color: red;
 }
 #graphics-tools-module .table-responsive-vertical .table > thead > tr,
 #graphics-tools-module .table-responsive-vertical .table > tbody > tr,
@@ -407,6 +408,16 @@
   #graphics-tools-module .table-responsive-vertical {
     box-shadow: none;
   }
+  #graphics-tools-module .table-responsive-vertical .table > thead > tr > th,
+  #graphics-tools-module .table-responsive-vertical .table > tfoot > tr > th {
+    color: #fff;
+  }
+  #graphics-tools-module .table-responsive-vertical .table-footer {
+    color: #fff;
+  }
+  #graphics-tools-module .table-responsive-vertical .td-title {
+    display: inline;
+  }
   #graphics-tools-module .table-responsive-vertical > .table {
     margin-bottom: 0;
     background-color: transparent;
@@ -439,7 +450,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
-    padding: 0.75rem 1.1rem;
+    padding: 0.75rem 1.1rem !important;
     text-align: right;
   }
   #graphics-tools-module .table-responsive-vertical > .table > tbody > tr > td[data-title]:before {
