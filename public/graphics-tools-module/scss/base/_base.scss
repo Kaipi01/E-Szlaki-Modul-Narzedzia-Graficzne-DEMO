@@ -48,7 +48,7 @@ body {
   .container {
     max-width: 83.5rem;
     margin: 0 auto;
-    padding-inline: 0rem;
+    padding-inline: 0.6rem;
 
     @media (min-width: $content-breakpoint-phone) {
       padding-inline: 1.25rem;
@@ -112,7 +112,7 @@ body {
   .hide,
   [hidden] {
     display: none !important;
-  }  
+  }
 
   input[disabled] {
     opacity: 0.5;
@@ -121,7 +121,6 @@ body {
   .area-header {
     display: inline-flex;
     align-items: center;
-    // width: 100%;
     margin: 0;
     font-size: 1.35rem;
     font-weight: 600;
@@ -134,11 +133,11 @@ body {
 
     &-wrapper {
       display: flex;
-      align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
+      align-items: center;
       justify-content: space-between;
-      margin-bottom: var(--current-gap); 
+      margin-bottom: var(--current-gap);
+      gap: 1rem;
     }
   }
 

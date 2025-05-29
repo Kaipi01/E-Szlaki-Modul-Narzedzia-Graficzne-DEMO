@@ -1,13 +1,19 @@
 @use "../base/variables" as *;
 @use "../functions/toRem" as *;
 
-#graphics-tools-module {
+#graphics-tools-module { 
+
   .main-navigation {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     gap: 1.5rem;
     width: 100%;
     margin-bottom: var(--panels-gap);
+
+    @media (min-width: $content-breakpoint-phone-large) {
+      flex-direction: row;
+      justify-content: space-between;
+    }
 
     &-list {
       display: flex;

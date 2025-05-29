@@ -154,6 +154,9 @@
     padding: 0.75rem 1.1rem !important;
     text-align: right;
   }
+  #graphics-tools-module .table-responsive-vertical > .table > tbody > tr > td::before {
+    text-align: left;
+  }
   #graphics-tools-module .table-responsive-vertical > .table > tbody > tr > td[data-title]:before {
     content: attr(data-title);
     color: var(--font-color);
@@ -250,9 +253,12 @@
   color: var(--font-color-gray);
 }
 #graphics-tools-module .search-form {
+  --border-radius: 0.375em;
   display: flex;
   align-items: center;
   width: 100%;
+  border: 3px solid var(--green);
+  border-radius: 0.575em;
 }
 #graphics-tools-module .search-form .search-btn {
   display: flex;
@@ -260,7 +266,7 @@
   justify-content: center;
   min-height: 2.9375rem;
   padding: 0 1rem !important;
-  border-radius: 0.375em;
+  border-radius: var(--border-radius);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -274,11 +280,12 @@
 #graphics-tools-module .search-box input[type=search] {
   width: 100%;
   min-height: 2.9375rem;
-  border-radius: 0.375em;
+  border-radius: var(--border-radius);
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border-color: var(--light-green);
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  font-weight: normal;
 }
 
 #graphics-tools-module .images-gallery {
@@ -840,13 +847,31 @@
   font-weight: 600;
 }
 #graphics-tools-module-main-panel .access-links {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
   list-style: none;
   gap: var(--current-gap);
   height: 100%;
 }
-#graphics-tools-module-main-panel .access-links > li {
-  width: 100%;
+@media (min-width: 25em) {
+  #graphics-tools-module-main-panel .access-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 40em) {
+  #graphics-tools-module-main-panel .access-links {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (min-width: 65em) {
+  #graphics-tools-module-main-panel .access-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 85em) {
+  #graphics-tools-module-main-panel .access-links {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 #graphics-tools-module-main-panel .access-icon {
   font-size: 2rem;

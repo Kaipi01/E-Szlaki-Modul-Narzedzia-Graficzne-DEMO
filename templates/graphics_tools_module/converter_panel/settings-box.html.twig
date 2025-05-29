@@ -19,11 +19,14 @@
                 <input class="change-quality__control form-control" type="number" max="100" min="1" step="1" value="100" name="quality" data-quality-input id="graphics-tools-module-converter-operation-quality" placeholder="Jakość Konwersji"> 
             </div>
 
-            <label class="custom-switch change-format__compress-switch">
-                <input data-add-compress-checkbox type="checkbox" name="add-compress">
-                <span class="toggle"><span class="toggle--handler"></span></span>
-                <span class="label-text">Dodaj Kompresje</span>
-            </label>
+            <div class="change-format__compress-switch">
+                <label for="add-compress" class="label-text">Dodaj Kompresje</label>
+
+                <label class="toggle-switch">
+                    <input data-add-compress-checkbox type="checkbox" name="add-compress" id="add-compress">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div> 
 
         </template>
     </custom-popover> 

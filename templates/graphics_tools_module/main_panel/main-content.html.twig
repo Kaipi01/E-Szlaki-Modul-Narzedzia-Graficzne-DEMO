@@ -65,93 +65,100 @@
 
         {% if userImages | length > 0 %}
 
-        <images-gallery-modal></images-gallery-modal>
+            <images-gallery-modal></images-gallery-modal>
 
-        <div class="last-images-preview">
+            {% set maxNameLength = 20 %}
 
-            {% for image in userImages | slice(0, 3) %}
+            <div class="last-images-preview">
 
-                {% if image.thumbnailSrc %}
-                    {% set thumbnail = image.thumbnailSrc %}
-                {% else %}
-                    {% set thumbnail = image.src %}
-                {% endif %}
+                {% for image in userImages | slice(0, 3) %}
 
-                <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}">
-                    <div class="image-overlay">
-                        <div class="photo-info">
-                            <div class="photo-info-text">
-                                <p class="photo-name medium"><i class="fa-regular fa-image"></i> {{ image.name }}</p>
-                                <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
+                    {% if image.thumbnailSrc %}
+                        {% set thumbnail = image.thumbnailSrc %}
+                    {% else %}
+                        {% set thumbnail = image.src %}
+                    {% endif %}
+
+                    <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
+                        <div class="image-overlay">
+                            <div class="photo-info">
+                                <div class="photo-info-text">
+                                    <p class="photo-name medium"><i class="fa-regular fa-image"></i> {{ image.name }}</p>
+                                    <p class="photo-subtext medium">{{ image.size | formatBytes }}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <img src="{{ thumbnail }}" />
+                        <img src="{{ thumbnail }}" />
 
-                    <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
-                </a>
+                        <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+                    </a>
 
-            {% endfor %}
+                {% endfor %}
 
-        </div>
-
-        <div class="image-operation__table-container">
-            <div class="table-responsive-vertical">
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <th>Format</th>
-                        <th>Nazwa pliku</th>
-                        <th>Rozmiar</th>
-                        <th>Data Modyfikacji</th>
-                        <th>Akcje</th>
-                    </thead>
-                    <tbody>
-
-                      {% for image in userImages | slice(0, 8) %}
-
-                        <tr>
-                            <td data-title="Format">
-                                <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
-                            </td>
-                            <td data-title="Nazwa pliku"><span><i class="fa-regular fa-image"></i> {{ image.name }}</span></td>
-                            <td data-title="Rozmiar">{{ image.size | formatBytes }}</td>
-                            <td data-title="Data Modyfikacji">
-                                <span><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
-                            </td>
-                            <td data-title="Akcje">
-                                <span class="image-operation__table-actions">
-                                    <a href="{{ image.src }}" download
-                                        class="mx-auto badge image-operation__item-download">
-                                        <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
-                                        <span>Pobierz</span>
-                                    </a>
-
-                                    {% if image.thumbnailSrc %}
-                                        {% set thumbnail = image.thumbnailSrc %}
-                                    {% else %}
-                                        {% set thumbnail = image.src %}
-                                    {% endif %}
-
-                                    <a href="#" aria-current="page" class="mx-auto badge image-operation__item" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}">
-                                        <i class="fa-solid fa-eye image-operation__item-icon"></i>
-                                        <span>Podgląd</span>
-                                    </a>
-                                </span>
-                            </td>
-                        </tr>
-
-                      {% endfor %}
-
-                    </tbody>
-                </table>
-                <div class="table-footer"></div>
             </div>
-        </div>
+
+            <div class="image-operation__table-container">
+                <div class="table-responsive-vertical">
+                    <table class="table table-hover table-striped">
+
+                        <thead>
+                            <th>Format</th>
+                            <th>Nazwa pliku</th>
+                            <th>Rozmiar</th>
+                            <th>Data Modyfikacji</th>
+                            <th>Akcje</th>
+                        </thead>
+
+                        <tbody>
+
+                        {% for image in userImages | slice(0, 8) %}
+
+                            <tr>
+                                <td data-title="Format">
+                                    <span class="mx-auto badge">{{ image.mimeType | replace({'image/': ''}) }}</span>
+                                </td>
+                                <td data-title="Nazwa pliku">
+                                    <span>
+                                        <i class="fa-regular fa-image"></i> {{ image.name|length > maxNameLength ? image.name|slice(0, maxNameLength) ~ '...' : image.name  }}
+                                    </span>
+                                </td>
+                                <td data-title="Rozmiar">{{ image.size | formatBytes }}</td>
+                                <td data-title="Data Modyfikacji">
+                                    <span><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+                                </td>
+                                <td data-title="Akcje">
+                                    <span class="image-operation__table-actions">
+                                        <a href="{{ image.src }}" download="{{ image.name }}"  class="mx-auto badge image-operation__item-download">
+                                            <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
+                                            <span>Pobierz</span>
+                                        </a>
+
+                                        {% if image.thumbnailSrc %}
+                                            {% set thumbnail = image.thumbnailSrc %}
+                                        {% else %}
+                                            {% set thumbnail = image.src %}
+                                        {% endif %}
+
+                                        <a href="#" aria-current="page" class="mx-auto badge image-operation__item" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
+                                            <i class="fa-solid fa-eye image-operation__item-icon"></i>
+                                            <span>Podgląd</span>
+                                        </a>
+                                    </span>
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                    <div class="table-footer"></div>
+                </div>
+            </div>
 
         {% else %}
 
-        <custom-alert data-message="Obecnie nie posiadasz żadnych grafik"></custom-alert>
+            <custom-alert data-message="Obecnie nie posiadasz żadnych grafik"></custom-alert>
 
         {% endif %}
 

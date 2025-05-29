@@ -144,7 +144,7 @@ body.theme-dark::after {
 #graphics-tools-module .container {
   max-width: 83.5rem;
   margin: 0 auto;
-  padding-inline: 0rem;
+  padding-inline: 0.6rem;
 }
 @media (min-width: 30em) {
   #graphics-tools-module.container,
@@ -235,11 +235,11 @@ body.theme-dark::after {
 }
 #graphics-tools-module .area-header-wrapper {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: var(--current-gap);
+  gap: 1rem;
 }
 #graphics-tools-module .opacity-0 {
   transition: 0.3s ease;
@@ -729,18 +729,28 @@ body.theme-dark::after {
 #graphics-tools-module.main-layout,
 #graphics-tools-module .main-layout {
   display: flex;
-  flex-direction: column;
   position: relative;
+  flex-direction: column;
   width: 100%;
-  gap: var(--current-gap);
   height: 100%;
+  gap: var(--current-gap);
 }
 #graphics-tools-module.main-layout .nav-area .nav-container,
 #graphics-tools-module .main-layout .nav-area .nav-container {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column-reverse;
+  align-items: flex-end;
   width: 100%;
+  margin-bottom: var(--panels-gap);
+  gap: 1rem;
+}
+@media (min-width: 40em) {
+  #graphics-tools-module.main-layout .nav-area .nav-container,
+  #graphics-tools-module .main-layout .nav-area .nav-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 @media (min-width: 85em) {
   #graphics-tools-module.main-layout,
@@ -783,10 +793,16 @@ body.theme-dark::after {
 
 #graphics-tools-module .main-navigation {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 1.5rem;
   width: 100%;
   margin-bottom: var(--panels-gap);
+}
+@media (min-width: 40em) {
+  #graphics-tools-module .main-navigation {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 #graphics-tools-module .main-navigation-list {
   display: flex;

@@ -7,7 +7,7 @@ import CompressorUIManager from "./CompressorUIManager.js";
 import CustomSelect from "../../modules/CustomSelect.js";
 import CustomTabs from "../../modules/CustomTabs.js";
 import Popover from "../../modules/Popover.js";
-import CompressorUploadService from "./CompressorUploadService.js";
+import CompressorUploadService from "./CompressorUploadService.js"; 
 
 customElements.define("custom-popover", Popover);
 
@@ -204,7 +204,7 @@ export default class CompressorPanel extends OperationPanel {
     }
 
     if (!this.state.allOperationsCompleted) {
-      this.handleAllImagesCompleted("Wszystkie obrazy zostały pomyślnie skompresowane!");
+      this.handleAllImagesCompleted("Wszystkie obrazy zostały pomyślnie skompresowane!"); 
     }
 
     progressNameElement.textContent = "Zakończono";
@@ -213,7 +213,7 @@ export default class CompressorPanel extends OperationPanel {
   validateState() {
     const compressQuality = this.state.compressQuality
 
-    console.log(this.state)
+    console.info(this.state)
 
     if (!compressQuality || compressQuality < 1 || compressQuality > 100) {
       throw new Error(`Podano nie poprawną wartość dla siły kompresji: ${compressQuality}%`);

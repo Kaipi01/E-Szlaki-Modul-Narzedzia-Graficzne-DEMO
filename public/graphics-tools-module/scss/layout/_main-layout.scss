@@ -27,43 +27,28 @@
 
   &.main-layout,
   .main-layout {
-    // display: grid;
     display: flex;
-    flex-direction: column;
     position: relative;
+    flex-direction: column;
     width: 100%;
-    gap: var(--current-gap);
     height: 100%;
-    // grid-template-columns: 1fr; 
+    gap: var(--current-gap);
 
     .nav-area {
-      // display: none;
-      // order: 2;
-      // position: relative;
-
       .nav-container {
         display: flex;
-        // flex-direction: column;
-        // position: sticky;
-        gap: 1rem;
-        // top: var(--current-gap);
-        align-items: center;
-        // right: 0;
-        // height: calc(100vh - (var(--current-gap) * 2));
+        flex-direction: column-reverse;
+        align-items: flex-end;
         width: 100%;
+        margin-bottom: var(--panels-gap);
+        gap: 1rem;
+
+        @media (min-width: $content-breakpoint-phone-large) {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
       }
-    }
-
-    // .main-area {
-
-    // }
-
-    @media (min-width: $content-breakpoint-tablet) {
-      // grid-template-columns: 1fr toRem(225);
-
-      // .nav-area {
-      //   display: block;
-      // }
     }
 
     @media (min-width: $content-breakpoint-desktop) {

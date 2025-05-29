@@ -20,7 +20,7 @@ export default class ImagesGalleryModal extends HTMLElement {
 
   render() {
     this.className = "images-gallery";
-    this.innerHTML = /*html*/`
+    this.innerHTML = /*html*/ `
             <div class="gallery-modal" id="galleryModal">
                 <div class="gallery-content">
                     <div class="gallery-options">
@@ -81,7 +81,7 @@ export default class ImagesGalleryModal extends HTMLElement {
 
     this.galleryPrevBtn.addEventListener('click', () => this.showImage(this.currentImageIndex - 1));
 
-    this.galleryNextBtn.addEventListener('click', () => this.showImage(this.currentImageIndex + 1)); 
+    this.galleryNextBtn.addEventListener('click', () => this.showImage(this.currentImageIndex + 1));
 
     this.galleryCloseBtn.addEventListener('click', () => {
 
@@ -122,7 +122,7 @@ export default class ImagesGalleryModal extends HTMLElement {
       if (target.hasAttribute('data-gallery-preview')) {
         e.preventDefault()
         this.openGallery(parseInt(target.dataset.galleryPreview))
-      } 
+      }
     })
 
     document.addEventListener('keydown', (e) => {
@@ -158,7 +158,7 @@ export default class ImagesGalleryModal extends HTMLElement {
     this.galleryPrintBtn = this.querySelector('[data-gallery-print-btn]')
     this.galleryDownloadBtn = this.querySelector('[data-gallery-download-btn]')
     this.galleryMaximizeBtn = this.querySelector('[data-gallery-maximize-btn]')
-    this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]') 
+    this.galleryMinimizeBtn = this.querySelector('[data-gallery-minimize-btn]')
     this.imagePreviews = document.querySelectorAll('[data-gallery-preview]')
 
     this.imagePreviews.forEach((imgPrev, index) => imgPrev.setAttribute('data-gallery-preview', index))
@@ -183,7 +183,7 @@ export default class ImagesGalleryModal extends HTMLElement {
     const imagePreviewsArray = [...this.imagePreviews]
 
     imagePreviewsArray.reverse().forEach((imagePreview, idx) => {
-    // imagePreviewsArray.forEach((imagePreview, idx) => {
+      // imagePreviewsArray.forEach((imagePreview, idx) => {
       const imageElement = document.createElement('img');
 
       imageElement.src = imagePreview.dataset.src
@@ -196,7 +196,7 @@ export default class ImagesGalleryModal extends HTMLElement {
       thumbnail.src = imagePreview.dataset.src
       thumbnail.className = "gallery-thumbnail"
 
-      galleryThumbnailsContainer.append(thumbnail); 
+      galleryThumbnailsContainer.append(thumbnail);
 
       thumbnail.addEventListener('click', () => this.showImage(this.imagePreviews.length - (idx + 1)))
     });
@@ -215,16 +215,16 @@ export default class ImagesGalleryModal extends HTMLElement {
   }
 
   activeFullScreen() {
-    const galleryImages = this.querySelectorAll('.gallery-image') 
+    const galleryImages = this.querySelectorAll('.gallery-image')
 
     galleryImages.forEach(image => image.classList.add('fullscreen'))
   }
 
   inactiveFullScreen() {
-    const galleryImages = this.querySelectorAll('.gallery-image') 
+    const galleryImages = this.querySelectorAll('.gallery-image')
 
     galleryImages.forEach(image => image.classList.remove('fullscreen'))
-  } 
+  }
 
   showImage(index) {
     const galleryImages = this.querySelectorAll('.gallery-image')
@@ -250,10 +250,19 @@ export default class ImagesGalleryModal extends HTMLElement {
       }
     })
 
-    currentGalleryImage?.classList.add('active');   
+    currentGalleryImage?.classList.add('active');
 
-    this.galleryPrintBtn.setAttribute('data-src', currentGalleryImageLink?.getAttribute('data-download-src'))
-    this.galleryDownloadBtn.href = currentGalleryImageLink?.getAttribute('data-download-src')
+    if (currentGalleryImageLink) {
+
+      console.log(currentGalleryImageLink)
+
+      const downloadSrc = currentGalleryImageLink.getAttribute('data-download-src')
+      const downloadImageName = currentGalleryImageLink.getAttribute('data-download-name')
+
+      this.galleryPrintBtn.setAttribute('data-src', downloadSrc)
+      this.galleryDownloadBtn.href = downloadSrc
+      this.galleryDownloadBtn.setAttribute('download', downloadImageName)
+    }
 
     galleryCounter.textContent = `${index + 1} / ${this.imagePreviews.length}`
   }

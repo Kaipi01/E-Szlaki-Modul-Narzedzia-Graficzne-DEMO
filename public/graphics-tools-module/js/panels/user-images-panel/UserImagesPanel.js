@@ -386,6 +386,7 @@ export default class UserImagesPanel extends AbstractPanel {
     link.setAttribute('data-gallery-preview', '');
     link.setAttribute('data-src', image.thumbnailSrc ?? image.src);
     link.setAttribute('data-download-src', image.src);
+    link.setAttribute('data-download-name', image.name);
 
     // Overlay z informacjami
     const overlay = document.createElement('div');
@@ -437,7 +438,7 @@ export default class UserImagesPanel extends AbstractPanel {
 
     downloadLink.href = image.src
     downloadLink.className = "badge badge-link badge-link-blue"
-    downloadLink.setAttribute('download', '')
+    downloadLink.setAttribute('download', image.name)
 
     downloadLink.innerHTML = `
       <i class="fa-solid fa-circle-down badge-link-icon"></i>

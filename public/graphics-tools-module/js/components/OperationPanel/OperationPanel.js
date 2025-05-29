@@ -2,7 +2,7 @@ import AbstractPanel from "../../modules/AbstractPanel.js";
 import Alert from "../../modules/Alert.js";
 import Toast from "../../modules/Toast.js";
 import { emitEvent } from "../../utils/events.js";
-import { downloadAjaxFile } from "../../utils/file-helpers.js";
+import { downloadAjaxFile } from "../../utils/file-helpers.js"; 
 
 export default class OperationPanel extends AbstractPanel {
 
@@ -110,11 +110,11 @@ export default class OperationPanel extends AbstractPanel {
       this.showError(error, "WARNING")
 
       return
-    }
+    } 
 
     const newFiles = this.InputFileManager.addFiles(fileList);
 
-    emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, { files: newFiles })
+    emitEvent(this.EVENT_ON_FILE_INPUT_SELECT, { files: newFiles }) 
 
     await this.updateImagesTableUI(newFiles)
 
@@ -165,7 +165,7 @@ export default class OperationPanel extends AbstractPanel {
 
       Toast.show(Toast.SUCCESS, message);
       this.elements.containerAlerts.innerHTML = ''
-      Alert.show(Alert.SUCCESS, message, this.elements.containerAlerts)
+      Alert.show(Alert.SUCCESS, message, this.elements.containerAlerts) 
     }
   }
 

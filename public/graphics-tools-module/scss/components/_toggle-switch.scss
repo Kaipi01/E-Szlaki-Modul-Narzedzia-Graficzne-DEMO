@@ -1,0 +1,68 @@
+@use "../base/variables" as *;
+@use "../functions/toRem" as *;
+
+#graphics-tools-module {
+  .toggle-switch {
+    $width: toRem(60);
+    $height: toRem(28);
+
+    display: inline-block;
+    position: relative;
+    width: $width;
+    height: $height;
+
+    &:has(:focus) {
+      outline: none;
+
+      * {
+        outline: none;
+      }
+
+      .toggle-slider {
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+      }
+    }
+
+    input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+
+      &:checked + .toggle-slider {
+        background-color: var(--green);
+
+        &:before {
+          $translate: calc(($width / 2) + toRem(2));
+          transform: translateX($translate);
+        }
+      }
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transition: 0.4s;
+      border-radius: $height;
+      background-color: var(--background-gray);
+      cursor: pointer;
+
+      &:before {
+        $position-gap: toRem(3);
+
+        content: "";
+        position: absolute;
+        bottom: $position-gap;
+        left: $position-gap;
+        width: toRem(22);
+        aspect-ratio: 1/1;
+        transition: 0.4s;
+        border-radius: 50%;
+        background-color: var(--white);
+        box-shadow: rgba(0, 0, 0, 0.319) 0px 1px 4px;
+      }
+    }
+  }
+}

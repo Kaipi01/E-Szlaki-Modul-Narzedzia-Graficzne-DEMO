@@ -53,17 +53,17 @@ export default class CompressorUIManager extends UIManager {
         );
 
         const progressBarHTML = `
-                        <div data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress animated-progress--no-label">
-                            <div class="animated-progress-bar">
-                                <div class="animated-progress-per" data-progress-bar-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} per="0"></div>
-                            </div>
-                            <div class="animated-progress-info">
-                                <div class="animated-progress-name">Oczekiwanie...</div>
-                                <div class="animated-progress-stats">
+                        <span data-progress-container-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} class="animated-progress animated-progress--no-label">
+                            <span class="animated-progress-bar">
+                                <span class="animated-progress-per" data-progress-bar-${file.name.replace(/[^a-zA-Z0-9]/g, '_')} per="0"></span>
+                            </span>
+                            <span class="animated-progress-info">
+                                <span class="animated-progress-name">Oczekiwanie...</span>
+                                <span class="animated-progress-stats">
                                     <span data-progress-text-${file.name.replace(/[^a-zA-Z0-9]/g, '_')}>0%</span>
-                                </div>
-                            </div>
-                        </div>
+                                </span>
+                            </span>
+                        </span>
                     `;
 
         const statusCell = this.createTableCell(progressBarHTML, {

@@ -1,16 +1,24 @@
 @use "./base/variables" as *;
+
 @use "./components/toast";
 @use "./components/alert";
 @use "./components/drop-zone";
 @use "./components/modern-table";
-@use "./components/custom-switch";
+@use "./components/toggle-switch";
 @use "./components/custom-popover";
 @use "./components/form-control";
 @use "./components/animated-progress";
 @use "./components/custom-select-green";
+
 @use "./layout/image-operation";
 
 #graphics-tools-module-converter {
+  .area-header {
+    padding-top: 1.25rem;
+    @media (min-width: $content-breakpoint-tablet) {
+      padding-top: 0;
+    }
+  }
 
   .select-files-btn {
     min-height: 2.9375rem;
@@ -18,7 +26,6 @@
   }
 
   .change-quality {
-
     &__wrapper {
       display: flex;
       align-items: center;
@@ -49,16 +56,21 @@
       box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25);
       gap: 1rem;
 
+      @media (min-width: $content-breakpoint-tablet-small) {
+        flex-wrap: nowrap;
+      }
+
       @media (min-width: $content-breakpoint-tablet) {
-        flex-wrap: nowrap; 
+        flex-wrap: nowrap;
         justify-content: space-between;
         max-width: max-content;
         gap: 2rem;
-      } 
+      }
 
-      .custom-popover-button, .custom-select-green {
-        min-width: 18rem; 
-      } 
+      .custom-popover-button,
+      .custom-select-green {
+        min-width: 18rem;
+      }
 
       .custom-select-green-styled {
         font-weight: bold;
@@ -66,7 +78,11 @@
     }
 
     &__compress-switch {
+      display: flex;
+      align-items: center;
       width: max-content;
+      margin-top: 1rem;
+      gap: 1rem;
     }
 
     &__label {

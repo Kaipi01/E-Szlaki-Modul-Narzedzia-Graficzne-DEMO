@@ -1,12 +1,15 @@
 @use "../functions/toRem" as *;
 @use "./form-control";
 
-#graphics-tools-module { 
-
+#graphics-tools-module {
   .search-form {
+    --border-radius: 0.375em;
+
     display: flex;
     align-items: center;
     width: 100%;
+    border: 3px solid var(--green);
+    border-radius: 0.575em;
 
     .search-btn {
       display: flex;
@@ -14,12 +17,12 @@
       justify-content: center;
       min-height: toRem(47);
       padding: 0 1rem !important;
-      border-radius: 0.375em;
+      border-radius: var(--border-radius);
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-       i {
+      i {
         font-size: 1.15rem;
-       }
+      }
     }
   }
 
@@ -30,11 +33,12 @@
     input[type="search"] {
       width: 100%;
       min-height: toRem(47);
-      border-radius: 0.375em;
+      border-radius: var(--border-radius);
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
       border-color: var(--light-green);
       box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+      font-weight: normal;
     }
   }
 }

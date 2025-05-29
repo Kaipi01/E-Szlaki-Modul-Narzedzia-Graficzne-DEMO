@@ -27,9 +27,12 @@
     }
   }
 
-  .search-form {
-    .search-box input[type="search"] {
-      min-width: toRem(350);
+  .search-form { 
+
+    @media (min-width: $content-breakpoint-phone-large) {
+      .search-box input[type="search"] {
+        min-width: toRem(350);
+      }
     }
   }
 
@@ -100,6 +103,8 @@
   .status-container {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
     justify-content: space-between;
     margin-bottom: toRem(16);
 

@@ -1,8 +1,9 @@
 @use "./base/variables" as *;
 @use "./functions/toRem" as *;
+
 @use "./components/toast";
-@use "./components/alert";
-@use "./components/custom-switch";
+@use "./components/alert"; 
+@use "./components/toggle-switch";
 @use "./components/drop-zone";
 @use "./components/modern-table";
 @use "./components/animated-progress";
@@ -15,6 +16,13 @@
 @use "./layout/image-operation";
 
 #graphics-tools-module-compressor {
+
+  .area-header {
+    padding-top: 1.25rem;
+    @media (min-width: $content-breakpoint-tablet) {
+      padding-top: 0;
+    }
+  }
 
   .change-params {
     &__wrapper {
@@ -45,9 +53,10 @@
       margin-block: 0.5rem;
       word-break: keep-all;
       white-space: nowrap;
-    }
+    } 
 
     &__control {
+      min-width: 12ch;
       border-radius: 5px;
       font-weight: bold;
 
@@ -55,14 +64,14 @@
         color: #fff;
       }
     } 
-  }
-
+  } 
+  
   .settings {
     position: relative;
     z-index: 4;
 
     &__wrapper {
-      // margin: 2rem auto;
+      width: 100%;
       padding: 1rem;
       border-radius: 0.5rem;
       background-color: var(--very-light-green-opacity);
@@ -101,12 +110,7 @@
         flex-direction: column;
         justify-content: center;
         margin-top: 1rem;
-      }
-
-      .custom-switch {
-        max-width: toRem(60);
-        margin: 0.5rem 0;
-      }
+      } 
 
       .custom-popover-button, .custom-select-green {
         min-width: toRem(200);
