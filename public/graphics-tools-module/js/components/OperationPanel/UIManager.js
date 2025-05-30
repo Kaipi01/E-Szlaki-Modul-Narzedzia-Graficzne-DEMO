@@ -1,4 +1,5 @@
-import { fadeAnimation } from "../../utils/animations.js";
+'use strict';
+
 import DropZoneManager from "../DropZoneManager.js";
 
 /**
@@ -136,13 +137,7 @@ export default class UIManager {
     const progressText = document.querySelector(`[data-progress-text-${safeFileName}]`);
 
     if (progressContainer && progressBar && progressText) {
-      progressContainer.style.removeProperty('display');
-
-      fadeAnimation(() => {
-        progressBar.style.width = '0%';
-        progressText.textContent = '0%';
-        progressBar.setAttribute('per', '0');
-      }, [progressContainer], 400);
+      progressContainer.style.removeProperty('display'); 
     }
   }
 
@@ -221,7 +216,6 @@ export default class UIManager {
     }
   }
 
-  /** Czyści tabele */
   clearTable() {
     this.elements.imageTable.innerHTML = '';
   }

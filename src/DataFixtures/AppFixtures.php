@@ -20,7 +20,6 @@ class AppFixtures extends Fixture
         $user->setEmail('user@example.com');
         $user->setRoles(['ROLE_USER']);
         
-        // Zakodowanie hasła
         $encodedPassword = $this->passwordEncoder->encodePassword(
             $user,
             '12345'

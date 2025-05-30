@@ -1,3 +1,5 @@
+'use strict';
+
 import AbstractPanel from "../../modules/AbstractPanel.js";
 import Alert from "../../modules/Alert.js";
 import Toast from "../../modules/Toast.js";
@@ -9,9 +11,7 @@ export default class OperationPanel extends AbstractPanel {
   EVENT_ON_CLEAR_TABLE = "gtm:event-on-clear-table";
   EVENT_ON_ALL_IMAGES_COMPLETED = "gtm:event-on-all-images-completed";
   EVENT_ON_FILE_INPUT_SELECT = "gtm:event-on-file-input-select";
-
   EVENT_ON_IMAGE_PROCESSED = "gtm:event-on-image-processed";
-
   EVENT_BATCH_QUEUE_IMAGES_PROCESSED = "gtm:event-batch-queue-images-processed";
 
   /**

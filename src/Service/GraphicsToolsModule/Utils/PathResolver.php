@@ -17,17 +17,14 @@ class PathResolver
 
     /** Konwertuje ścieżkę absolutną na relatywną */
     public function getRelativePath(string $absolutePath): string
-    {
-        // Zamieniamy backslashes na slashe dla zgodności
+    { 
         $absolutePath = str_replace('\\', '/', $absolutePath);
         $projectPath = str_replace('\\', '/', "{$this->projectDir}/public");
-
-        // Usuwamy część ścieżki odpowiadającą katalogowi głównemu
+ 
         if (str_starts_with($absolutePath, $projectPath)) {
             return str_replace($projectPath, '', $absolutePath);
         }
-
-        // Jeśli ścieżka nie należy do katalogu `public`, zwracamy oryginalną
+ 
         return $absolutePath;
     }
 

@@ -1,3 +1,5 @@
+'use strict';
+
 import UploadService from "../../components/OperationPanel/UploadService.js";
 
 export default class CompressorUploadService extends UploadService {

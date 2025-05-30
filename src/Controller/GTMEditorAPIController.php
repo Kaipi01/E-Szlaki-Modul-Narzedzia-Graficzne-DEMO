@@ -78,10 +78,6 @@ class GTMEditorAPIController extends AbstractController
 
         $imageData = $this->uploader->upload($imageBlob, $uploadDir, setUniqueName: true);
 
-        // if (!file_exists($imageData['path'])) {
-        //     throw new Exception('Plik nie istnieje.');
-        // }
-
         return $imageData;
     }
 

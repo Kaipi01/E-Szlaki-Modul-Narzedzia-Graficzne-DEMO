@@ -21,37 +21,7 @@ abstract class ImageProcessHandler
             'processHash' => $this->state->processHash,
             'status' => ImageOperationStatus::PREPARING,
             'progress' => 40
-        ]); 
-
-        // if ($this->state->destinationPath && file_exists($this->state->destinationPath)) {
-        //     return $processData; 
-        // }
-        
-        // $imagePath = $this->state->imagePath;
-        
-        // if (!$imagePath || !file_exists($imagePath)) {
-        //     throw new \RuntimeException('Nie można odnaleźć pliku obrazu.');
-        // }
-        
-        // $destinationDir = "{$this->processDir}/{$this->state->ownerId}";
-
-        // if (!is_dir($destinationDir)) {
-        //     if (!mkdir($destinationDir, 0755, true)) {
-        //         throw new \RuntimeException('Nie można utworzyć katalogu docelowego.');
-        //     }
-        // }
-
-        // $originalName = $this->state->imageOriginalName;
-            
-        // $destinationPath = "$destinationDir/$originalName";
-
-        // if (!copy($imagePath, $destinationPath)) {
-        //     throw new \RuntimeException('Nie udało się skopiować pliku.');
-        // } 
-        
-        // unlink($imagePath);
-
-        // $this->state->destinationPath = $destinationPath;
+        ]);  
 
         return $processData;
     }

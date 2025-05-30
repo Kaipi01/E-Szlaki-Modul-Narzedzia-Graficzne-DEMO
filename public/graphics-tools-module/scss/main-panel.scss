@@ -17,15 +17,15 @@
 
   display: grid;
   position: relative;
-  width: 100%;
-  gap: var(--current-gap);
-  height: 100%;
-  align-content: start;
 
   grid-template-areas:
     "quick-access"
     "stats"
     "content";
+  align-content: start;
+  width: 100%;
+  height: 100%;
+  gap: var(--current-gap);
 
   @media (min-width: $content-breakpoint-tablet-large) {
     grid-template-areas:
@@ -52,20 +52,20 @@
 
   .quick-access-area {
     display: flex;
+    grid-area: quick-access;
     flex-direction: column;
     gap: var(--current-gap);
-    grid-area: quick-access;
   }
 
   .stats-area {
-    position: relative;
     display: flex;
+    position: relative;
+    grid-area: stats;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    flex-direction: column;
-    gap: 0.6rem;
-    grid-area: stats;
     background-color: var(--background-50);
+    gap: 0.6rem;
 
     .area-header {
       color: var(--blue);
@@ -110,9 +110,9 @@
   .access-links { 
     display: grid;
     grid-template-columns: 1fr;
+    height: 100%;
     list-style: none;
-    gap: var(--current-gap);
-    height: 100%;  
+    gap: var(--current-gap);  
 
     @media (min-width: $content-breakpoint-phone-small) {
       grid-template-columns: repeat(2, 1fr);
@@ -144,13 +144,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    padding-block: 2rem;
     transition: 0.3s ease;
-    text-align: center;
     color: #fff;
     font-weight: bold;
+    text-align: center;
     cursor: pointer;
-    padding-block: 2rem;
-    height: 100%;
 
     @media (min-width: $content-breakpoint-tablet-large) {
       font-size: 1.15rem;
@@ -196,19 +196,16 @@
 
     & > a {
       @media (min-width: $content-breakpoint-phone) {
-        min-width: toRem(300);
         flex: 1;
+        min-width: toRem(300);
       }
     }
   }
   .image-wrapper {
     display: flex;
     position: relative;
-    // flex-basis: 48%;
     width: 100%;
-    // height: auto;
     aspect-ratio: 3/2;
-    // margin-bottom: var(--current-gap);
     overflow: hidden;
     border-radius: toRem(12);
     box-shadow: rgba(0, 0, 0, 0.55) toRem(0) toRem(5) toRem(15);
@@ -285,8 +282,8 @@
     border-radius: toRem(10);
     background-color: rgba(0, 0, 0, 0.75);
     color: #fff;
-    font-weight: bold;
     font-size: 0.85rem;
+    font-weight: bold;
   }
 
   .column-header {
@@ -361,10 +358,7 @@
     }
   }
 
-  @media screen and (max-width: $content-breakpoint-tablet-small) {
-    .last-images-preview {
-      //flex-direction: column;
-    }
+  @media screen and (max-width: $content-breakpoint-tablet-small) { 
 
     .image-wrapper {
       padding: toRem(8) 0;

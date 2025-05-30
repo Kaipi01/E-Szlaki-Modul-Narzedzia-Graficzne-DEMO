@@ -27,17 +27,17 @@ class CompressionProcessHandler extends ImageProcessHandler implements ImageProc
         $imagePath = $this->state->imagePath;
         $compressionQuality = $this->state->compressionQuality;
         $resizeOptions = $this->state->resizeOptions;
-        $afterOperationCallback = null;
+        $beforeOperationCallback = null;
 
         if (!$imagePath || !file_exists($imagePath)) {
             throw new \RuntimeException('Nie znaleziono pliku do kompresji');
         }
 
         if ($resizeOptions !== null) {
-            $afterOperationCallback = $this->getResizeImageCallback($resizeOptions);
+            $beforeOperationCallback = $this->getResizeImageCallback($resizeOptions);
         }
 
-        $this->state->compressionResults = $this->compressor->compress($imagePath, $compressionQuality, $afterOperationCallback);
+        $this->state->compressionResults = $this->compressor->compress($imagePath, $compressionQuality, $beforeOperationCallback);
         $this->state->compressionResults->originalName = $this->state->imageOriginalName;
 
         return ImageProcessData::fromArray([

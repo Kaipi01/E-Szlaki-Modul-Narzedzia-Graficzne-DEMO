@@ -1,3 +1,5 @@
+'use strict';
+
 import { formatFileSize } from "../utils/file-helpers.js";
 
 /**

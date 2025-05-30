@@ -1,3 +1,5 @@
+'use strict';
+
 import UIManager from "../../components/OperationPanel/UIManager.js";
 import { formatFileSize } from "../../utils/file-helpers.js";
 

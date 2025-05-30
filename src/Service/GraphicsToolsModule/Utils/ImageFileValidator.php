@@ -29,11 +29,16 @@ class ImageFileValidator implements ImageFileValidatorInterface
         '/\.jsp$/i', // Java Server Pages
     ];
 
+    public const MAX_IMAGE_SIZE = 100 * 1024 * 1024;
+
 
     /** @inheritDoc */
     public function validate(UploadedFile $image): void
     {
-        // Sprawdzenie typu MIME
+        if ($image->getSize() > self::MAX_IMAGE_SIZE) {
+            throw new InvalidArgumentException("Plik jest zbyt duży.");
+        }
+
         $mimeType = $image->getMimeType(); 
 
         if (!in_array($mimeType, ImageType::getAllowedMimeTypes(), true)) {
@@ -55,7 +60,6 @@ class ImageFileValidator implements ImageFileValidatorInterface
             }
         }
 
-        // Dodatkowe sprawdzenie długości nazwy pliku
         if (strlen($originalFilename) > 255) {
             throw new InvalidArgumentException("Nazwa pliku jest zbyt długa. Maksymalna długość to 255 znaków.");
         }
@@ -82,5 +86,4 @@ class ImageFileValidator implements ImageFileValidatorInterface
 
         return $imageInfo !== false;
     }
- 
 }

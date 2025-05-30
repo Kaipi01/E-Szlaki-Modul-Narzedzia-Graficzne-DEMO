@@ -1,3 +1,5 @@
+'use strict';
+
 import Toast from "../../modules/Toast.js";
 import CustomSelect from "../../modules/CustomSelect.js";
 import { formatFileSize } from "../../utils/file-helpers.js";

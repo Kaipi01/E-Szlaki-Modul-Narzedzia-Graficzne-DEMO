@@ -1,3 +1,5 @@
+'use strict';
+
 import DropZoneManager from "../../components/DropZoneManager.js";
 import InputFileManager from "../../components/InputFileManager.js";
 import AbstractPanel from "../../modules/AbstractPanel.js"
@@ -101,7 +103,7 @@ export default class EditorPanel extends AbstractPanel {
     this.filterLayer = null;
     this.filterLayerBackground = null;
 
-    // // Drop Zone
+    // Drop Zone
     this.dropZoneElement = this.getByAttribute('data-drop-zone')
     this.fileInput = this.getByAttribute('data-file-input')
 

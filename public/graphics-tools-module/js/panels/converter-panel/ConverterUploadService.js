@@ -1,3 +1,5 @@
+'use strict';
+
 import UploadService from "../../components/OperationPanel/UploadService.js";
 
 export default class ConverterUploadService extends UploadService {
@@ -6,7 +8,7 @@ export default class ConverterUploadService extends UploadService {
   }
 
   async uploadFile(file, { onProgress, onError, onComplete }) {
-    onProgress(20); // FIXME: nie dokońca działa to jak trzeba ;/
+    onProgress(20); 
 
     const errorHandler = (errorMessage) => {
       onProgress(0);

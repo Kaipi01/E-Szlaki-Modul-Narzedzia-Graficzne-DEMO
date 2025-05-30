@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace App\Service\GraphicsToolsModule\Compressor;
 
 use App\Service\GraphicsToolsModule\Compressor\Contracts\ImageOptimizerInterface;
+use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use Spatie\ImageOptimizer\Optimizers\{Cwebp, Jpegoptim, Pngquant};
 use Spatie\ImageOptimizer\OptimizerChainFactory;
 use Exception;
 
 class ImageOptimizerService implements ImageOptimizerInterface
-{ 
+{
+    public function __construct(private GTMLoggerInterface $logger)
+    {
+    }
+
     /** @inheritDoc */
     public function optimize(string $imagePath, int $quality = 80): void
     {
@@ -44,4 +49,4 @@ class ImageOptimizerService implements ImageOptimizerInterface
 
         $optimizerChain->optimize($imagePath);
     }
-} 
+}

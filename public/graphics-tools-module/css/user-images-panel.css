@@ -942,11 +942,11 @@
 }
 #graphics-tools-module-user-images-panel .status-container {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  gap: 1.5rem;
 }
 #graphics-tools-module-user-images-panel .status-container .results-info {
   padding: 0.5rem 1rem;

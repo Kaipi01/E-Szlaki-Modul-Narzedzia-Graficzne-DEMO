@@ -39,8 +39,7 @@ abstract class AbstractDTO
             }
 
             $value = $data[$name];
-
-            // Jeśli wartość jest null i typ dopuszcza null, pomijamy dalsze sprawdzenia
+ 
             if ($value === null && $allowsNull) {
                 continue;
             }
@@ -157,8 +156,7 @@ abstract class AbstractDTO
                 }
                 break;
 
-            default:
-                // Pozostałe typy lub obiekty bez dodatkowych sprawdzeń
+            default: 
                 break;
         }
     }
