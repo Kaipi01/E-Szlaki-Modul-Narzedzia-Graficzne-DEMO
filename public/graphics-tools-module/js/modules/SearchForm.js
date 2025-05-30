@@ -18,6 +18,7 @@ export default class SearchForm extends HTMLElement {
     this.forPanel = this.getAttribute("data-for-panel")
     this.initValue = this.getAttribute("data-value") ?? ''
     this.searchAction = this.getAttribute("data-action")
+    this.inputPattern = this.getAttribute("data-input-pattern")
     this.inputName = this.getAttribute("data-input-name") ?? "search"
     this.render();
 
@@ -70,6 +71,10 @@ export default class SearchForm extends HTMLElement {
     this.input.name = this.inputName
     this.input.placeholder = "Szukaj"
     this.input.className = "floating-label-control form-control"
+
+    if (this.inputPattern) {
+      this.input.pattern = this.inputPattern
+    }
 
     inputBox.append(this.input)
     inputBox.append(inputLabel)

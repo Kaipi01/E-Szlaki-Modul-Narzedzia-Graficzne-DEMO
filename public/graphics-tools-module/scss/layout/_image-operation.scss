@@ -1,3 +1,4 @@
+@use "../base/variables" as *;
 @use "../functions/toRem" as *;
 @use "../functions/flex-center" as *;
 
@@ -151,16 +152,28 @@
 
     &__actions {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       border-bottom-right-radius: 0;
       border-bottom-left-radius: 0;
       background-color: #1d1d1d;
       color: var(--white);
+      gap: 1rem;
+
+      @media (min-width: $content-breakpoint-tablet-small) {
+        flex-direction: row;
+        justify-content: space-between;
+      }
 
       &-result {
         font-size: 1.5rem;
         font-weight: bold;
+        text-align: center;
+
+        @media (min-width: $content-breakpoint-tablet-small) {
+          text-align: left;
+        }
 
         &-value {
           color: $success-color;
@@ -171,8 +184,13 @@
       &-buttons {
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-end;
+        align-items: center;
+        justify-content: center;
         gap: toRem(15);
+
+        @media (min-width: $content-breakpoint-tablet-small) {
+          justify-content: flex-end;
+        }
       }
     }
   }

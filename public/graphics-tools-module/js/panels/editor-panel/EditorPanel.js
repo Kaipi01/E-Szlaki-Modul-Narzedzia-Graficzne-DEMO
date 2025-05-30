@@ -439,9 +439,9 @@ export default class EditorPanel extends AbstractPanel {
     const confirmBtn = modal.querySelector('[data-confirm-btn]');
     const denyBtn = modal.querySelector('[data-deny-btn]');
 
-    const closeModal = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
+    denyBtn.onclick = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
 
-    const removeImage = (e) => {
+    confirmBtn.onclick = (e) => {
       this.editorActionsContainer.setAttribute('hidden', '')
       this.dropZoneElement.removeAttribute('hidden')
       this.previewContainer.setAttribute('hidden', '')
@@ -463,13 +463,10 @@ export default class EditorPanel extends AbstractPanel {
 
       Toast.show(Toast.INFO, "Grafika została usunięta")
 
-      closeModal();
+      Modal.hide(this.CONFIRM_MODAL_ID);
     };
 
     modalMessage.textContent = "Czy na pewno chcesz usunąć aktualnie przerabianą grafikę?"
-
-    confirmBtn.addEventListener('click', removeImage, { once: true });
-    denyBtn.addEventListener('click', closeModal, { once: true });
   }
 
   resetSettingsButtonHandler() {
@@ -480,19 +477,17 @@ export default class EditorPanel extends AbstractPanel {
     const confirmBtn = modal.querySelector('[data-confirm-btn]');
     const denyBtn = modal.querySelector('[data-deny-btn]');
 
-    const closeModal = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
-    const resetSettingsAndClose = (e) => {
+    denyBtn.onclick = (e) => Modal.hide(this.CONFIRM_MODAL_ID);
+
+    confirmBtn.onclick = (e) => {
       this.resetAllSettings();
 
       Toast.show(Toast.INFO, "Wszystkie ustawienia zostały zresetowane")
 
-      closeModal();
+      Modal.hide(this.CONFIRM_MODAL_ID);
     };
 
     modalMessage.textContent = "Czy na pewno chcesz zresetować wszystkie ustawienia?"
-
-    confirmBtn.addEventListener('click', resetSettingsAndClose, { once: true });
-    denyBtn.addEventListener('click', closeModal, { once: true });
   }
 
   initFilterLayers() {

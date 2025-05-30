@@ -500,9 +500,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1.25rem;
+    min-width: 100%;
     padding: 0.75rem 1.1rem !important;
     text-align: right;
+    gap: 1.25rem;
   }
   #graphics-tools-module .table-responsive-vertical > .table > tbody > tr > td::before {
     text-align: left;
@@ -527,6 +528,12 @@
   --progress-bar-label-color: var(--green);
   --progress-bar-border-radius: 10px;
   width: 100%;
+  max-width: 19.6875rem;
+}
+@media screen and (max-width: 70rem) {
+  #graphics-tools-module .animated-progress {
+    max-width: 13.4375rem;
+  }
 }
 #graphics-tools-module .animated-progress--no-label .animated-progress-per::before, #graphics-tools-module .animated-progress--no-label .animated-progress-per::after {
   content: none;
@@ -1103,16 +1110,30 @@
 }
 #graphics-tools-module .image-operation__actions {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
   background-color: #1d1d1d;
   color: var(--white);
+  gap: 1rem;
+}
+@media (min-width: 45em) {
+  #graphics-tools-module .image-operation__actions {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
 #graphics-tools-module .image-operation__actions-result {
   font-size: 1.5rem;
   font-weight: bold;
+  text-align: center;
+}
+@media (min-width: 45em) {
+  #graphics-tools-module .image-operation__actions-result {
+    text-align: left;
+  }
 }
 #graphics-tools-module .image-operation__actions-result-value {
   color: #2ecc71;
@@ -1121,8 +1142,14 @@
 #graphics-tools-module .image-operation__actions-buttons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
   gap: 0.9375rem;
+}
+@media (min-width: 45em) {
+  #graphics-tools-module .image-operation__actions-buttons {
+    justify-content: flex-end;
+  }
 }
 
 #graphics-tools-module-compressor .area-header {
@@ -1149,8 +1176,14 @@
 }
 #graphics-tools-module-compressor .change-params__fields {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
+}
+@media (min-width: 45em) {
+  #graphics-tools-module-compressor .change-params__fields {
+    flex-wrap: nowrap;
+  }
 }
 #graphics-tools-module-compressor .change-params__label {
   display: block;

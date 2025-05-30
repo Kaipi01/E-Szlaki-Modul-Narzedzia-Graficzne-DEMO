@@ -8,6 +8,11 @@
     --progress-bar-border-radius: 10px;
 
     width: 100%;
+    max-width: toRem(315);
+
+    @media screen and (max-width: 70rem) {
+      max-width: toRem(215);
+    }
 
     &--no-label {
       .animated-progress-per {

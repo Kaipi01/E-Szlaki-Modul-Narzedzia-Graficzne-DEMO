@@ -606,6 +606,12 @@
   --progress-bar-label-color: var(--green);
   --progress-bar-border-radius: 10px;
   width: 100%;
+  max-width: 19.6875rem;
+}
+@media screen and (max-width: 70rem) {
+  #graphics-tools-module .animated-progress {
+    max-width: 13.4375rem;
+  }
 }
 #graphics-tools-module .animated-progress--no-label .animated-progress-per::before, #graphics-tools-module .animated-progress--no-label .animated-progress-per::after {
   content: none;
@@ -1231,6 +1237,7 @@
   padding-bottom: 1.5rem;
   font-size: 1.35rem;
   font-weight: bold;
+  word-wrap: break-word;
 }
 #graphics-tools-module-editor .confirm-modal-actions {
   display: flex;

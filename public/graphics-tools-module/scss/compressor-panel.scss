@@ -44,8 +44,13 @@
 
     &__fields {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 1rem;
+
+      @media(min-width: $content-breakpoint-tablet-small) {
+        flex-wrap: nowrap;
+      }
     }
 
     &__label {

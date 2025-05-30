@@ -1,7 +1,6 @@
- 
-<div class="quick-access-area"> 
+<div class="quick-access-area">
 
-    <custom-search-form data-input-name="szukaj" data-action="{{ path('gtm_user_images_panel') }}"></custom-search-form>
+    <custom-search-form data-action="{{ path('gtm_user_images_panel') }}" data-input-name="szukaj"></custom-search-form>
 
     <ul class="access-links">
         <li>
@@ -49,7 +48,7 @@
     </circular-progress-bar>
 
     {% if userCurrentDiscStoragePercent > 90 %}
-        <p>Zbliżasz się do limitu dostępnego miejsca na dysku. Usuń starsze pliki, by zwolnić miejsce.</p>
+    <p>Zbliżasz się do limitu dostępnego miejsca na dysku. Usuń starsze pliki, by zwolnić miejsce.</p>
     {% endif %}
 
 </div>
@@ -66,19 +65,25 @@
 
             <images-gallery-modal></images-gallery-modal>
 
-            {% set maxNameLength = 20 %}
+            {% set maxNameLength = 20 %} 
+            {% set tableStartImagesNumber = 0 %} 
 
-            <div class="last-images-preview">
+            {% if userImages | length > 3 %}
 
-                {% for image in userImages | slice(0, 3) %}
+                {% set tableStartImagesNumber = 3 %}
+
+                <div class="last-images-preview">
+
+                    {% for image in userImages | slice(0, 3) %}
 
                     {% if image.thumbnailSrc %}
-                        {% set thumbnail = image.thumbnailSrc %}
+                    {% set thumbnail = image.thumbnailSrc %}
                     {% else %}
-                        {% set thumbnail = image.src %}
+                    {% set thumbnail = image.src %}
                     {% endif %}
 
-                    <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
+                    <a href="#" aria-current="page" class="image-wrapper" data-gallery-preview data-src="{{ thumbnail }}"
+                        data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
                         <div class="image-overlay">
                             <div class="photo-info">
                                 <div class="photo-info-text">
@@ -93,9 +98,11 @@
                         <span class="photo-date">{{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
                     </a>
 
-                {% endfor %}
+                    {% endfor %}
 
-            </div>
+                </div>
+
+            {% endif %}
 
             <div class="image-operation__table-container">
                 <div class="table-responsive-vertical">
@@ -111,7 +118,7 @@
 
                         <tbody>
 
-                        {% for image in userImages | slice(0, 8) %}
+                            {% for image in userImages | slice(tableStartImagesNumber, 8) %}
 
                             <tr>
                                 <td data-title="Format">
@@ -119,27 +126,32 @@
                                 </td>
                                 <td data-title="Nazwa pliku">
                                     <span>
-                                        <i class="fa-regular fa-image"></i> {{ image.name|length > maxNameLength ? image.name|slice(0, maxNameLength) ~ '...' : image.name  }}
+                                        <i class="fa-regular fa-image"></i> {{ image.name|length > maxNameLength ?
+                                        image.name|slice(0, maxNameLength) ~ '...' : image.name }}
                                     </span>
                                 </td>
                                 <td data-title="Rozmiar">{{ image.size | formatBytes }}</td>
                                 <td data-title="Data Modyfikacji">
-                                    <span><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y", "Europe/Warsaw") }}</span>
+                                    <span><i class="fa-regular fa-calendar"></i> {{ image.uploadedAt | date("d.m.Y",
+                                        "Europe/Warsaw") }}</span>
                                 </td>
                                 <td data-title="Akcje">
                                     <span class="image-operation__table-actions">
-                                        <a href="{{ image.src }}" download="{{ image.name }}"  class="mx-auto badge image-operation__item-download">
+                                        <a href="{{ image.src }}" download="{{ image.name }}"
+                                            class="mx-auto badge image-operation__item-download">
                                             <i class="fa-solid fa-circle-down image-operation__item-download-icon"></i>
                                             <span>Pobierz</span>
                                         </a>
 
                                         {% if image.thumbnailSrc %}
-                                            {% set thumbnail = image.thumbnailSrc %}
+                                        {% set thumbnail = image.thumbnailSrc %}
                                         {% else %}
-                                            {% set thumbnail = image.src %}
+                                        {% set thumbnail = image.src %}
                                         {% endif %}
 
-                                        <a href="#" aria-current="page" class="mx-auto badge image-operation__item" data-gallery-preview data-src="{{ thumbnail }}" data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
+                                        <a href="#" aria-current="page" class="mx-auto badge image-operation__item"
+                                            data-gallery-preview data-src="{{ thumbnail }}"
+                                            data-download-src="{{ image.src }}" data-download-name="{{ image.name }}">
                                             <i class="fa-solid fa-eye image-operation__item-icon"></i>
                                             <span>Podgląd</span>
                                         </a>
@@ -147,7 +159,7 @@
                                 </td>
                             </tr>
 
-                        {% endfor %}
+                            {% endfor %}
 
                         </tbody>
                     </table>
@@ -157,7 +169,7 @@
 
         {% else %}
 
-            <custom-alert data-message="Obecnie nie posiadasz żadnych grafik"></custom-alert>
+        <custom-alert data-message="Obecnie nie posiadasz żadnych grafik"></custom-alert>
 
         {% endif %}
 

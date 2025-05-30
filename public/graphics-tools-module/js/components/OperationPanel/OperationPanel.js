@@ -269,10 +269,7 @@ export default class OperationPanel extends AbstractPanel {
 
     const statusCell = this.getStatusCellForFile(file.name);
     const progressNameElement = statusCell.querySelector(".animated-progress-name");
-
-    progressNameElement.textContent = "Wysyłanie...";
-
-    this.uploadService.uploadFile(file, {
+    const uploadCallbacks = {
       onProgress: (percentValue) => this.onProgresOperationHandler(percentValue, progressNameElement, file.name),
       onError: (message) => this.onErrorOperationHandler(message, file.name),
       onComplete: async (operationHash) => {
@@ -283,7 +280,19 @@ export default class OperationPanel extends AbstractPanel {
 
         emitEvent(this.EVENT_ON_IMAGE_PROCESSED)
       },
-    });
+    }
+
+    progressNameElement.textContent = "Wysyłanie...";
+
+    try {
+      this.uploadService.uploadFile(file, uploadCallbacks);
+    } catch(e) {  
+      console.error(`Wystąpił błąd dla pliku ${file.name}: ${e.message}`)
+
+        this.state.processedImagesNumber++;
+
+        emitEvent(this.EVENT_ON_IMAGE_PROCESSED)
+    }
   }
 
   /**

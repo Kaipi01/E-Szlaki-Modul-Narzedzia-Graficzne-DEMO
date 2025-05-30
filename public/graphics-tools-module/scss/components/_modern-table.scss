@@ -175,9 +175,10 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 1.25rem;
+        min-width: 100%;
         padding: 0.75rem 1.1rem !important;
         text-align: right;
+        gap: 1.25rem;
       }
       & > .table > tbody > tr > td::before { 
         text-align: left;

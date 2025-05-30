@@ -27,8 +27,7 @@
     }
   }
 
-  .search-form { 
-
+  .search-form {
     @media (min-width: $content-breakpoint-phone-large) {
       .search-box input[type="search"] {
         min-width: toRem(350);
@@ -121,17 +120,26 @@
 
   .images-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(toRem(335), 1fr));
+    grid-template-columns: 1fr;
     width: 100%;
     list-style: none;
     gap: toRem(16);
 
+    @media (min-width: $content-breakpoint-phone) {
+      grid-template-columns: repeat(auto-fill, minmax(toRem(335), 1fr));
+    }
+
     .image-info {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       width: 100%;
       padding: 1rem;
+
+      & > a {
+        flex: 1;
+      }
     }
 
     .image-card {
@@ -242,6 +250,7 @@
       padding-bottom: 1.5rem;
       font-size: 1.35rem;
       font-weight: bold;
+      word-wrap: break-word;
     }
 
     &-actions {

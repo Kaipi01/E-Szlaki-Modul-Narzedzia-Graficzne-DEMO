@@ -133,6 +133,8 @@ body {
 
     &-wrapper {
       display: flex;
+      position: relative;
+      z-index: 3;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
