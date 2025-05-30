@@ -8,7 +8,7 @@ use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AppFixtures extends Fixture
-{  
+{
     public function __construct(private UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
@@ -16,17 +16,23 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager)
     { 
+        $manager->persist($this->createTestUser('user@example.com'));
+        $manager->persist($this->createTestUser('test@example.com'));
+        $manager->flush();
+    }
+
+    private function createTestUser(string $email): User
+    {
         $user = new User();
-        $user->setEmail('user@example.com');
+        $user->setEmail($email);
         $user->setRoles(['ROLE_USER']);
-        
+
         $encodedPassword = $this->passwordEncoder->encodePassword(
             $user,
             '12345'
         );
-        $user->setPassword($encodedPassword); 
-         
-        $manager->persist($user);  
-        $manager->flush();
+        $user->setPassword($encodedPassword);
+
+        return $user;
     }
 }

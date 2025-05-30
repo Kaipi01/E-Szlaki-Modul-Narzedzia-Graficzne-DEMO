@@ -211,9 +211,7 @@ export default class CompressorPanel extends OperationPanel {
   }
 
   validateState() {
-    const compressQuality = this.state.compressQuality
-
-    console.info(this.state)
+    const compressQuality = this.state.compressQuality 
 
     if (!compressQuality || compressQuality < 1 || compressQuality > 100) {
       throw new Error(`Podano nie poprawną wartość dla siły kompresji: ${compressQuality}%`);

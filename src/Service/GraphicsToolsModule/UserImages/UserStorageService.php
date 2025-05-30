@@ -58,8 +58,8 @@ class UserStorageService implements UserStorageInterface
     {
         $userFolder = $this->container->getParameter('gtm_uploads') . "/" . $userId;
 
-        if (!is_dir($userFolder)) {
-            throw new FileNotFoundException("Folder użytkownika {$userId} nie istnieje.");
+        if (!is_dir($userFolder)) { 
+            return 0;
         }
 
         return $this->getFolderSize($userFolder);

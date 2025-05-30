@@ -156,9 +156,7 @@ export default class ConverterPanel extends OperationPanel {
   }
 
   validateState() {
-    const {quality, selectedFormat} = this.state
-
-    console.info(this.state)
+    const {quality, selectedFormat} = this.state 
 
     if (!quality || quality < 1 || quality > 100) {
       throw new Error(`Podano nie poprawną wartość dla jakości konwersji: ${quality}%`);

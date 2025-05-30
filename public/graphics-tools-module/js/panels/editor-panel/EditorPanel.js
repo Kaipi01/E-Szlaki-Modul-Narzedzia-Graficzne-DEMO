@@ -721,9 +721,7 @@ export default class EditorPanel extends AbstractPanel {
     const imageBlob = await this.getImageBlob(mimeType)
 
     this.exportButton.innerHTML = '<i class="fas fa-download"></i> Trwa Eksportowanie. Proszę czekać ...'
-    this.exportButton.classList.add('loading-btn-icon')  
-
-    console.info(this.state.currentChanges)
+    this.exportButton.classList.add('loading-btn-icon')   
 
     formData.append('imageBlob', imageBlob, imageName)
     formData.append('imageChanges', this.getCurrentChangesJSON())

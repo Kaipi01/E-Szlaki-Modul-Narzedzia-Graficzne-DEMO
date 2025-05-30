@@ -6,7 +6,6 @@ use App\Service\GraphicsToolsModule\Utils\Contracts\GTMLoggerInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\ImageFileValidatorInterface;
 use App\Service\GraphicsToolsModule\Utils\Contracts\UploadImageServiceInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\HttpFoundation\Request;
 
 class UploadImageService implements UploadImageServiceInterface
 {
@@ -22,14 +21,13 @@ class UploadImageService implements UploadImageServiceInterface
         if (!$image->isValid()) {
             throw new \Exception("Przesłany plik jest nieprawidłowy. Kod błędu: {$image->getError()}");
         }
+        $this->ensureDirectoryExists($uploadDir);
         $this->imageFileValidator->validate($image);
 
         $originalName = $image->getClientOriginalName();
         $newImageName = $this->getSaveImageName($originalName, $keepOriginalName, $setUniqueName);
         $mimeType = $image->getMimeType();
         $size = $image->getSize();
-
-        $this->ensureDirectoryExists($uploadDir);
 
         try {
             $image->move($uploadDir, $newImageName);
@@ -50,21 +48,7 @@ class UploadImageService implements UploadImageServiceInterface
             ]);
             throw new \Exception('Nie udało się wysłać pliku.');
         }
-    }
-
-    public function uploadAllFromRequest(Request $request, string $uploadDir, bool $keepOriginalName = false, bool $setUniqueName = false): array
-    {
-        $fileInfos = [];
-
-        foreach ($request->files->all() as $key => $file) {
-
-            if ($file instanceof UploadedFile) { 
-                $fileInfos[] = $this->upload($file, $uploadDir, $keepOriginalName, $setUniqueName);
-            }
-        }
-
-        return $fileInfos;
-    }
+    } 
 
     public function ensureDirectoryExists(string $directory): void
     {
