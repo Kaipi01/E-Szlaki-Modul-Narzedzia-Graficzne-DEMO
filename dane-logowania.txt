@@ -1,7 +1,0 @@
-Najpierw oczywiście załaduj go za pomocą Fixtures
-
-php bin/console doctrine:fixtures:load
-
-
-email: user@example.com 
-hasło: 12345
